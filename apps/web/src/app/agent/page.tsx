@@ -7,16 +7,6 @@ import { useLiveData } from "@/lib/useLiveData";
 import { useT } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 
-const ACTION_LABEL: Record<string, string> = {
-  deposit_vault: "Deposit to savings",
-  withdraw_vault: "Withdraw from savings",
-  blend_supply: "Supply to lending",
-  blend_withdraw: "Withdraw from lending",
-  rebalance: "Rebalance",
-  fund_payroll: "Fund payroll",
-  noop: "Hold (no action)",
-};
-
 interface LegalDoc {
   tenantDomain?: string;
   jurisdictions?: string[];
@@ -24,13 +14,20 @@ interface LegalDoc {
   disputeChannels?: { governingLaw: string }[];
 }
 
-const COUNTRY_FLAG: Record<string, string> = { BR: "🇧🇷 Brazil", AR: "🇦🇷 Argentina", CO: "🇨🇴 Colombia" };
-
 export default function AgentPage() {
   const t = useT();
   const { accessToken, connect, connecting } = useAuth();
   const decisions = useLiveData<Decision[]>(api.decisions, [], { realtimeTable: "agent_decisions" });
   const legal = useLiveData<LegalState>(api.legal, { published: false });
+
+  // Localized helpers with graceful fallback to the raw value.
+  const tf = (key: string, fallback: string) => {
+    const v = t(key);
+    return v === key ? fallback : v;
+  };
+  const actionLabel = (a: string) => tf(`pages.agent.actions.${a}`, a);
+  const statusLabel = (s: string) => tf(`pages.agent.status.${s}`, s);
+  const countryLabel = (c: string) => tf(`pages.agent.countries.${c}`, c);
 
   if (!accessToken) {
     return (
@@ -43,8 +40,8 @@ export default function AgentPage() {
         <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand/10 via-ink-900/40 to-accent/10 px-6 py-16 text-center">
           <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-brand/20 blur-3xl" />
           <div className="relative mx-auto max-w-md">
-            <h3 className="text-xl font-semibold text-white">{t("pages.agent.title")}</h3>
-            <p className="mx-auto mt-2 max-w-sm text-sm text-slate-300">{t("pages.agent.desc")}</p>
+            <h3 className="text-xl font-semibold text-white">{t("pages.agent.connectTitle")}</h3>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-slate-300">{t("pages.agent.connectBody")}</p>
             <button className="btn-primary mt-6 px-5 py-2.5" onClick={() => void connect()} disabled={connecting}>
               {connecting ? t("auth.connecting") : t("auth.connect")}
             </button>
@@ -56,7 +53,9 @@ export default function AgentPage() {
 
   const doc = (legal.data.document ?? {}) as LegalDoc;
   const consents = doc.consentRequirements ?? [];
-  const countries = Array.from(new Set((doc.disputeChannels ?? []).map((c) => c.governingLaw)));
+  const countries = Array.from(
+    new Set([...(doc.disputeChannels ?? []).map((c) => c.governingLaw), ...(doc.jurisdictions ?? [])]),
+  );
 
   return (
     <div className="space-y-8">
@@ -67,25 +66,25 @@ export default function AgentPage() {
       />
 
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Legal context */}
+        {/* The assistant's rulebook (legal context) */}
         <Card>
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-white">legal-context.json</h3>
+          <div className="mb-1 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-white">{t("pages.agent.rulebookTitle")}</h3>
             <Badge tone={legal.data.published ? "agent" : "default"}>
-              {legal.data.published ? "published" : "—"}
+              {legal.data.published ? t("pages.agent.published") : t("pages.agent.unpublished")}
             </Badge>
           </div>
-          <KeyValue k="Domain" v={<span className="font-mono text-xs">{doc.tenantDomain ?? "—"}</span>} />
+          <p className="mb-4 text-xs text-slate-400">{t("pages.agent.rulebookBody")}</p>
           <KeyValue
-            k="Active in"
-            v={
-              countries.length
-                ? countries.map((c) => COUNTRY_FLAG[c] ?? c).join(" · ")
-                : (doc.jurisdictions?.map((c) => COUNTRY_FLAG[c] ?? c).join(" · ") ?? "—")
-            }
+            k={t("pages.agent.kDomain")}
+            v={<span className="font-mono text-xs">{doc.tenantDomain ?? "—"}</span>}
           />
           <KeyValue
-            k="Document hash"
+            k={t("pages.agent.kActiveIn")}
+            v={countries.length ? countries.map(countryLabel).join(" · ") : "—"}
+          />
+          <KeyValue
+            k={t("pages.agent.kHash")}
             v={
               legal.data.hash ? (
                 <a
@@ -109,15 +108,16 @@ export default function AgentPage() {
                 target="_blank"
                 rel="noreferrer"
               >
-                View .well-known
+                {t("pages.agent.viewWellKnown")} ↗
               </a>
             </div>
           )}
         </Card>
 
-        {/* Real consent requirements from the published context */}
+        {/* What you've allowed (consents) */}
         <Card>
-          <h3 className="mb-4 text-sm font-semibold text-white">Required consents</h3>
+          <h3 className="mb-1 text-sm font-semibold text-white">{t("pages.agent.consentsTitle")}</h3>
+          <p className="mb-4 text-xs text-slate-400">{t("pages.agent.consentsBody")}</p>
           <div className="space-y-2">
             {consents.map((c) => (
               <div key={c.id} className="rounded-lg border border-white/10 bg-ink-900/60 p-3">
@@ -126,27 +126,25 @@ export default function AgentPage() {
               </div>
             ))}
             {consents.length === 0 && (
-              <p className="text-sm text-slate-500">No legal context published yet.</p>
+              <p className="text-sm text-slate-500">{t("pages.agent.consentsEmpty")}</p>
             )}
           </div>
-          <p className="mt-4 text-xs text-slate-500">
-            The assistant cannot run treasury or payroll without these consents — the API returns
-            HTTP 412 if one is missing.
-          </p>
+          <p className="mt-4 text-xs text-slate-500">{t("pages.agent.consentsNote")}</p>
         </Card>
       </div>
 
-      {/* Agent decisions (real) */}
+      {/* Agent decisions (real, with on-chain receipts) */}
       <Card>
-        <h3 className="mb-4 text-sm font-semibold text-white">{t("pages.treasury.activityTitle")}</h3>
+        <h3 className="mb-1 text-sm font-semibold text-white">{t("pages.agent.activityTitle")}</h3>
+        <p className="mb-4 text-xs text-slate-400">{t("pages.agent.activityBody")}</p>
         <div className="space-y-3">
           {decisions.data.map((d) => (
             <div key={d.id} className="rounded-lg border border-white/10 bg-ink-900/60 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <Badge tone="agent">{ACTION_LABEL[d.action] ?? d.action}</Badge>
+                  <Badge tone="agent">{actionLabel(d.action)}</Badge>
                   <Badge tone={d.status === "executed" ? "success" : d.status === "proposed" ? "warn" : "default"}>
-                    {d.status}
+                    {statusLabel(d.status)}
                   </Badge>
                 </div>
                 <span className="font-mono text-xs text-slate-500">{localDateTime(d.createdAt)}</span>
@@ -154,7 +152,7 @@ export default function AgentPage() {
               <p className="mt-3 text-sm text-slate-300">{d.rationale}</p>
               <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-xs">
                 <span className="text-slate-400">
-                  LCP:{" "}
+                  {t("pages.agent.lcpLabel")}:{" "}
                   {d.legalContextHash ? (
                     <a
                       className="font-mono text-accent hover:underline hover:text-accent/80 transition inline-flex items-center gap-1"
@@ -169,7 +167,7 @@ export default function AgentPage() {
                   )}
                 </span>
                 <span className="text-slate-400">
-                  tx:{" "}
+                  {t("pages.agent.txLabel")}:{" "}
                   {d.stellarTxHash && !d.stellarTxHash.startsWith("sim:") ? (
                     <a
                       className="font-mono text-brand hover:underline"
@@ -187,7 +185,7 @@ export default function AgentPage() {
             </div>
           ))}
           {decisions.data.length === 0 && (
-            <p className="text-sm text-slate-500">{t("pages.treasury.activityEmpty")}</p>
+            <p className="text-sm text-slate-500">{t("pages.agent.activityEmpty")}</p>
           )}
         </div>
       </Card>

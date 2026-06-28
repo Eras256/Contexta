@@ -1,92 +1,104 @@
 "use client";
 
-import { Badge, Card, SectionHeader } from "@/components/ui";
+import { Card, SectionHeader } from "@/components/ui";
+import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
+import { apiBaseUrl } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 
-const BUILDING_BLOCKS = [
-  { name: "Stellar / Soroban", use: "Settlement layer; Treasury + Payroll contracts emit LCP-bound events." },
-  { name: "Anchors (SEP-24/31)", use: "On/off-ramp digital dollars to PIX, Transferencias 3.0, Bre-B." },
-  { name: "DeFindex", use: "RWA / CETES yield vaults; deposit/withdraw via API + strategy metadata." },
-  { name: "Blend", use: "Lending pools for USDC supply yield; testnet contracts." },
-  { name: "Supabase", use: "Accounts, orgs, payroll, treasury config, audit, legal-context refs." },
-  { name: "Fly.io", use: "API + worker hosting in GRU (São Paulo) for LATAM latency." },
-];
-
-const SCF_MAP = [
-  { exp: "Integrates ≥1 Stellar building block", how: "Soroban contracts + anchors + DeFindex + Blend — four building blocks." },
-  { exp: "Clear user & market", how: "LATAM SMBs/startups paying cross-border teams in BR/AR/CO." },
-  { exp: "Working testnet demo", how: "End-to-end flow runs on testnet with mock fallbacks for offline judging." },
-  { exp: "Production architecture", how: "Monorepo, typed config, RBAC, audit logs, CI, Dockerized deploy." },
-  { exp: "Compliance posture", how: "Legal Context Protocol binds terms/consent/dispute to every agent action." },
-];
+const REPO_URL = "https://github.com/Eras256/Contextio";
+const NPM_URL = "https://www.npmjs.com/package/contextio-sdk";
+const STACK = ["Stellar · Soroban", "Rust", "TypeScript", "Next.js", "Supabase", "Fly.io"];
 
 export default function DocsPage() {
   const t = useT();
+
+  const highlights = [
+    t("pages.docs.r1"),
+    t("pages.docs.r2"),
+    t("pages.docs.r3"),
+    t("pages.docs.r4"),
+  ];
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       <SectionHeader
         eyebrow={t("pages.docs.eyebrow")}
         title={t("pages.docs.title")}
         description={t("pages.docs.desc")}
       />
 
-      <Card>
-        <h3 className="mb-4 text-sm font-semibold text-white">Stellar building blocks used</h3>
-        <div className="grid gap-3 sm:grid-cols-2">
-          {BUILDING_BLOCKS.map((b) => (
-            <div key={b.name} className="rounded-lg border border-white/10 bg-ink-900/60 p-4">
-              <Badge tone="success">{b.name}</Badge>
-              <p className="mt-2 text-sm text-slate-300">{b.use}</p>
-            </div>
-          ))}
+      {/* Big picture */}
+      <section className="space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold text-white">{t("pages.docs.archTitle")}</h3>
+          <p className="mt-1 max-w-2xl text-sm text-slate-400">{t("pages.docs.archBody")}</p>
         </div>
-      </Card>
-
-      <Card>
-        <h3 className="mb-4 text-sm font-semibold text-white">SCF Integration Track mapping</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
-                <th className="pb-2">Expectation</th>
-                <th className="pb-2">How Contextio meets it</th>
-              </tr>
-            </thead>
-            <tbody>
-              {SCF_MAP.map((r, i) => (
-                <tr key={i} className="table-row align-top">
-                  <td className="py-3 pr-4 font-medium text-white">{r.exp}</td>
-                  <td className="py-3 text-slate-300">{r.how}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <h3 className="mb-3 text-sm font-semibold text-white">For judges</h3>
-          <ul className="space-y-2 text-sm text-slate-300">
-            <li>• Architecture overview — see Overview page diagram &amp; root <span className="font-mono">README.md</span></li>
-            <li>• API schemas — <span className="font-mono">apps/api/README.md</span> (REST surface)</li>
-            <li>• Smart contract interfaces — <span className="font-mono">contracts/*/README.md</span></li>
-            <li>• LCP document — <a className="text-accent hover:underline" href="/.well-known/legal-context.json">/.well-known/legal-context.json</a></li>
-          </ul>
+        <Card className="overflow-x-auto">
+          <ArchitectureDiagram />
         </Card>
-        <Card>
-          <h3 className="mb-3 text-sm font-semibold text-white">Customer discovery (placeholder)</h3>
-          <div className="space-y-2 text-sm text-slate-400">
-            <p className="italic">Interview summaries to be added manually.</p>
-            <ul className="space-y-1">
-              <li># Interview 1 — &lt;company, role&gt;</li>
-              <li>## Pain — cross-border payroll cost &amp; delays</li>
-              <li>## Current workflow — &lt;…&gt;</li>
-              <li>## Reaction to Contextio — &lt;…&gt;</li>
-            </ul>
+      </section>
+
+      {/* Highlights */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {highlights.map((h) => (
+          <div key={h} className="flex items-start gap-2 rounded-xl border border-white/10 bg-ink-900/60 p-4">
+            <span className="mt-0.5 text-brand">✓</span>
+            <span className="text-sm text-slate-300">{h}</span>
           </div>
+        ))}
+      </div>
+
+      {/* LCP + SCF */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="flex flex-col">
+          <h3 className="text-sm font-semibold text-white">{t("pages.docs.lcpTitle")}</h3>
+          <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">{t("pages.docs.lcpBody")}</p>
+          <a
+            className="btn-ghost mt-4 self-start"
+            href={`${apiBaseUrl}/.well-known/legal-context.json?domain=contextio.xyz`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t("pages.docs.lcpLink")} ↗
+          </a>
+        </Card>
+        <Card className="flex flex-col">
+          <h3 className="text-sm font-semibold text-white">{t("pages.docs.scfTitle")}</h3>
+          <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-400">{t("pages.docs.scfBody")}</p>
+          <a className="btn-ghost mt-4 self-start" href={REPO_URL} target="_blank" rel="noreferrer">
+            {t("pages.docs.repoLink")} ↗
+          </a>
         </Card>
       </div>
+
+      {/* SDK */}
+      <Card className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-white">{t("pages.docs.sdkTitle")}</h3>
+          <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-400">{t("pages.docs.sdkBody")}</p>
+        </div>
+        <a className="btn-primary shrink-0 px-5 py-2.5 text-sm" href={NPM_URL} target="_blank" rel="noreferrer">
+          {t("pages.docs.sdkLink")} ↗
+        </a>
+      </Card>
+
+      {/* Stack */}
+      <section className="space-y-3">
+        <div>
+          <h3 className="text-lg font-semibold text-white">{t("pages.docs.stackTitle")}</h3>
+          <p className="mt-1 max-w-2xl text-sm text-slate-400">{t("pages.docs.stackBody")}</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {STACK.map((s) => (
+            <span
+              key={s}
+              className="rounded-full border border-white/10 bg-ink-900/60 px-3 py-1.5 font-mono text-xs text-slate-300"
+            >
+              {s}
+            </span>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
