@@ -66,7 +66,13 @@ export function createContainer(): Container {
     {
       poolId: config.BLEND_POOL_CONTRACT_ID || undefined,
       oracleId: config.BLEND_ORACLE_CONTRACT_ID || undefined,
+      backstopId: config.BLEND_BACKSTOP_CONTRACT_ID || undefined,
+      asset: config.BLEND_ASSET_ID || undefined,
+      rpcUrl: config.STELLAR_RPC_URL,
+      networkPassphrase: config.STELLAR_NETWORK_PASSPHRASE,
+      signerSecret: config.STELLAR_SERVICE_SECRET || undefined,
     },
+    stellarClient,
     logger,
   );
   const soroban = new SorobanGateway(
@@ -84,7 +90,7 @@ export function createContainer(): Container {
   const legal = new LegalContextService(repo, logger);
   const treasury = new TreasuryService(repo, defindex, blend, soroban, legal, audit, logger);
   const payroll = new PayrollService(repo, soroban, legal, audit, logger);
-  const agent = new AgentService(repo, treasury, defindex, payroll, oracle, legal, audit, logger);
+  const agent = new AgentService(repo, treasury, defindex, blend, payroll, oracle, legal, audit, logger);
   const walletAuth = new WalletAuthService(repo, config, logger);
 
   return {

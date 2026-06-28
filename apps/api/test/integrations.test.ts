@@ -34,7 +34,7 @@ describe("DefindexClient (mock mode)", () => {
 });
 
 describe("BlendClient (mock mode)", () => {
-  const client = new BlendClient({}, logger);
+  const client = new BlendClient({}, {} as never, logger);
 
   it("supplies and reflects the position", async () => {
     const supply = await client.supply("USDC", "5000000000");

@@ -20,21 +20,34 @@ interface LiveVault {
   network: string;
 }
 
+interface BlendVault {
+  poolId: string;
+  asset: string;
+  supplyApyBps: number;
+  tvlBaseUnits: string;
+  positionBaseUnits: string;
+  network: string;
+}
+
 const xlm = (stroops: string) =>
   `${(Number(stroops) / 1e7).toLocaleString(undefined, { maximumFractionDigits: 4 })}`;
 
 export default function IntegrationsPage() {
   const t = useT();
   const [vault, setVault] = useState<LiveVault | null>(null);
+  const [blend, setBlend] = useState<BlendVault | null>(null);
 
   useEffect(() => {
     let alive = true;
-    fetch(`${API}/api/v1/public/defindex`, { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((j) => {
-        if (alive && j?.live && j.vault) setVault(j.vault as LiveVault);
-      })
-      .catch(() => {});
+    const grab = (path: string, set: (v: unknown) => void) =>
+      fetch(`${API}/api/v1/public/${path}`, { cache: "no-store" })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => {
+          if (alive && j?.live && j.vault) set(j.vault);
+        })
+        .catch(() => {});
+    void grab("defindex", (v) => setVault(v as LiveVault));
+    void grab("blend", (v) => setBlend(v as BlendVault));
     return () => {
       alive = false;
     };
@@ -86,14 +99,33 @@ export default function IntegrationsPage() {
             )}
           </Card>
 
-          <IntegrationCard
-            t={t}
-            name={t("pages.integrations.blendName")}
-            body={t("pages.integrations.blendBody")}
-            status="mock"
-            metric="5.40% APY"
-            sub="USDC"
-          />
+          {/* Real Blend pool */}
+          <Card className="flex flex-col">
+            <div className="flex items-start justify-between gap-2">
+              <span className="font-medium text-white">{t("pages.integrations.blendName")}</span>
+              <Badge tone={blend ? "success" : "warn"}>
+                {t(blend ? "pages.integrations.statusLive" : "pages.integrations.statusReady")}
+              </Badge>
+            </div>
+            <p className="mt-2 text-xs leading-relaxed text-slate-400">{t("pages.integrations.blendBody")}</p>
+            {blend ? (
+              <div className="mt-3 space-y-1.5 border-t border-white/5 pt-3 text-xs">
+                <Row k={t("pages.integrations.dfxApy")} v={<span className="font-semibold text-brand">{bps(blend.supplyApyBps)}</span>} />
+                <Row k={t("pages.integrations.dfxTvl")} v={<span className="font-mono text-slate-300">{xlm(blend.tvlBaseUnits)} {blend.asset}</span>} />
+                <Row k={t("pages.integrations.dfxPosition")} v={<span className="font-mono text-slate-300">{xlm(blend.positionBaseUnits)} {blend.asset}</span>} />
+                <a
+                  className="mt-2 inline-flex font-mono text-accent hover:underline"
+                  href={explorer(blend.poolId, blend.network)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t("pages.integrations.dfxView")} ↗
+                </a>
+              </div>
+            ) : (
+              <div className="mt-3 border-t border-white/5 pt-3 text-xs text-slate-500">{t("auth.connecting")}</div>
+            )}
+          </Card>
         </div>
       </section>
 

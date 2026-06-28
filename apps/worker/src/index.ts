@@ -6,6 +6,7 @@ import { runAgentRebalance } from "./jobs/agentRebalance.js";
 import { runScheduledPayroll } from "./jobs/scheduledPayroll.js";
 import { runRefreshMarketData } from "./jobs/refreshMarketData.js";
 import { runDefindexYield } from "./jobs/defindexYield.js";
+import { runBlendYield } from "./jobs/blendYield.js";
 
 /**
  * Worker entrypoint. Loads active tenants from Supabase, then schedules the
@@ -56,17 +57,23 @@ async function main(): Promise<void> {
     run: async () => runRefreshMarketData(api, await activeTenantIds(), logger),
   });
 
-  // Real DeFindex yield moves on the same cadence as the heartbeat but offset by
-  // half an interval, so the two jobs — which sign with the SAME platform key —
-  // never grab the same Stellar sequence number, and the public feed gets a fresh
-  // verifiable tx roughly every half-interval (~2.5 min at the default 5-min poll).
-  // Only when settling for real (not dry-run).
+  // Real DeFi yield moves (DeFindex + Blend) on the heartbeat cadence, each
+  // offset so the three tx-producing jobs — which all sign with the SAME platform
+  // key — never grab the same Stellar sequence number. They round-robin: treasury
+  // heartbeat at 0, DeFindex at +1/3, Blend at +2/3 of the interval → a fresh
+  // verifiable tx roughly every ~1.7 min at the default 5-min poll. Real-mode only.
   if (!config.AGENT_DRY_RUN) {
     scheduler.add({
       name: "defindex-yield",
       intervalMs,
-      initialDelayMs: Math.floor(intervalMs / 2),
+      initialDelayMs: Math.floor(intervalMs / 3),
       run: async () => runDefindexYield(api, await activeTenantIds(), logger),
+    });
+    scheduler.add({
+      name: "blend-yield",
+      intervalMs,
+      initialDelayMs: Math.floor((intervalMs * 2) / 3),
+      run: async () => runBlendYield(api, await activeTenantIds(), logger),
     });
   }
 

@@ -14,6 +14,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@blend-capital/blend-sdk": "^3.3.0",
     "@contextio/config": "workspace:*",
     "@contextio/shared": "workspace:*",
     "@contextio/tests": "workspace:*",

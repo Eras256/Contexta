@@ -66,5 +66,21 @@ export function publicRouter(): Router {
     }
   });
 
+  /** Public, read-only snapshot of the live Blend pool reserve the platform lends into. */
+  router.get("/blend", async (req, res, next) => {
+    try {
+      const blend = req.container.blend;
+      if (!blend.live) {
+        res.json({ live: false });
+        return;
+      }
+      const r = await blend.getVaultData();
+      res.setHeader("cache-control", "public, max-age=30");
+      res.json(r.ok ? { live: true, vault: r.value } : { live: true, vault: null, error: r.error.message });
+    } catch (e) {
+      next(e);
+    }
+  });
+
   return router;
 }

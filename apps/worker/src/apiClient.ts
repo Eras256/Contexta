@@ -55,4 +55,8 @@ export class ApiClient {
   yieldCycle(tenantId: string): Promise<{ id?: string; skipped?: boolean }> {
     return this.call(tenantId, "POST", "/agent/yield-cycle", {});
   }
+
+  blendCycle(tenantId: string): Promise<{ id?: string; skipped?: boolean }> {
+    return this.call(tenantId, "POST", "/agent/blend-cycle", {});
+  }
 }

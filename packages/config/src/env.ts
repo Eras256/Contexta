@@ -73,6 +73,7 @@ export const serverEnvSchema = baseEnvSchema.extend({
   BLEND_POOL_CONTRACT_ID: z.string().optional().or(z.literal("")),
   BLEND_BACKSTOP_CONTRACT_ID: z.string().optional().or(z.literal("")),
   BLEND_ORACLE_CONTRACT_ID: z.string().optional().or(z.literal("")),
+  BLEND_ASSET_ID: z.string().optional().or(z.literal("")),
 
   FX_PROVIDER: z.enum(["mock", "http"]).default("mock"),
   FX_API_URL: z.string().url().optional().or(z.literal("")),

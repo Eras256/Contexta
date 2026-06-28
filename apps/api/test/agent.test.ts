@@ -61,6 +61,7 @@ function buildAgent(opts: {
     {} as never,
     treasury,
     {} as never, // defindex (unused in plan tests)
+    {} as never, // blend (unused in plan tests)
     payroll,
     oracle,
     {} as never,

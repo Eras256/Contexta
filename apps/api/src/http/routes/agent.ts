@@ -58,6 +58,17 @@ export function agentRouter(): Router {
     }
   });
 
+  /** Run one real Blend lending cycle (supply/withdraw a fixed step). */
+  router.post("/blend-cycle", requireCapability("treasury.rebalance"), async (req, res, next) => {
+    try {
+      const ctx = requireCtx(req);
+      const decision = await req.container.agent.runBlendCycle(ctx.tenantId);
+      res.json(decision ?? { skipped: true });
+    } catch (e) {
+      next(e);
+    }
+  });
+
   router.post("/decisions/:id/execute", requireCapability("treasury.rebalance"), async (req, res, next) => {
     try {
       const ctx = requireCtx(req);

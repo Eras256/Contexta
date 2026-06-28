@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@blend-capital/blend-sdk>@stellar/stellar-sdk': 16.0.1
+
 importers:
 
   .:
@@ -32,6 +35,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@blend-capital/blend-sdk':
+        specifier: ^3.3.0
+        version: 3.3.0
       '@contextio/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -268,6 +274,9 @@ packages:
 
   '@base-org/account@2.4.0':
     resolution: {integrity: sha512-A4Umpi8B9/pqR78D1Yoze4xHyQaujioVRqqO3d6xuDFw9VRtjg6tK3bPlwE0aW+nVH/ntllCpPa2PbI8Rnjcug==}
+
+  '@blend-capital/blend-sdk@3.3.0':
+    resolution: {integrity: sha512-D1AdEnqhLzkSOsauysSIw+IbD0yJ1tj8JrtZwmkJU6MrGX8hu+WkDqlVXVOXrYIUZPZJinjODOqH7v9jVCcqXg==}
 
   '@bufbuild/protobuf@2.12.1':
     resolution: {integrity: sha512-BvAMfS6LrgZiryOAZ4pBYucu4wG/Ei/9o9DZ9akbREnMLbPJiom2i8b9C8IsKErQoiKqVhrerzt3kOT/RrzLHg==}
@@ -5462,6 +5471,15 @@ snapshots:
       - utf-8-validate
       - zod
     optional: true
+
+  '@blend-capital/blend-sdk@3.3.0':
+    dependencies:
+      '@stellar/stellar-sdk': 16.0.1
+      buffer: 6.0.3
+      follow-redirects: 1.16.0
+    transitivePeerDependencies:
+      - debug
+      - supports-color
 
   '@bufbuild/protobuf@2.12.1': {}
 

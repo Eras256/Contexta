@@ -8,6 +8,7 @@ import type { Oracle } from "../integrations/oracle.js";
 import type { LegalContextService } from "./legalContextService.js";
 import type { AuditService } from "./auditService.js";
 import type { DefindexClient } from "../integrations/defindex.js";
+import type { BlendClient } from "../integrations/blend.js";
 
 export interface RebalancePlan {
   action: AgentDecision["action"];
@@ -34,6 +35,7 @@ export class AgentService {
     private readonly repo: Repository,
     private readonly treasury: TreasuryService,
     private readonly defindex: DefindexClient,
+    private readonly blend: BlendClient,
     private readonly payroll: PayrollService,
     private readonly oracle: Oracle,
     private readonly legal: LegalContextService,
@@ -107,6 +109,72 @@ export class AgentService {
       legalContextId: saved.legalContextId,
     });
     this.logger.info({ tenantId, decisionId: saved.id, txHash: r.value.txHash, deposit }, "DeFindex yield cycle settled");
+    return saved;
+  }
+
+  /**
+   * Real Blend lending cycle: supply (or withdraw) a fixed XLM step into the
+   * live Blend pool to keep a position inside a band — a genuine, verifiable
+   * on-chain lend. Records an executed agent decision (Stellar tx + LCP binding)
+   * so it shows in the feed. No-op when Blend isn't live.
+   */
+  async runBlendCycle(tenantId: string): Promise<AgentDecision | null> {
+    if (!this.blend.live) return null;
+
+    const STEP = 10_000_000n; // 1 XLM
+    const BAND_CEILING = 500_000_000n; // ~50 XLM
+
+    const snap = await this.blend.getVaultData();
+    const position = snap.ok ? BigInt(snap.value.positionBaseUnits || "0") : 0n;
+    const apyBps = snap.ok ? snap.value.supplyApyBps : 0;
+    const supply = position < BAND_CEILING;
+
+    const binding = await this.legal.bindForAction(tenantId, ["treasury-management"]);
+    const current = await this.legal.getForTenant(tenantId);
+
+    const r = supply
+      ? await this.blend.supply("", STEP.toString())
+      : await this.blend.withdraw("", STEP.toString());
+    if (!r.ok) {
+      this.logger.warn({ tenantId, err: r.error.message }, "Blend lending cycle deferred");
+      return null;
+    }
+
+    const apyPct = (apyBps / 100).toFixed(2);
+    const decision: AgentDecision = {
+      id: randomUUID(),
+      tenantId,
+      action: supply ? "blend_supply" : "blend_withdraw",
+      rationale: supply
+        ? `Lent 1 XLM into the Blend pool (~${apyPct}% supply APY) — real, on-chain lending.`
+        : `Pulled 1 XLM back from the Blend pool to keep the lending position within band.`,
+      payload: {
+        from: supply ? "liquidity" : "blend_pool",
+        to: supply ? "blend_pool" : "liquidity",
+        asset: "XLM",
+        amountBaseUnits: STEP.toString(),
+        amount: "1",
+        strategyRef: this.blend.poolId,
+        venue: "blend",
+        apyBps,
+      },
+      status: "executed",
+      legalContextId: current?.document.contextId ?? null,
+      legalContextHash: binding.hash,
+      stellarTxHash: r.value.txHash ?? null,
+      createdAt: new Date().toISOString(),
+      decidedAt: new Date().toISOString(),
+    };
+    const saved = await this.repo.insertDecision(decision);
+    await this.audit.record({
+      tenantId,
+      actorId: null,
+      actorType: "agent",
+      action: "integration.blend.supply",
+      detail: { decisionId: saved.id, txHash: r.value.txHash, supply },
+      legalContextId: saved.legalContextId,
+    });
+    this.logger.info({ tenantId, decisionId: saved.id, txHash: r.value.txHash, supply }, "Blend lending cycle settled");
     return saved;
   }
 

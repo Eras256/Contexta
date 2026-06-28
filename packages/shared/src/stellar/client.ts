@@ -106,6 +106,46 @@ export class StellarClient {
   }
 
   /**
+   * Submit a pre-built Soroban operation (base-64 XDR) — e.g. one produced by an
+   * external protocol SDK like Blend's `PoolContract.submit`. We wrap it in a
+   * transaction, let `prepareTransaction` attach the footprint + auth + resource
+   * fees, sign with the platform key, submit, and confirm.
+   */
+  async submitOperationXdr(
+    operationXdr: string,
+    sourceSecret: string,
+    timeoutMs = 30_000,
+  ): Promise<InvokeResult> {
+    const keypair = Keypair.fromSecret(sourceSecret);
+    const source = await this.server.getAccount(keypair.publicKey());
+    const op = xdr.Operation.fromXDR(operationXdr, "base64");
+    const built = new TransactionBuilder(source, {
+      fee: (Number(BASE_FEE) * 100).toString(),
+      networkPassphrase: this.config.networkPassphrase,
+    })
+      .addOperation(op)
+      .setTimeout(180)
+      .build();
+
+    const prepared = await this.server.prepareTransaction(built);
+    prepared.sign(keypair);
+
+    const sent = await this.server.sendTransaction(prepared);
+    if (sent.status === "ERROR") {
+      throw new Error(`Stellar submission failed: ${JSON.stringify(sent.errorResult)}`);
+    }
+    const confirmed = await this.pollTransaction(sent.hash, timeoutMs);
+    if (confirmed.status !== "SUCCESS") {
+      throw new Error(`Transaction ${sent.hash} did not succeed: ${confirmed.status}`);
+    }
+    return {
+      txHash: sent.hash,
+      returnValue: confirmed.returnValue ? scValToNative(confirmed.returnValue) : null,
+      ledger: confirmed.ledger,
+    };
+  }
+
+  /**
    * Read-only invocation via simulation only — no fees, no submission. Use for
    * view methods (balances, positions) where a ledger write isn't required.
    */
