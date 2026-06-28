@@ -212,7 +212,7 @@ export function LiveAgentFeed() {
             <div className="flex min-w-0 items-center gap-2 font-mono text-[13px] font-semibold tracking-wide text-brand">
               <span className="text-brand/50 font-bold">{">_"}</span>
               <span className="truncate uppercase text-slate-300">
-                {t("feed.title2")} <span className="text-slate-500 font-normal">// {t("feed.connection")}</span>
+                {t("feed.title2")} <span className="text-slate-500 font-normal">{"// "}{t("feed.connection")}</span>
               </span>
             </div>
           </div>
