@@ -1,11 +1,31 @@
-import { Badge, Card, SectionHeader, Stat } from "@/components/ui";
+"use client";
+
+import { Badge, Card, DataBadge, SectionHeader, Stat } from "@/components/ui";
 import { demoEmployees, demoSchedule } from "@/lib/demoData";
-import { COUNTRY_LABEL, RAIL_LABEL, usd, usdBase } from "@/lib/format";
+import { COUNTRY_LABEL, RAIL_LABEL, fromBaseUnits, usd, usdBase } from "@/lib/format";
+import { api, type Obligation } from "@/lib/api";
+import { useLiveData } from "@/lib/useLiveData";
+
+const demoObligations: Obligation[] = [
+  {
+    scheduleId: "s1",
+    scheduleName: demoSchedule.name,
+    nextRunAt: demoSchedule.nextRunAt,
+    asset: demoSchedule.asset,
+    requiredBaseUnits: demoSchedule.requiredBaseUnits,
+    employeeCount: demoSchedule.employeeCount,
+  },
+];
 
 export default function PayrollPage() {
+  const { data: obligations, live, loading } = useLiveData(api.obligations, demoObligations);
+  const next = obligations[0];
   const monthlyTotal = demoEmployees.reduce((acc, e) => acc + Number(e.salaryAmount), 0);
-  const requiredLiquidity = Number(BigInt(demoSchedule.requiredBaseUnits)) / 1e7;
+  const requiredLiquidity = next ? fromBaseUnits(next.requiredBaseUnits) : 0;
   const volBuffer = requiredLiquidity * 0.085;
+  const nextRunLabel = next
+    ? new Date(next.nextRunAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    : "—";
 
   return (
     <div className="space-y-8">
@@ -13,13 +33,13 @@ export default function PayrollPage() {
         eyebrow="Payroll"
         title="Payroll & contractors"
         description="Manage your LATAM team, schedule recurring or one-off payouts, and see exactly how the agent will fund each run."
-        action={<button className="btn-primary">Add employee</button>}
+        action={<DataBadge live={live} loading={loading} />}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card><Stat label="Active people" value={demoEmployees.length} sub="BR · AR · CO" /></Card>
         <Card><Stat label="Monthly obligations" value={usd(monthlyTotal)} sub="gross" /></Card>
-        <Card><Stat label="Next run" value="Jul 1" sub="Monthly LATAM payroll" /></Card>
+        <Card><Stat label="Next run" value={nextRunLabel} sub={next?.scheduleName ?? "—"} /></Card>
         <Card><Stat label="Required liquidity" value={usd(requiredLiquidity + volBuffer)} sub="incl. FX buffer" /></Card>
       </div>
 
@@ -61,13 +81,13 @@ export default function PayrollPage() {
         <Card>
           <h3 className="mb-4 text-sm font-semibold text-white">Schedule editor</h3>
           <div className="space-y-3">
-            <Field label="Schedule name" value={demoSchedule.name} />
+            <Field label="Schedule name" value={next?.scheduleName ?? demoSchedule.name} />
             <div className="grid grid-cols-2 gap-3">
               <Field label="Cadence" value="Monthly" />
-              <Field label="Next run" value="2026-07-01" />
+              <Field label="Next run" value={next ? next.nextRunAt.slice(0, 10) : "2026-07-01"} />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <Field label="Settlement asset" value="USDC" />
+              <Field label="Settlement asset" value={next?.asset ?? "USDC"} />
               <Field label="Default rail" value="Stellar → anchors" />
             </div>
             <div className="flex gap-2 pt-2">
@@ -84,7 +104,7 @@ export default function PayrollPage() {
             How the agent plans to meet the next run, sourced from yield where there&apos;s a surplus.
           </p>
           <div className="space-y-3 text-sm">
-            <SimRow k="Gross obligations" v={usdBase(demoSchedule.requiredBaseUnits)} tone="default" />
+            <SimRow k="Gross obligations" v={next ? usdBase(next.requiredBaseUnits) : "—"} tone="default" />
             <SimRow k="FX volatility buffer (8.5%)" v={`+ ${usd(volBuffer)}`} tone="warn" />
             <SimRow k="Currently liquid" v={usd(95000)} tone="info" />
             <div className="my-2 border-t border-white/10" />
@@ -106,6 +126,7 @@ function Field({ label, value }: { label: string; value: string }) {
     <label className="block">
       <span className="label">{label}</span>
       <input
+        key={value}
         defaultValue={value}
         className="mt-1 w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-white focus:border-brand/50 focus:outline-none"
       />

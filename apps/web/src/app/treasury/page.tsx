@@ -1,6 +1,10 @@
-import { AllocationBar, Badge, Card, SectionHeader, Stat } from "@/components/ui";
+"use client";
+
+import { AllocationBar, Badge, Card, DataBadge, SectionHeader, Stat } from "@/components/ui";
 import { demoPositions, totals } from "@/lib/demoData";
 import { bps, shortHash, usdBase } from "@/lib/format";
+import { api, type TreasurySnapshot } from "@/lib/api";
+import { useLiveData } from "@/lib/useLiveData";
 
 const STRATEGY_LABEL: Record<string, string> = {
   liquidity: "Liquid reserve",
@@ -15,10 +19,25 @@ const HISTORY = [
   { ts: "2026-06-10 11:05", actor: "Agent", asset: "USDC", amount: "+15,000", method: "Blend supply", lcp: "b3f1c0a9…2b3c4d" },
 ];
 
+const demoSnapshot: TreasurySnapshot = {
+  config: {
+    minLiquidityBaseUnits: "500000000000",
+    maxYieldBps: 6000,
+    volatilitySensitivity: 60,
+    countryLimitsBps: { BR: 5000, AR: 3000, CO: 3000 },
+  },
+  positions: demoPositions,
+  totals: totals(demoPositions),
+};
+
 export default function TreasuryPage() {
-  const t = totals(demoPositions);
+  const { data: snap, live, loading } = useLiveData(api.treasury, demoSnapshot, {
+    realtimeTable: "treasury_positions",
+  });
+  const t = snap.totals;
+  const cfg = snap.config;
   const weightedApy =
-    demoPositions
+    snap.positions
       .filter((p) => p.apyBps)
       .reduce((acc, p) => acc + (p.apyBps ?? 0) * Number(BigInt(p.amountBaseUnits)), 0) /
     Math.max(1, Number(BigInt(t.yieldBaseUnits)));
@@ -29,7 +48,7 @@ export default function TreasuryPage() {
         eyebrow="Treasury"
         title="Treasury dashboard"
         description="Live view of balances across liquidity, DeFindex vaults and Blend pools, with the agent's allocation between liquid reserves and yield."
-        action={<Badge tone="success">Autopilot: on</Badge>}
+        action={<DataBadge live={live} loading={loading} />}
       />
 
       {/* Top stats */}
@@ -66,15 +85,18 @@ export default function TreasuryPage() {
                 </tr>
               </thead>
               <tbody>
-                {demoPositions.map((p, i) => (
+                {snap.positions.map((p, i) => (
                   <tr key={i} className="table-row">
                     <td className="py-2 font-medium text-white">{p.asset}</td>
-                    <td className="py-2 text-slate-300">{STRATEGY_LABEL[p.strategy]}</td>
+                    <td className="py-2 text-slate-300">{STRATEGY_LABEL[p.strategy] ?? p.strategy}</td>
                     <td className="py-2 font-mono text-xs text-slate-400">{p.strategyRef ?? "—"}</td>
                     <td className="py-2 text-right text-slate-300">{p.apyBps ? bps(p.apyBps) : "—"}</td>
                     <td className="py-2 text-right font-medium text-white">{usdBase(p.amountBaseUnits)}</td>
                   </tr>
                 ))}
+                {snap.positions.length === 0 && (
+                  <tr><td colSpan={5} className="py-4 text-center text-slate-500">No positions yet.</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -86,17 +108,17 @@ export default function TreasuryPage() {
         <Card>
           <h3 className="mb-1 text-sm font-semibold text-white">Risk profile</h3>
           <p className="mb-4 text-xs text-slate-400">Hard constraints the agent must respect.</p>
-          <ConfigRow k="Liquidity floor" v="$50,000" />
-          <ConfigRow k="Max allocation to yield" v="60%" />
-          <ConfigRow k="Country limit · BR" v="50%" />
-          <ConfigRow k="Country limit · AR" v="30%" />
-          <ConfigRow k="Country limit · CO" v="30%" />
+          <ConfigRow k="Liquidity floor" v={cfg ? usdBase(cfg.minLiquidityBaseUnits) : "—"} />
+          <ConfigRow k="Max allocation to yield" v={cfg ? bps(cfg.maxYieldBps) : "—"} />
+          <ConfigRow k="Country limit · BR" v={cfg ? bps(cfg.countryLimitsBps.BR ?? 0) : "—"} />
+          <ConfigRow k="Country limit · AR" v={cfg ? bps(cfg.countryLimitsBps.AR ?? 0) : "—"} />
+          <ConfigRow k="Country limit · CO" v={cfg ? bps(cfg.countryLimitsBps.CO ?? 0) : "—"} />
         </Card>
         <Card>
           <h3 className="mb-1 text-sm font-semibold text-white">Agent parameters</h3>
           <p className="mb-4 text-xs text-slate-400">How aggressively the agent reacts.</p>
           <ConfigRow k="Update frequency" v="Every 5 min" />
-          <ConfigRow k="Volatility sensitivity" v="60 / 100" />
+          <ConfigRow k="Volatility sensitivity" v={cfg ? `${cfg.volatilitySensitivity} / 100` : "—"} />
           <ConfigRow k="Execution mode" v={<Badge tone="warn">Dry-run</Badge>} />
         </Card>
         <Card>

@@ -31,6 +31,7 @@ jobs:
       # Build workspace packages first so app typechecks resolve their d.ts.
       - run: pnpm --filter @contexta/config build
       - run: pnpm --filter @contexta/shared build
+      - run: pnpm --filter @contexta/tests build
 
       - name: Lint
         run: pnpm lint

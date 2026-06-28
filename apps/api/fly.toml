@@ -25,6 +25,9 @@ primary_region = "gru"
   STELLAR_HORIZON_URL = "https://horizon-testnet.stellar.org"
   STELLAR_NETWORK_PASSPHRASE = "Test SDF Network ; September 2015"
   LCP_PLATFORM_DOMAIN = "contexta.app"
+  # Wallet sign-in: a freshly-connected wallet auto-joins this demo tenant.
+  AUTH_DEMO_TENANT_ID = "00000000-0000-4000-8000-000000000001"
+  AUTH_DEMO_ROLE = "owner"
 
 # Run Supabase migrations on each deploy before swapping traffic.
 # (Provide DATABASE_URL as a secret; uses the supabase CLI image in CI, or a

@@ -11,6 +11,7 @@ import { LegalContextService } from "./services/legalContextService.js";
 import { TreasuryService } from "./services/treasuryService.js";
 import { PayrollService } from "./services/payrollService.js";
 import { AgentService } from "./services/agentService.js";
+import { WalletAuthService } from "./services/walletAuthService.js";
 
 /**
  * Composition root. Everything is wired here once and injected downward, so
@@ -30,6 +31,7 @@ export interface Container {
   treasury: TreasuryService;
   payroll: PayrollService;
   agent: AgentService;
+  walletAuth: WalletAuthService;
 }
 
 export function createContainer(): Container {
@@ -76,6 +78,7 @@ export function createContainer(): Container {
   const treasury = new TreasuryService(repo, defindex, blend, soroban, legal, audit, logger);
   const payroll = new PayrollService(repo, soroban, legal, audit, logger);
   const agent = new AgentService(repo, treasury, payroll, oracle, legal, audit, logger);
+  const walletAuth = new WalletAuthService(repo, config, logger);
 
   return {
     logger,
@@ -90,5 +93,6 @@ export function createContainer(): Container {
     treasury,
     payroll,
     agent,
+    walletAuth,
   };
 }

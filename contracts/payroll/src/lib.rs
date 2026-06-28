@@ -96,6 +96,12 @@ impl PayrollContract {
 
     /// Execute a payroll run. Idempotent on `run_id`. `caller` must be the admin
     /// (agent) or an allowlisted operator (user); the trigger type is emitted.
+    ///
+    /// The argument count exceeds clippy's default (the run carries its full
+    /// settlement context — tenant, run id, total, asset, headcount, LCP hash —
+    /// so it is auditable on-chain in a single event); the lint is suppressed
+    /// rather than collapsing these into an opaque struct that obscures the ABI.
+    #[allow(clippy::too_many_arguments)]
     pub fn execute_run(
         env: Env,
         caller: Address,

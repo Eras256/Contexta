@@ -87,6 +87,15 @@ export function AllocationBar({ yieldShareBps }: { yieldShareBps: number }) {
   );
 }
 
+export function DataBadge({ live, loading }: { live: boolean; loading: boolean }) {
+  if (loading) return <Badge>Loading…</Badge>;
+  return live ? (
+    <Badge tone="success">● Live data</Badge>
+  ) : (
+    <Badge tone="warn">Demo data · sign in</Badge>
+  );
+}
+
 export function KeyValue({ k, v }: { k: string; v: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 py-2 table-row">

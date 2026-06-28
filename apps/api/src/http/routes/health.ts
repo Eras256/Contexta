@@ -7,6 +7,22 @@ import { Router } from "express";
 export function healthRouter(): Router {
   const router = Router();
 
+  // Friendly service index so the base URL isn't a bare 404. Lists the public
+  // entry points; everything else lives under the authenticated /api/v1 surface.
+  router.get("/", (_req, res) => {
+    res.json({
+      name: "Contexta API",
+      status: "ok",
+      docs: "https://github.com/contexta/contexta",
+      endpoints: {
+        health: "/healthz",
+        readiness: "/readyz",
+        legalContext: "/.well-known/legal-context.json",
+        api: "/api/v1",
+      },
+    });
+  });
+
   router.get("/healthz", (_req, res) => {
     res.json({ status: "ok", uptime: process.uptime() });
   });

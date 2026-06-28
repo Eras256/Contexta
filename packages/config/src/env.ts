@@ -75,6 +75,14 @@ export const serverEnvSchema = baseEnvSchema.extend({
   FX_PROVIDER: z.enum(["mock", "http"]).default("mock"),
   FX_API_URL: z.string().url().optional().or(z.literal("")),
   FX_API_KEY: z.string().optional().or(z.literal("")),
+
+  // Wallet auth (Sign In With Stellar). Session JWTs are signed with the
+  // Supabase JWT secret (HS256) so they also authorize Supabase Realtime/RLS.
+  // A freshly-connected wallet auto-joins this tenant with AUTH_DEMO_ROLE (demo
+  // convenience); leave AUTH_DEMO_TENANT_ID blank to disable auto-join.
+  AUTH_DEMO_TENANT_ID: z.string().optional().or(z.literal("")),
+  AUTH_DEMO_ROLE: z.enum(["owner", "admin", "member", "viewer"]).default("owner"),
+  AUTH_SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
 });
 
 /** Worker-only extras layered on top of the server schema. */

@@ -1,3 +1,12 @@
+-- ============================================================================
+-- Contexta — FULL Supabase setup (single file). Idempotent: safe to re-run.
+-- Paste into the Supabase SQL Editor (or psql). Order: schema → RLS → seed.
+-- Generated 2026-06-28T02:36:45Z from migrations 0001+0002+seed.
+-- NOTE: on a project that already has a DIFFERENT 'audit_logs' table, drop it
+--       first (it must have a tenant_id column for Contexta).
+-- ============================================================================
+
+-- ████ 1/3 SCHEMA (0001_init.sql) ███████████████████████████████████████████
 -- Contexta — initial schema.
 -- Postgres / Supabase. Base-unit monetary values are stored as text to preserve
 -- exact bigint fidelity (7-dp Stellar base units), matching the API repository
@@ -188,3 +197,191 @@ $$ language plpgsql;
 drop trigger if exists trg_tenants_touch on public.tenants;
 create trigger trg_tenants_touch before update on public.tenants
   for each row execute function public.touch_updated_at();
+
+-- ████ 2/3 ROW LEVEL SECURITY (0002_rls.sql) ████████████████████████████████
+-- Row Level Security. The backend uses the service-role key (bypasses RLS) for
+-- privileged, audited writes. These policies protect direct access from the
+-- browser anon/auth client: a user may only read rows for tenants they belong to.
+
+-- Helper: is the current auth user a member of the given tenant?
+create or replace function public.is_tenant_member(t uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.tenant_users tu
+    where tu.tenant_id = t and tu.user_id = auth.uid()
+  );
+$$;
+
+-- Helper: does the current user hold at least the given role on the tenant?
+create or replace function public.has_tenant_role(t uuid, min_role text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.tenant_users tu
+    where tu.tenant_id = t
+      and tu.user_id = auth.uid()
+      and case tu.role
+            when 'owner'  then 3
+            when 'admin'  then 2
+            when 'member' then 1
+            else 0
+          end
+        >=
+          case min_role
+            when 'owner'  then 3
+            when 'admin'  then 2
+            when 'member' then 1
+            else 0
+          end
+  );
+$$;
+
+do $$
+declare tbl text;
+begin
+  foreach tbl in array array[
+    'tenants','users','tenant_users','legal_contexts','treasuries',
+    'treasury_positions','payroll_employees','payroll_schedules','payroll_runs',
+    'agent_decisions','consent_records','audit_logs'
+  ]
+  loop
+    execute format('alter table public.%I enable row level security;', tbl);
+  end loop;
+end $$;
+
+-- tenants: members can read their tenant.
+drop policy if exists tenants_read on public.tenants;
+create policy tenants_read on public.tenants
+  for select using (public.is_tenant_member(id));
+
+-- users: a user can read their own row.
+drop policy if exists users_self on public.users;
+create policy users_self on public.users
+  for select using (id = auth.uid());
+
+-- tenant_users: members can see co-members of their tenants.
+drop policy if exists tenant_users_read on public.tenant_users;
+create policy tenant_users_read on public.tenant_users
+  for select using (public.is_tenant_member(tenant_id));
+
+-- Generic tenant-scoped read for the rest.
+do $$
+declare tbl text;
+begin
+  foreach tbl in array array[
+    'legal_contexts','treasuries','treasury_positions','payroll_employees',
+    'payroll_schedules','payroll_runs','agent_decisions','consent_records','audit_logs'
+  ]
+  loop
+    execute format('drop policy if exists %I_read on public.%I;', tbl, tbl);
+    execute format(
+      'create policy %I_read on public.%I for select using (public.is_tenant_member(tenant_id));',
+      tbl, tbl
+    );
+  end loop;
+end $$;
+
+-- Admin+ may insert/update employees & schedules directly (optional convenience;
+-- the API still mediates most writes via the service role).
+drop policy if exists employees_write on public.payroll_employees;
+create policy employees_write on public.payroll_employees
+  for all
+  using (public.has_tenant_role(tenant_id, 'admin'))
+  with check (public.has_tenant_role(tenant_id, 'admin'));
+
+drop policy if exists schedules_write on public.payroll_schedules;
+create policy schedules_write on public.payroll_schedules
+  for all
+  using (public.has_tenant_role(tenant_id, 'admin'))
+  with check (public.has_tenant_role(tenant_id, 'admin'));
+
+-- ████ 3/3 SEED DATA (seed.sql) — demo tenant/employees; skip if not wanted ██
+-- Demo seed data for Contexta. Mirrors @contexta/tests fixtures so the API,
+-- worker, and UI tell the same story. Safe to run against a fresh local DB:
+--   supabase db reset   (runs migrations then this seed)
+
+-- Demo user (in a real project this id comes from auth.users after sign-up).
+insert into public.users (id, email, full_name)
+values ('00000000-0000-4000-8000-0000000000aa', 'owner@acme.example', 'Acme Owner')
+on conflict (id) do nothing;
+
+-- Tenant
+insert into public.tenants (id, name, domain, country)
+values ('00000000-0000-4000-8000-000000000001', 'Acme LATAM', 'acme.contexta.app', 'BR')
+on conflict (id) do nothing;
+
+insert into public.tenant_users (tenant_id, user_id, role)
+values ('00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-0000000000aa', 'owner')
+on conflict do nothing;
+
+-- Legal context (v1) + link tenant.legal_context_id
+insert into public.legal_contexts (id, tenant_id, context_id, version, hash, document)
+values (
+  '00000000-0000-4000-8000-0000000000c1',
+  '00000000-0000-4000-8000-000000000001',
+  '11111111-1111-4111-8111-111111111111',
+  1,
+  'b3f1c0a9d2e4f5a6b7c8d9e0f1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d',
+  '{
+    "specVersion": "0.1.0",
+    "contextId": "11111111-1111-4111-8111-111111111111",
+    "version": 1,
+    "tenantDomain": "acme.contexta.app",
+    "provider": {"legalName": "Acme Treasury Ltda", "jurisdiction": "BR", "contactEmail": "legal@acme.example"},
+    "terms": {"url": "https://acme.contexta.app/legal/terms", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "effectiveDate": "2026-01-01"},
+    "jurisdiction": "BR",
+    "consentRequirements": [
+      {"id": "treasury-management", "description": "Authorize agents to allocate idle treasury.", "required": true, "scope": ["treasury","yield"]},
+      {"id": "payroll-execution", "description": "Authorize scheduled payroll settlement.", "required": true, "scope": ["payroll","offramp"]}
+    ],
+    "disputeChannels": [{"type": "arbitration", "provider": "Contexta default arbitration", "venue": "https://acme.contexta.app/legal/disputes", "governingLaw": "BR", "language": "en"}],
+    "settlement": {"networks": ["stellar:testnet","stellar:pubnet"], "assets": ["USDC","XLM"]},
+    "publishedAt": "2026-01-04T10:02:00.000Z"
+  }'::jsonb
+)
+on conflict (tenant_id, version) do nothing;
+
+update public.tenants
+  set legal_context_id = '11111111-1111-4111-8111-111111111111'
+  where id = '00000000-0000-4000-8000-000000000001';
+
+-- Treasury config
+insert into public.treasuries (tenant_id, min_liquidity_base_units, max_yield_bps, country_limits_bps, volatility_sensitivity)
+values ('00000000-0000-4000-8000-000000000001', '500000000000', 6000, '{"BR":5000,"AR":3000,"CO":3000}', 60)
+on conflict (tenant_id) do nothing;
+
+-- Positions
+insert into public.treasury_positions (tenant_id, asset, strategy, strategy_ref, amount_base_units, apy_bps) values
+  ('00000000-0000-4000-8000-000000000001', 'USDC',  'liquidity',      null,                  '800000000000', null),
+  ('00000000-0000-4000-8000-000000000001', 'XLM',   'liquidity',      null,                  '150000000000', null),
+  ('00000000-0000-4000-8000-000000000001', 'CETES', 'defindex_vault', 'vault_cetes_rwa_001', '1200000000000', 1075),
+  ('00000000-0000-4000-8000-000000000001', 'USDC',  'blend_pool',     'blend_pool_main',     '300000000000', 540)
+on conflict do nothing;
+
+-- Employees
+insert into public.payroll_employees (id, tenant_id, full_name, email, country, wallet_address, bank_reference, payout_asset, preferred_rail, salary_amount) values
+  ('00000000-0000-4000-8000-000000000030','00000000-0000-4000-8000-000000000001','Ana Souza','ana@acme.example','BR',null,'ana.souza@pix.example','BRL','PIX','4500.00'),
+  ('00000000-0000-4000-8000-000000000031','00000000-0000-4000-8000-000000000001','Bruno Díaz','bruno@acme.example','AR','GBRUNOEXAMPLE',null,'USDC','STELLAR','3800.00'),
+  ('00000000-0000-4000-8000-000000000032','00000000-0000-4000-8000-000000000001','Carolina Gómez','caro@acme.example','CO',null,'bre-b:caro.gomez','COP','BRE_B','3200.00')
+on conflict (id) do nothing;
+
+-- Schedule
+insert into public.payroll_schedules (id, tenant_id, name, cadence, next_run_at, asset, rail, employee_ids) values
+  ('00000000-0000-4000-8000-000000000040','00000000-0000-4000-8000-000000000001','Monthly LATAM payroll','monthly','2026-07-01T12:00:00Z','USDC','STELLAR',
+   array['00000000-0000-4000-8000-000000000030','00000000-0000-4000-8000-000000000031','00000000-0000-4000-8000-000000000032']::uuid[])
+on conflict (id) do nothing;
+
+-- Consents
+insert into public.consent_records (tenant_id, user_id, consent_id, signature) values
+  ('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-0000000000aa','treasury-management','G7K2EXAMPLE9f1a'),
+  ('00000000-0000-4000-8000-000000000001','00000000-0000-4000-8000-0000000000aa','payroll-execution','G7K2EXAMPLE9f1a')
+on conflict do nothing;

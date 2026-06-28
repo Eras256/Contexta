@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { AuthControls } from "@/components/AuthControls";
 
 const SECTIONS = [
   { href: "/", label: "Overview" },
@@ -49,9 +50,7 @@ export function Navbar() {
           <Link href="/treasury" className="btn-ghost hidden sm:inline-flex">
             Launch testnet workspace
           </Link>
-          <Link href="/docs" className="btn-primary">
-            Request demo
-          </Link>
+          <AuthControls />
         </div>
       </div>
 

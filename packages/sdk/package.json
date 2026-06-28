@@ -1,0 +1,56 @@
+{
+  "name": "contexta-sdk",
+  "version": "0.1.0",
+  "description": "Client SDK for Contexta — agentic treasury & payroll on Stellar. Typed API client, Stellar wallet sign-in (SEP-53), and Legal Context Protocol (LCP) hashing/verification.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "README.md"],
+  "sideEffects": false,
+  "keywords": [
+    "stellar",
+    "soroban",
+    "contexta",
+    "sdk",
+    "treasury",
+    "payroll",
+    "lcp",
+    "legal-context-protocol",
+    "freighter",
+    "sep-53",
+    "wallet-auth"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/contexta/contexta",
+    "directory": "packages/sdk"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint \"src/**/*.ts\"",
+    "test": "vitest run",
+    "prepublishOnly": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.6.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

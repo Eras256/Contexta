@@ -12,6 +12,7 @@ import { healthRouter } from "./http/routes/health.js";
 import { treasuryRouter } from "./http/routes/treasury.js";
 import { payrollRouter } from "./http/routes/payroll.js";
 import { legalRouter, wellKnownRouter } from "./http/routes/legal.js";
+import { authRouter } from "./http/routes/auth.js";
 import { agentRouter } from "./http/routes/agent.js";
 import { integrationsRouter } from "./http/routes/integrations.js";
 import { auditRouter } from "./http/routes/audit.js";
@@ -56,6 +57,13 @@ export function createApp(container: Container = createContainer()): Express {
   // ── Public routes (no auth) ──────────────────────────────────────────────
   app.use("/", healthRouter());
   app.use("/.well-known", wellKnownRouter());
+  // Wallet sign-in handshake (rate-limited, no bearer) — must precede the
+  // authenticated /api/v1 router so it isn't gated by the auth middleware.
+  app.use(
+    "/api/v1/auth",
+    rateLimit({ windowMs: RATE_LIMIT.sensitive.windowMs, max: RATE_LIMIT.sensitive.max }),
+    authRouter(),
+  );
 
   // ── Authenticated API ────────────────────────────────────────────────────
   const api = express.Router();

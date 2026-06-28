@@ -74,3 +74,16 @@ export const blendOpSchema = z.object({
   asset: z.string().min(1),
   amountBaseUnits: z.string().regex(/^\d+$/u),
 });
+
+const stellarAddress = z.string().regex(/^G[A-Z2-7]{55}$/u, "Expected a Stellar public key (G...)");
+
+export const walletChallengeSchema = z.object({
+  address: stellarAddress,
+});
+
+export const walletVerifySchema = z.object({
+  address: stellarAddress,
+  message: z.string().min(1).max(2000),
+  hmac: z.string().min(1),
+  signedMessage: z.string().min(1).max(2000),
+});

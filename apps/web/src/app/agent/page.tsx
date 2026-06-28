@@ -1,6 +1,10 @@
-import { Badge, Card, KeyValue, SectionHeader } from "@/components/ui";
+"use client";
+
+import { Badge, Card, DataBadge, KeyValue, SectionHeader } from "@/components/ui";
 import { demoDecisions, demoTenant } from "@/lib/demoData";
 import { shortHash } from "@/lib/format";
+import { api, type Decision, type LegalState } from "@/lib/api";
+import { useLiveData } from "@/lib/useLiveData";
 
 const ACTION_LABEL: Record<string, string> = {
   deposit_vault: "Deposit to vault",
@@ -17,13 +21,26 @@ const CONSENT_RECORDS = [
   { who: "owner@acme.example", what: "payroll-execution", at: "2026-01-04 10:02", sig: "G7K2…9f1a" },
 ];
 
+const demoLegal: LegalState = {
+  published: true,
+  hash: demoTenant.legalContextHash,
+  document: { tenantDomain: demoTenant.domain, jurisdiction: "BR" },
+};
+
 export default function AgentPage() {
+  const decisions = useLiveData<Decision[]>(api.decisions, demoDecisions as Decision[], {
+    realtimeTable: "agent_decisions",
+  });
+  const legal = useLiveData<LegalState>(api.legal, demoLegal);
+  const doc = (legal.data.document ?? {}) as { tenantDomain?: string; jurisdiction?: string };
+
   return (
     <div className="space-y-8">
       <SectionHeader
         eyebrow="Agent & Legal Context"
         title="Agent monitoring & Legal Context Protocol"
         description="Configure the legal context that governs agentic commerce, then watch every agent decision link back to its terms, consents, and on-chain settlement."
+        action={<DataBadge live={decisions.live} loading={decisions.loading} />}
       />
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -31,19 +48,19 @@ export default function AgentPage() {
         <Card>
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-sm font-semibold text-white">legal-context.json</h3>
-            <Badge tone="agent">v1 · published</Badge>
+            <Badge tone="agent">{legal.data.published ? "v1 · published" : "unpublished"}</Badge>
           </div>
-          <KeyValue k="Tenant domain" v={<span className="font-mono text-xs">{demoTenant.domain}</span>} />
-          <KeyValue k="Jurisdiction" v="Brazil (BR)" />
+          <KeyValue k="Tenant domain" v={<span className="font-mono text-xs">{doc.tenantDomain ?? demoTenant.domain}</span>} />
+          <KeyValue k="Jurisdiction" v={doc.jurisdiction === "BR" ? "Brazil (BR)" : (doc.jurisdiction ?? "Brazil (BR)")} />
           <KeyValue k="Arbitration" v="Contexta default arbitration" />
           <KeyValue k="Consents required" v="treasury-management, payroll-execution" />
           <KeyValue
             k="Document hash"
-            v={<span className="font-mono text-xs text-accent">{shortHash(demoTenant.legalContextHash)}</span>}
+            v={<span className="font-mono text-xs text-accent">{shortHash(legal.data.hash ?? null)}</span>}
           />
           <div className="mt-4 flex gap-2">
-            <button className="btn-primary">Edit & republish</button>
-            <a className="btn-ghost" href="/.well-known/legal-context.json">
+            <button className="btn-primary">Edit &amp; republish</button>
+            <a className="btn-ghost" href="https://contexta-api.fly.dev/.well-known/legal-context.json?domain=acme.contexta.app" target="_blank" rel="noreferrer">
               View .well-known
             </a>
           </div>
@@ -90,7 +107,7 @@ export default function AgentPage() {
       <Card>
         <h3 className="mb-4 text-sm font-semibold text-white">Agent decisions</h3>
         <div className="space-y-3">
-          {demoDecisions.map((d) => (
+          {decisions.data.map((d) => (
             <div key={d.id} className="rounded-lg border border-white/10 bg-ink-900/60 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
@@ -113,11 +130,14 @@ export default function AgentPage() {
                 </span>
                 <span className="text-slate-400">
                   Audit:{" "}
-                  <span className="font-mono text-slate-300">audit_logs/{d.id}</span>
+                  <span className="font-mono text-slate-300">audit_logs/{d.id.slice(0, 8)}</span>
                 </span>
               </div>
             </div>
           ))}
+          {decisions.data.length === 0 && (
+            <p className="text-sm text-slate-500">No agent decisions yet. The worker proposes on each tick.</p>
+          )}
         </div>
       </Card>
     </div>

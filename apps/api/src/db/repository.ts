@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type {
   AgentDecision,
@@ -54,6 +55,49 @@ export class Repository {
           createdAt: data.created_at,
         }
       : null;
+  }
+
+  // ── Wallet identities (Sign In With Stellar) ────────────────────────────
+  async findUserByWallet(address: string): Promise<{ id: string } | null> {
+    const { data, error } = await this.db
+      .from("users")
+      .select("id")
+      .eq("wallet_address", address)
+      .maybeSingle();
+    if (error) throw new Error(`DB error (findUserByWallet): ${error.message}`);
+    return data ? { id: data.id as string } : null;
+  }
+
+  async createWalletUser(address: string): Promise<{ id: string }> {
+    const id = randomUUID();
+    // users.email is NOT NULL + unique; synthesize a stable address-derived email.
+    const { error } = await this.db.from("users").insert({
+      id,
+      wallet_address: address,
+      email: `${address.toLowerCase()}@wallet.contexta.app`,
+      full_name: `${address.slice(0, 4)}…${address.slice(-4)}`,
+    });
+    if (error) throw new Error(`DB error (createWalletUser): ${error.message}`);
+    return { id };
+  }
+
+  async ensureMembership(tenantId: string, userId: string, role: string): Promise<void> {
+    const { error } = await this.db
+      .from("tenant_users")
+      .upsert({ tenant_id: tenantId, user_id: userId, role }, { onConflict: "tenant_id,user_id" });
+    if (error) throw new Error(`DB error (ensureMembership): ${error.message}`);
+  }
+
+  async firstMembershipForUser(userId: string): Promise<{ tenantId: string; role: string } | null> {
+    const { data, error } = await this.db
+      .from("tenant_users")
+      .select("tenant_id, role, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(`DB error (firstMembershipForUser): ${error.message}`);
+    return data ? { tenantId: data.tenant_id as string, role: data.role as string } : null;
   }
 
   // ── Treasury ────────────────────────────────────────────────────────────
