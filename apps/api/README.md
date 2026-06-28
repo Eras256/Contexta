@@ -64,7 +64,7 @@ in **deterministic mock mode** so the whole API works offline.
 ## Deploy (Fly.io)
 
 ```bash
-fly apps create contexta-api
+fly apps create contextio-api
 fly secrets set SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... SUPABASE_JWT_SECRET=... \
   INTERNAL_API_SECRET=... STELLAR_SERVICE_SECRET=...
 # Run from the monorepo root so workspace packages resolve:

@@ -20,7 +20,7 @@ npm i contextio-sdk
 import { ContextioClient, signInWithStellar } from "contextio-sdk";
 import { StellarWalletsKit, Networks, defaultModules } from "@creit.tech/stellar-wallets-kit";
 
-const client = new ContextioClient({ baseUrl: "https://contexta-api.fly.dev" });
+const client = new ContextioClient({ baseUrl: "https://contextio-api.fly.dev" });
 
 StellarWalletsKit.init({ network: Networks.TESTNET, modules: defaultModules() });
 const { address } = await StellarWalletsKit.authModal();

@@ -83,8 +83,8 @@ export default function IntegrationsPage() {
         <h3 className="mb-4 text-sm font-semibold text-white">Platform health</h3>
         <div className="grid gap-4 sm:grid-cols-3">
           <HealthTile name="Supabase" detail="Postgres + Auth" status="connected" />
-          <HealthTile name="Fly.io · API" detail="gru · contexta-api" status="connected" />
-          <HealthTile name="Fly.io · Worker" detail="gru · contexta-worker" status="connected" />
+          <HealthTile name="Fly.io · API" detail="gru · contextio-api" status="connected" />
+          <HealthTile name="Fly.io · Worker" detail="gru · contextio-agent" status="connected" />
         </div>
       </Card>
     </div>

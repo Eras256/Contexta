@@ -9,7 +9,7 @@ import type {
 } from "./types.js";
 
 export interface ContextioClientOptions {
-  /** Base URL of the Contextio API, e.g. https://contexta-api.fly.dev */
+  /** Base URL of the Contextio API, e.g. https://contextio-api.fly.dev */
   baseUrl: string;
   /** Session JWT (from wallet sign-in). Required for tenant-scoped endpoints. */
   accessToken?: string;

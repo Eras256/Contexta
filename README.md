@@ -17,7 +17,7 @@ all code in this monorepo is original.
 | Surface | URL |
 | :-- | :-- |
 | Web app (Vercel) | **https://contextio-stellar.vercel.app** |
-| API (Fly.io · region GRU) | **https://contexta-api.fly.dev** |
+| API (Fly.io · region GRU) | **https://contextio-api.fly.dev** |
 | Client SDK (npm) | **`contextio-sdk`** — `npm i contextio-sdk` |
 | Soroban contracts (testnet) | treasury `CASGAQQVHDF4Q2XTK3QWYHRABYX7JUIO6HCLEOZZR7V3TIMVHMXPTA7I` · payroll `CDXML4PU5RVXQ7DSM7UO5OURKFUJMPGI57PRZCQ3NZTKFGPOIDIOIRCT` |
 
@@ -100,7 +100,7 @@ npm i contextio-sdk
 import { ContextioClient, signInWithStellar, hashLegalContext } from "contextio-sdk";
 import { StellarWalletsKit, Networks, defaultModules } from "@creit.tech/stellar-wallets-kit";
 
-const client = new ContextioClient({ baseUrl: "https://contexta-api.fly.dev" });
+const client = new ContextioClient({ baseUrl: "https://contextio-api.fly.dev" });
 StellarWalletsKit.init({ network: Networks.TESTNET, modules: defaultModules() });
 const { address } = await StellarWalletsKit.authModal();
 
@@ -175,7 +175,7 @@ settle on-chain instead of in simulation.
 
 **API → Fly.io** (region GRU, single machine):
 ```bash
-fly apps create contexta-api
+fly apps create contextio-api
 fly secrets set SUPABASE_URL=... SUPABASE_ANON_KEY=... SUPABASE_SERVICE_ROLE_KEY=... \
   SUPABASE_JWT_SECRET=... INTERNAL_API_SECRET=... STELLAR_SERVICE_SECRET=... \
   TREASURY_CONTRACT_ID=... PAYROLL_CONTRACT_ID=... CORS_ORIGINS=https://<your-web>.vercel.app

@@ -58,3 +58,4 @@ Memory.md
 
 # Vercel
 .vercel
+.env*

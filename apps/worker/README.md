@@ -30,7 +30,7 @@ pnpm --filter @contextio/worker test
 ## Deploy (Fly.io)
 
 ```bash
-fly apps create contexta-worker
+fly apps create contextio-agent
 fly secrets set SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... INTERNAL_API_SECRET=...
 fly deploy --config apps/worker/fly.toml --dockerfile apps/worker/Dockerfile
 ```

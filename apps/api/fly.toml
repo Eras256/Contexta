@@ -4,13 +4,13 @@
 #   fly deploy --config apps/api/fly.toml --dockerfile apps/api/Dockerfile
 #
 # First-time setup:
-#   fly apps create contexta-api
+#   fly apps create contextio-api
 #   fly secrets set SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
 #       SUPABASE_JWT_SECRET=... INTERNAL_API_SECRET=... STELLAR_SERVICE_SECRET=...
 #
 # GRU (São Paulo) keeps latency low for BR/AR/CO users and anchors.
 
-app = "contexta-api"
+app = "contextio-api"
 primary_region = "gru"
 
 [build]
@@ -24,7 +24,7 @@ primary_region = "gru"
   STELLAR_RPC_URL = "https://soroban-testnet.stellar.org"
   STELLAR_HORIZON_URL = "https://horizon-testnet.stellar.org"
   STELLAR_NETWORK_PASSPHRASE = "Test SDF Network ; September 2015"
-  LCP_PLATFORM_DOMAIN = "contexta.app"
+  LCP_PLATFORM_DOMAIN = "contextio.xyz"
   # Wallet sign-in: a freshly-connected wallet auto-joins this demo tenant.
   AUTH_DEMO_TENANT_ID = "00000000-0000-4000-8000-000000000001"
   AUTH_DEMO_ROLE = "owner"
