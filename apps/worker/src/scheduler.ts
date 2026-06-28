@@ -4,6 +4,12 @@ export interface ScheduledTask {
   name: string;
   intervalMs: number;
   run: () => Promise<void>;
+  /**
+   * Delay before the first run (default 0 = immediate). Used to interleave tasks
+   * that sign with the same Stellar account so their transactions don't grab the
+   * same sequence number and collide.
+   */
+  initialDelayMs?: number;
 }
 
 /**
@@ -32,9 +38,19 @@ export class Scheduler {
         this.logger.debug({ task: task.name, ms: Date.now() - start }, "Task completed");
       }
     };
-    // Kick off immediately, then on the interval.
-    void tick();
-    this.timers.push(setInterval(tick, task.intervalMs));
+    // Kick off after the optional initial delay, then on the interval.
+    if (task.initialDelayMs && task.initialDelayMs > 0) {
+      this.timers.push(
+        setTimeout(() => {
+          if (this.stopped) return;
+          void tick();
+          this.timers.push(setInterval(tick, task.intervalMs));
+        }, task.initialDelayMs),
+      );
+    } else {
+      void tick();
+      this.timers.push(setInterval(tick, task.intervalMs));
+    }
   }
 
   stop(): void {

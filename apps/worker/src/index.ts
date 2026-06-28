@@ -56,13 +56,16 @@ async function main(): Promise<void> {
     run: async () => runRefreshMarketData(api, await activeTenantIds(), logger),
   });
 
-  // Real DeFindex yield moves on a slower cadence (~every 6 ticks, min 30 min)
-  // so the agent visibly allocates idle cash into on-chain yield without paying
-  // Soroban fees every poll. Only when settling for real (not dry-run).
+  // Real DeFindex yield moves on the same cadence as the heartbeat but offset by
+  // half an interval, so the two jobs — which sign with the SAME platform key —
+  // never grab the same Stellar sequence number, and the public feed gets a fresh
+  // verifiable tx roughly every half-interval (~2.5 min at the default 5-min poll).
+  // Only when settling for real (not dry-run).
   if (!config.AGENT_DRY_RUN) {
     scheduler.add({
       name: "defindex-yield",
-      intervalMs: Math.max(1_800_000, intervalMs * 6),
+      intervalMs,
+      initialDelayMs: Math.floor(intervalMs / 2),
       run: async () => runDefindexYield(api, await activeTenantIds(), logger),
     });
   }
