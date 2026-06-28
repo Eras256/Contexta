@@ -1,5 +1,5 @@
 {
-  "name": "@contexta/worker",
+  "name": "@contextio/worker",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,8 +13,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@contexta/config": "workspace:*",
-    "@contexta/shared": "workspace:*",
+    "@contextio/config": "workspace:*",
+    "@contextio/shared": "workspace:*",
     "@supabase/supabase-js": "^2.47.10"
   },
   "devDependencies": {

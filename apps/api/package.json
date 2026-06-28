@@ -1,5 +1,5 @@
 {
-  "name": "@contexta/api",
+  "name": "@contextio/api",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -14,9 +14,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@contexta/config": "workspace:*",
-    "@contexta/shared": "workspace:*",
-    "@contexta/tests": "workspace:*",
+    "@contextio/config": "workspace:*",
+    "@contextio/shared": "workspace:*",
+    "@contextio/tests": "workspace:*",
     "@supabase/supabase-js": "^2.47.10",
     "cors": "^2.8.5",
     "express": "^4.21.2",

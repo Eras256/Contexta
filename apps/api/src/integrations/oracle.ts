@@ -1,6 +1,6 @@
-import { type Logger } from "@contexta/shared";
-import type { ServerEnv } from "@contexta/config";
-import type { Country } from "@contexta/shared";
+import { type Logger } from "@contextio/shared";
+import type { ServerEnv } from "@contextio/config";
+import type { Country } from "@contextio/shared";
 
 /**
  * FX + yield oracle abstraction. The mock provider returns deterministic,

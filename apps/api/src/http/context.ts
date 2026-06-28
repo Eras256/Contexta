@@ -1,5 +1,5 @@
 import type { Request } from "express";
-import type { Role } from "@contexta/shared";
+import type { Role } from "@contextio/shared";
 import type { Container } from "../container.js";
 
 /** Authenticated request context resolved by the auth middleware. */

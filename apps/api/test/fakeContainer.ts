@@ -1,4 +1,4 @@
-import { createLogger } from "@contexta/shared";
+import { createLogger } from "@contextio/shared";
 import type { Container } from "../src/container.js";
 
 /**

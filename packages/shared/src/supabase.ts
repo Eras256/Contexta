@@ -37,7 +37,7 @@ export interface SupabaseAnonConfig {
 export function createServiceClient(config: SupabaseServiceConfig): SupabaseClient {
   return createClient(config.url, config.serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },
-    global: { headers: { "x-contexta-client": "service" } },
+    global: { headers: { "x-contextio-client": "service" } },
     realtime: realtimeTransport,
   });
 }
@@ -47,7 +47,7 @@ export function createAnonClient(config: SupabaseAnonConfig): SupabaseClient {
     auth: { autoRefreshToken: false, persistSession: false },
     global: {
       headers: {
-        "x-contexta-client": "anon",
+        "x-contextio-client": "anon",
         ...(config.accessToken ? { Authorization: `Bearer ${config.accessToken}` } : {}),
       },
     },

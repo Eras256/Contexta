@@ -1,4 +1,4 @@
-import { createServiceClient, createLogger, stellar, type Logger } from "@contexta/shared";
+import { createServiceClient, createLogger, stellar, type Logger } from "@contextio/shared";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { env } from "./env.js";
 import { Repository } from "./db/repository.js";

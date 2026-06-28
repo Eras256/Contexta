@@ -30,7 +30,7 @@ export function Navbar() {
             Cx
           </span>
           <span className="text-sm font-semibold tracking-tight text-white">
-            Contexta
+            Contextio
             <span className="ml-2 hidden text-xs font-normal text-slate-400 sm:inline">
               Smart Treasury · Stellar
             </span>

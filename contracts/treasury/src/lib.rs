@@ -1,5 +1,5 @@
 #![no_std]
-//! Contexta Treasury contract.
+//! Contextio Treasury contract.
 //!
 //! Records tenant treasury flows (deposits/withdrawals) across strategy buckets
 //! — liquidity, DeFindex vaults, Blend pools — and emits an event for every flow

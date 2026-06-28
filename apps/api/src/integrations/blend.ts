@@ -1,5 +1,5 @@
-import { type Logger, type Result, ok, tryAsync } from "@contexta/shared";
-import { createBlendMock, type BlendMock, type BlendPosition } from "@contexta/tests/mocks";
+import { type Logger, type Result, ok, tryAsync } from "@contextio/shared";
+import { createBlendMock, type BlendMock, type BlendPosition } from "@contextio/tests/mocks";
 
 /**
  * Blend Protocol integration (lending/borrowing). When pool contract ids are

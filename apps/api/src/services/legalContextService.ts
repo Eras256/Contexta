@@ -1,5 +1,5 @@
 import { randomUUID, createHash } from "node:crypto";
-import { type Logger } from "@contexta/shared";
+import { type Logger } from "@contextio/shared";
 import {
   bindLegalContext,
   buildLegalContext,
@@ -9,7 +9,7 @@ import {
   verifyBinding,
   type LcpBinding,
   type LegalContext,
-} from "@contexta/shared/lcp";
+} from "@contextio/shared/lcp";
 import type { Repository } from "../db/repository.js";
 
 /**
@@ -49,7 +49,7 @@ export class LegalContextService {
     providerContactEmail: string;
     termsUrl: string;
     termsText?: string;
-    jurisdiction: string;
+    jurisdictions: string[];
     actorId: string | null;
   }): Promise<{ document: LegalContext; hash: string; url: string }> {
     const existing = await this.repo.getLegalContextByTenant(input.tenantId);
@@ -70,7 +70,7 @@ export class LegalContextService {
       termsUrl: input.termsUrl,
       termsSha256,
       termsEffectiveDate: new Date().toISOString().slice(0, 10),
-      jurisdiction: input.jurisdiction,
+      jurisdictions: input.jurisdictions,
     });
     const hash = hashLegalContext(document);
 

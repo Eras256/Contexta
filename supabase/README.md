@@ -1,12 +1,12 @@
 # Supabase (data layer)
 
-Postgres schema, RLS policies, and seed data for Contexta.
+Postgres schema, RLS policies, and seed data for Contextio.
 
 ```
 migrations/
   0001_init.sql   tables, indexes, FKs, updated_at trigger
   0002_rls.sql    row-level security + role helpers
-seed.sql          demo tenant (Acme LATAM) matching @contexta/tests fixtures
+seed.sql          demo tenant (Acme LATAM) matching @contextio/tests fixtures
 config.toml       local Supabase CLI config
 ```
 

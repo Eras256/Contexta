@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { AuditAction, AuditLog } from "@contexta/shared";
+import type { AuditAction, AuditLog } from "@contextio/shared";
 import type { Repository } from "../db/repository.js";
 
 /** Thin helper that standardizes audit-log creation across services. */

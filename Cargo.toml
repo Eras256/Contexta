@@ -1,4 +1,4 @@
-# Cargo workspace for Contexta Soroban contracts.
+# Cargo workspace for Contextio Soroban contracts.
 # pnpm manages the TS/JS packages; this manages the Rust/Soroban side.
 [workspace]
 resolver = "2"
@@ -8,8 +8,8 @@ members = ["contracts/treasury", "contracts/payroll"]
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
-authors = ["Contexta"]
-repository = "https://github.com/contexta/contexta"
+authors = ["Contextio"]
+repository = "https://github.com/Eras256/Contexta"
 
 [workspace.dependencies]
 soroban-sdk = "22.0.0"

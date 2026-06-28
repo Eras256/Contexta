@@ -1,6 +1,6 @@
-# @contexta/api
+# @contextio/api
 
-Node/TypeScript backend for Contexta — the agentic treasury & payroll platform.
+Node/TypeScript backend for Contextio — the agentic treasury & payroll platform.
 Express, layered into **routes → services → integrations → data access**, with a
 DI composition root (`src/container.ts`) so every layer is unit-testable.
 
@@ -9,7 +9,7 @@ DI composition root (`src/container.ts`) so every layer is unit-testable.
 | Area | Module |
 | --- | --- |
 | Auth & multi-tenancy | `http/middleware/auth.ts` (Supabase JWT + internal worker secret) |
-| RBAC | `http/middleware/rbac.ts` + `@contexta/config` capability matrix |
+| RBAC | `http/middleware/rbac.ts` + `@contextio/config` capability matrix |
 | Treasury | `services/treasuryService.ts`, `http/routes/treasury.ts` |
 | Payroll | `services/payrollService.ts`, `http/routes/payroll.ts` |
 | Legal Context (LCP) | `services/legalContextService.ts`, `http/routes/legal.ts` |
@@ -52,9 +52,9 @@ plus `x-tenant-id`, or the worker's `x-internal-secret` plus `x-tenant-id`.
 ## Local development
 
 ```bash
-pnpm --filter @contexta/api dev      # tsx watch on :8080
-pnpm --filter @contexta/api test     # vitest (HTTP + agent unit tests)
-pnpm --filter @contexta/api build
+pnpm --filter @contextio/api dev      # tsx watch on :8080
+pnpm --filter @contextio/api test     # vitest (HTTP + agent unit tests)
+pnpm --filter @contextio/api build
 ```
 
 Set environment per `.env.example` at the repo root. With `DEFINDEX_API_KEY`,

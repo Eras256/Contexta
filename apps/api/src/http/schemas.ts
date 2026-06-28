@@ -57,7 +57,7 @@ export const publishLegalSchema = z.object({
   providerContactEmail: z.string().email(),
   termsUrl: z.string().url(),
   termsText: z.string().optional(),
-  jurisdiction: z.string().min(2),
+  jurisdictions: z.array(z.string().min(2)).min(1),
 });
 
 export const proposeSchema = z.object({

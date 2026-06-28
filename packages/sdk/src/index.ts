@@ -1,4 +1,4 @@
-export { ContextaClient, ContextaApiError, type ContextaClientOptions } from "./client.js";
+export { ContextioClient, ContextioApiError, type ContextioClientOptions } from "./client.js";
 export { signInWithStellar, type SignMessageFn } from "./auth.js";
 export {
   canonicalize,

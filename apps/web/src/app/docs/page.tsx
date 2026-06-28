@@ -49,7 +49,7 @@ export default function DocsPage() {
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
                 <th className="pb-2">Expectation</th>
-                <th className="pb-2">How Contexta meets it</th>
+                <th className="pb-2">How Contextio meets it</th>
               </tr>
             </thead>
             <tbody>
@@ -82,7 +82,7 @@ export default function DocsPage() {
               <li># Interview 1 — &lt;company, role&gt;</li>
               <li>## Pain — cross-border payroll cost &amp; delays</li>
               <li>## Current workflow — &lt;…&gt;</li>
-              <li>## Reaction to Contexta — &lt;…&gt;</li>
+              <li>## Reaction to Contextio — &lt;…&gt;</li>
             </ul>
           </div>
         </Card>

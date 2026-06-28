@@ -1,4 +1,4 @@
-import { loadWorkerEnv, type WorkerEnv } from "@contexta/config";
+import { loadWorkerEnv, type WorkerEnv } from "@contextio/config";
 
 let cached: WorkerEnv | null = null;
 

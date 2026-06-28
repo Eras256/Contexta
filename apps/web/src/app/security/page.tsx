@@ -93,7 +93,7 @@ export default function SecurityPage() {
             ))}
           </div>
           <p className="mt-3 text-xs text-slate-500">
-            Enforced centrally via the capability matrix in <span className="font-mono">@contexta/config</span>.
+            Enforced centrally via the capability matrix in <span className="font-mono">@contextio/config</span>.
           </p>
         </Card>
       </div>

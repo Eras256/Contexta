@@ -1,4 +1,4 @@
--- Contexta — initial schema.
+-- Contextio — initial schema.
 -- Postgres / Supabase. Base-unit monetary values are stored as text to preserve
 -- exact bigint fidelity (7-dp Stellar base units), matching the API repository
 -- which parses them via BigInt(). Decimal salary values are also text.

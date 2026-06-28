@@ -1,6 +1,6 @@
 # Architecture
 
-Contexta is a non-custodial control plane: the company keeps custody, and AI
+Contextio is a non-custodial control plane: the company keeps custody, and AI
 agents propose + execute treasury and payroll actions within signed limits, each
 bound to a verifiable legal context.
 

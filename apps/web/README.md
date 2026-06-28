@@ -1,6 +1,6 @@
-# @contexta/web
+# @contextio/web
 
-Next.js (App Router) frontend for Contexta. Institutional dark theme, Tailwind,
+Next.js (App Router) frontend for Contextio. Institutional dark theme, Tailwind,
 server components by default with small client islands for navigation.
 
 ## Sections (top navbar)
@@ -22,9 +22,9 @@ to switch any view to live data from `apps/api`.
 ## Commands
 
 ```bash
-pnpm --filter @contexta/web dev        # http://localhost:3000
-pnpm --filter @contexta/web build
-pnpm --filter @contexta/web test:e2e   # Playwright (starts dev server)
+pnpm --filter @contextio/web dev        # http://localhost:3000
+pnpm --filter @contextio/web build
+pnpm --filter @contextio/web test:e2e   # Playwright (starts dev server)
 ```
 
 ## Notes

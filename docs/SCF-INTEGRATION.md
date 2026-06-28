@@ -1,8 +1,8 @@
 # SCF Integration Track mapping
 
-How Contexta aligns with Stellar Community Fund **Integration Track** expectations.
+How Contextio aligns with Stellar Community Fund **Integration Track** expectations.
 
-| Expectation | How Contexta meets it |
+| Expectation | How Contextio meets it |
 | --- | --- |
 | Integrates ≥ 1 Stellar building block | **Four**: Soroban contracts, anchors (SEP-24/31), DeFindex vaults, Blend pools. |
 | Clear user & market | LATAM SMBs/startups paying cross-border teams in BR/AR/CO; digital-dollar treasury + local-rail payroll. |

@@ -18,7 +18,7 @@ const body = Hanken_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Contexta — Smart Treasury & Payroll for LATAM on Stellar",
+  title: "Contextio — Smart Treasury & Payroll for LATAM on Stellar",
   description:
     "A smart money assistant for Latin American businesses: keep payday covered, earn yield on idle cash, and pay your team in Brazil, Argentina, and Colombia — non-custodial, on Stellar.",
 };

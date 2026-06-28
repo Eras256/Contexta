@@ -1,5 +1,5 @@
 {
-  "name": "@contexta/tests",
+  "name": "@contextio/tests",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -28,7 +28,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@contexta/shared": "workspace:*"
+    "@contextio/shared": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.3",

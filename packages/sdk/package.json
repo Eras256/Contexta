@@ -1,7 +1,7 @@
 {
-  "name": "contexta-sdk",
+  "name": "contextio-sdk",
   "version": "0.1.0",
-  "description": "Client SDK for Contexta — agentic treasury & payroll on Stellar. Typed API client, Stellar wallet sign-in (SEP-53), and Legal Context Protocol (LCP) hashing/verification.",
+  "description": "Client SDK for Contextio — agentic treasury & payroll on Stellar. Typed API client, Stellar wallet sign-in (SEP-53), and Legal Context Protocol (LCP) hashing/verification.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./dist/index.js",
@@ -18,7 +18,7 @@
   "keywords": [
     "stellar",
     "soroban",
-    "contexta",
+    "contextio",
     "sdk",
     "treasury",
     "payroll",
@@ -30,7 +30,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/contexta/contexta",
+    "url": "https://github.com/Eras256/Contexta",
     "directory": "packages/sdk"
   },
   "publishConfig": {

@@ -1,7 +1,7 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { SignJWT } from "jose";
-import { type Logger, stellar } from "@contexta/shared";
-import type { ServerEnv } from "@contexta/config";
+import { type Logger, stellar } from "@contextio/shared";
+import type { ServerEnv } from "@contextio/config";
 import type { Repository } from "../db/repository.js";
 
 /**
@@ -49,7 +49,7 @@ export class WalletAuthService {
     const now = new Date();
     const expires = new Date(now.getTime() + 5 * 60_000);
     const message = [
-      "Contexta — Sign in with Stellar",
+      "Contextio — Sign in with Stellar",
       "",
       "Sign this message to authenticate. This does not move funds.",
       `Address: ${address}`,

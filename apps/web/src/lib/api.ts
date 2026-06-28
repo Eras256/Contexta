@@ -1,5 +1,5 @@
 /**
- * Typed client for the Contexta API. Components pass a Supabase access token +
+ * Typed client for the Contextio API. Components pass a Supabase access token +
  * tenant id (from the auth context). The API verifies the token (JWKS/HS256),
  * checks tenant membership, and enforces RBAC + the Legal Context Protocol.
  */

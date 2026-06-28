@@ -6,7 +6,7 @@ import {
   type JWTPayload,
   type JWTVerifyGetKey,
 } from "jose";
-import type { ServerEnv } from "@contexta/config";
+import type { ServerEnv } from "@contextio/config";
 import { HttpError, type AuthContext } from "../context.js";
 
 /**

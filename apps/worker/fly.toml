@@ -1,4 +1,4 @@
-# Fly.io config for the Contexta agent worker (no public HTTP service).
+# Fly.io config for the Contextio agent worker (no public HTTP service).
 #
 # Deploy (from the monorepo root):
 #   fly deploy --config apps/worker/fly.toml --dockerfile apps/worker/Dockerfile

@@ -1,4 +1,4 @@
-import type { Logger } from "@contexta/shared";
+import type { Logger } from "@contextio/shared";
 
 export interface ScheduledTask {
   name: string;

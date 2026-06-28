@@ -14,7 +14,7 @@ function main(): void {
   const server = app.listen(config.API_PORT, config.API_HOST, () => {
     container.logger.info(
       { port: config.API_PORT, host: config.API_HOST, network: config.STELLAR_NETWORK },
-      "Contexta API listening",
+      "Contextio API listening",
     );
   });
 

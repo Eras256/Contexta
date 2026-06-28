@@ -11,9 +11,9 @@ export function healthRouter(): Router {
   // entry points; everything else lives under the authenticated /api/v1 surface.
   router.get("/", (_req, res) => {
     res.json({
-      name: "Contexta API",
+      name: "Contextio API",
       status: "ok",
-      docs: "https://github.com/contexta/contexta",
+      docs: "https://github.com/Eras256/Contexta",
       endpoints: {
         health: "/healthz",
         readiness: "/readyz",

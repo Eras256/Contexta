@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // @contexta/shared is a workspace package shipped as TS/ESM; transpile it.
-  transpilePackages: ["@contexta/shared"],
+  // @contextio/shared is a workspace package shipped as TS/ESM; transpile it.
+  transpilePackages: ["@contextio/shared"],
   experimental: {
     typedRoutes: true,
   },

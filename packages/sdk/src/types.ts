@@ -1,4 +1,4 @@
-/** Public types for the Contexta SDK. Mirror the API's JSON response shapes. */
+/** Public types for the Contextio SDK. Mirror the API's JSON response shapes. */
 
 export type Country = "BR" | "AR" | "CO";
 export type Asset = "USDC" | "XLM" | "CETES" | "BRL" | "ARS" | "COP";
@@ -102,7 +102,7 @@ export interface LegalContext {
   tenantDomain: string;
   provider: LcpParty;
   terms: { url: string; sha256: string; effectiveDate: string };
-  jurisdiction: string;
+  jurisdictions: string[];
   consentRequirements: LcpConsentRequirement[];
   disputeChannels: LcpDisputeChannel[];
   settlement: { networks: string[]; assets: string[] };

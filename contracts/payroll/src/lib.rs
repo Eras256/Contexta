@@ -1,5 +1,5 @@
 #![no_std]
-//! Contexta Payroll contract.
+//! Contextio Payroll contract.
 //!
 //! Executes payroll runs on-chain as tamper-evident, LCP-bound events. Each run
 //! is keyed by an off-chain run id (UUID from Supabase) so execution is

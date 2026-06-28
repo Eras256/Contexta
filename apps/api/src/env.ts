@@ -1,4 +1,4 @@
-import { loadServerEnv, type ServerEnv } from "@contexta/config";
+import { loadServerEnv, type ServerEnv } from "@contextio/config";
 
 let cached: ServerEnv | null = null;
 

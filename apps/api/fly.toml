@@ -1,4 +1,4 @@
-# Fly.io config for the Contexta API.
+# Fly.io config for the Contextio API.
 #
 # Deploy (from the monorepo root):
 #   fly deploy --config apps/api/fly.toml --dockerfile apps/api/Dockerfile

@@ -1,4 +1,4 @@
-# Contexta — Agentic Treasury & Payroll for LATAM on Stellar
+# Contextio — Agentic Treasury & Payroll for LATAM on Stellar
 
 > Non-custodial treasury & payroll where **AI agents** manage liquidity, yield, and
 > payroll for companies paying teams in **Brazil, Argentina, and Colombia**.
@@ -18,7 +18,7 @@ all code in this monorepo is original.
 | :-- | :-- |
 | Web app (Vercel) | **https://contexta-stellar.vercel.app** |
 | API (Fly.io · region GRU) | **https://contexta-api.fly.dev** |
-| Client SDK (npm) | **`contexta-sdk`** — `npm i contexta-sdk` |
+| Client SDK (npm) | **`contextio-sdk`** — `npm i contextio-sdk` |
 | Soroban contracts (testnet) | treasury `CASGAQQVHDF4Q2XTK3QWYHRABYX7JUIO6HCLEOZZR7V3TIMVHMXPTA7I` · payroll `CDXML4PU5RVXQ7DSM7UO5OURKFUJMPGI57PRZCQ3NZTKFGPOIDIOIRCT` |
 
 Connect Freighter (on **Testnet**) at the web app → sign the message → explore live treasury, agent, and payroll data.
@@ -37,7 +37,7 @@ contexta/
 │  ├─ shared/      domain types, logger, Supabase + Stellar clients, LCP module
 │  ├─ config/      type-safe env (zod) + RBAC capability matrix + security settings
 │  ├─ tests/       fixtures + DeFindex/Blend mocks (built dep used by the API)
-│  └─ sdk/         public client SDK published to npm as `contexta-sdk`
+│  └─ sdk/         public client SDK published to npm as `contextio-sdk`
 ├─ contracts/
 │  ├─ treasury/    Soroban (Rust): LCP-bound treasury flows
 │  └─ payroll/     Soroban (Rust): idempotent, LCP-bound payroll runs
@@ -87,20 +87,20 @@ The platform computes a **canonical SHA-256** of that document and binds the
 hash into every agentic Stellar transaction (treasury flow / payroll run) and
 audit record — so the legal basis of an action is independently verifiable.
 Implementation: [`packages/shared/src/lcp`](packages/shared/src/lcp). The
-**`contexta-sdk`** lets any client re-derive and verify that hash with
+**`contextio-sdk`** lets any client re-derive and verify that hash with
 byte-for-byte parity.
 
-## Client SDK (`contexta-sdk`)
+## Client SDK (`contextio-sdk`)
 
 ```bash
-npm i contexta-sdk
+npm i contextio-sdk
 ```
 
 ```ts
-import { ContextaClient, signInWithStellar, hashLegalContext } from "contexta-sdk";
+import { ContextioClient, signInWithStellar, hashLegalContext } from "contextio-sdk";
 import { StellarWalletsKit, Networks, defaultModules } from "@creit.tech/stellar-wallets-kit";
 
-const client = new ContextaClient({ baseUrl: "https://contexta-api.fly.dev" });
+const client = new ContextioClient({ baseUrl: "https://contexta-api.fly.dev" });
 StellarWalletsKit.init({ network: Networks.TESTNET, modules: defaultModules() });
 const { address } = await StellarWalletsKit.authModal();
 
@@ -125,9 +125,9 @@ and optionally the Supabase CLI and Stellar CLI.
 pnpm install
 
 # Build workspace packages first (apps depend on their d.ts):
-pnpm --filter @contexta/config build
-pnpm --filter @contexta/shared build
-pnpm --filter @contexta/tests build
+pnpm --filter @contextio/config build
+pnpm --filter @contextio/shared build
+pnpm --filter @contextio/tests build
 
 cp .env.example .env.local    # fill in values (works in mock mode with blanks)
 ```
@@ -215,7 +215,7 @@ these in [.github/workflows/ci.yml](.github/workflows/ci.yml).
   authorized contract methods (multisig/smart-account in production).
 - **Wallet auth**: Sign In With Stellar (SEP-53) — verified server-side; sessions
   are short-lived JWTs; the API also supports Supabase JWKS (ES256) verification.
-- **RBAC**: declarative capability matrix in `@contexta/config`; enforced at the API.
+- **RBAC**: declarative capability matrix in `@contextio/config`; enforced at the API.
 - **Input validation**: zod on every state-changing endpoint.
 - **Hardening**: helmet + explicit headers, CORS allowlist, per-route rate limits,
   body-size cap; secrets redacted in logs.
@@ -263,7 +263,7 @@ cargo fmt --all -- --check && cargo clippy --target wasm32-unknown-unknown -- -D
 **Conventions**
 - **TypeScript**: strict types (no `any`; prefer `unknown`); explicit `.js`
   extensions on relative imports in backend ESM packages; validate every
-  state-changing HTTP body with `zod`; log via the structured `@contexta/shared`
+  state-changing HTTP body with `zod`; log via the structured `@contextio/shared`
   logger and redact secrets.
 - **Architecture rules**: all agentic actions go through `apps/api`; the worker
   never writes on-chain/DB directly (it calls the API with `x-internal-secret`);
@@ -282,7 +282,7 @@ than opening a public issue.
 Licensed under the **Apache License 2.0** — see [LICENSE](LICENSE).
 
 ```
-Copyright 2026 Contexta
+Copyright 2026 Contextio
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

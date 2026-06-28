@@ -1,7 +1,7 @@
 # Minimal Supabase CLI config for local development.
 # `supabase start` boots Postgres + Auth; `supabase db reset` runs migrations + seed.
 
-project_id = "contexta"
+project_id = "contextio"
 
 [db]
 port = 54322

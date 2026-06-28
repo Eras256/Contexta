@@ -40,10 +40,10 @@ const en: Dict = {
     badge2: "Your keys · your money",
     title: "Pay your team and grow your cash — on autopilot",
     subtitle:
-      "Contexta is a smart money assistant for businesses in Latin America. It keeps enough cash ready for payday, puts the rest to work earning yield, and pays your team in Brazil, Argentina, and Colombia — while you keep full control of your funds.",
+      "Contextio is a smart money assistant for businesses in Latin America. It keeps enough cash ready for payday, puts the rest to work earning yield, and pays your team in Brazil, Argentina, and Colombia — while you keep full control of your funds.",
     ctaPrimary: "Try the live demo",
     ctaSecondary: "See how it works",
-    trust: "Non-custodial — Contexta never holds your money. You do.",
+    trust: "Non-custodial — Contextio never holds your money. You do.",
   },
   steps: {
     eyebrow: "Three simple steps",
@@ -53,17 +53,17 @@ const en: Dict = {
       "Sign in with your Stellar wallet, like tapping your card — but you keep the keys. No passwords, no sign-up forms.",
     s2Title: "2 · Set your rules",
     s2Body:
-      "Tell Contexta how much cash to always keep ready and how bold to be. Think of it as a thermostat: you set the range, it stays inside it.",
+      "Tell Contextio how much cash to always keep ready and how bold to be. Think of it as a thermostat: you set the range, it stays inside it.",
     s3Title: "3 · Let it run",
     s3Body:
       "Your assistant watches the balance 24/7 — covers payday, earns yield on spare cash, and pays your team on time.",
   },
   benefits: {
-    eyebrow: "Why teams use Contexta",
+    eyebrow: "Why teams use Contextio",
     title: "Less busywork. More peace of mind.",
     b1Title: "Always ready for payday",
     b1Body:
-      "Contexta keeps a safety cushion sized to your next payroll, plus a buffer for currency swings — so payday is never a surprise.",
+      "Contextio keeps a safety cushion sized to your next payroll, plus a buffer for currency swings — so payday is never a surprise.",
     b2Title: "Your idle cash earns",
     b2Body:
       "Spare dollars earn yield in vetted Stellar pools instead of sitting still — like a high-yield savings account that funds itself.",
@@ -96,7 +96,7 @@ const en: Dict = {
   feed: {
     eyebrow: "Live",
     title: "What the assistant is doing right now",
-    subtitle: "Real, on-chain activity from Contexta's autonomous agent — running 24/7 on Stellar testnet.",
+    subtitle: "Real, on-chain activity from Contextio's autonomous agent — running 24/7 on Stellar testnet.",
     agentLabel: "Agent wallet",
     empty: "Waking up the assistant…",
     viewAll: "See all activity",
@@ -106,19 +106,19 @@ const en: Dict = {
   },
   footer: {
     tagline:
-      "Contexta — smart treasury & payroll for Latin America, on Stellar. Non-custodial · Testnet demo · Not financial advice.",
+      "Contextio — smart treasury & payroll for Latin America, on Stellar. Non-custodial · Testnet demo · Not financial advice.",
     security: "Security",
     docs: "Docs",
   },
   diagram: {
     laneCompany: "YOUR COMPANY",
-    lanePlatform: "CONTEXTA (THE ASSISTANT)",
+    lanePlatform: "CONTEXTIO (THE ASSISTANT)",
     laneStellar: "STELLAR NETWORK & PAYOUTS",
     treasuryTitle: "Your money",
     treasurySub: "dollars · XLM",
     agentTitle: "Smart assistant",
     agentSub: "plans & watches",
-    engineTitle: "Contexta engine",
+    engineTitle: "Contextio engine",
     engineSub: "checks your rules",
     recordsTitle: "Records",
     recordsSub: "history & audit",
@@ -150,7 +150,7 @@ const en: Dict = {
       statShareSub: "of your total",
       allocTitle: "Ready cash vs. earning",
       allocBody:
-        "Contexta keeps enough ready for payday, then puts the rest to work. You set the balance; it stays inside it.",
+        "Contextio keeps enough ready for payday, then puts the rest to work. You set the balance; it stays inside it.",
       liquid: "Ready cash",
       earning: "Earning",
       posTitle: "Where your money is",
@@ -174,7 +174,7 @@ const en: Dict = {
     payroll: {
       eyebrow: "Payroll",
       title: "Pay your LATAM team",
-      desc: "See who gets paid, when payday is, and exactly how Contexta will cover the next run.",
+      desc: "See who gets paid, when payday is, and exactly how Contextio will cover the next run.",
       connectTitle: "See your payroll",
       connectBody: "Connect your Stellar wallet to see your real team and upcoming paydays. Nothing here is fake.",
       statPeople: "People you pay",
@@ -195,7 +195,7 @@ const en: Dict = {
       active: "Active",
       paused: "Paused",
       fundTitle: "How the next payday gets covered",
-      fundBody: "Contexta pulls from spare cash first, then from what's earning — only if needed.",
+      fundBody: "Contextio pulls from spare cash first, then from what's earning — only if needed.",
       fundGross: "To pay your team",
       fundBuffer: "Safety buffer (8.5%)",
       fundNeeded: "Total needed",
@@ -221,7 +221,7 @@ const en: Dict = {
     },
     docs: {
       eyebrow: "Docs & SCF",
-      title: "How Contexta works under the hood",
+      title: "How Contextio works under the hood",
       desc: "Architecture, the Legal Context Protocol, and how this maps to the Stellar Community Fund track.",
     },
   },
@@ -250,10 +250,10 @@ const es: Dict = {
     badge2: "Tus llaves · tu dinero",
     title: "Paga a tu equipo y haz crecer tu dinero — en piloto automático",
     subtitle:
-      "Contexta es un asistente de dinero inteligente para empresas de Latinoamérica. Mantiene listo el efectivo para el día de pago, pone el resto a generar rendimiento y paga a tu equipo en Brasil, Argentina y Colombia — mientras tú conservas el control total de tus fondos.",
+      "Contextio es un asistente de dinero inteligente para empresas de Latinoamérica. Mantiene listo el efectivo para el día de pago, pone el resto a generar rendimiento y paga a tu equipo en Brasil, Argentina y Colombia — mientras tú conservas el control total de tus fondos.",
     ctaPrimary: "Probar la demo",
     ctaSecondary: "Ver cómo funciona",
-    trust: "Sin custodia — Contexta nunca guarda tu dinero. Tú sí.",
+    trust: "Sin custodia — Contextio nunca guarda tu dinero. Tú sí.",
   },
   steps: {
     eyebrow: "Tres pasos simples",
@@ -263,17 +263,17 @@ const es: Dict = {
       "Inicia sesión con tu wallet de Stellar, como acercar tu tarjeta — pero las llaves son tuyas. Sin contraseñas ni formularios.",
     s2Title: "2 · Define tus reglas",
     s2Body:
-      "Dile a Contexta cuánto efectivo mantener siempre listo y qué tan arriesgado ser. Es como un termostato: tú pones el rango y se mantiene dentro.",
+      "Dile a Contextio cuánto efectivo mantener siempre listo y qué tan arriesgado ser. Es como un termostato: tú pones el rango y se mantiene dentro.",
     s3Title: "3 · Déjalo funcionar",
     s3Body:
       "Tu asistente vigila el saldo 24/7 — cubre el día de pago, genera rendimiento con el excedente y paga a tu equipo a tiempo.",
   },
   benefits: {
-    eyebrow: "Por qué usan Contexta",
+    eyebrow: "Por qué usan Contextio",
     title: "Menos trabajo manual. Más tranquilidad.",
     b1Title: "Siempre listo para el día de pago",
     b1Body:
-      "Contexta reserva un colchón del tamaño de tu próxima nómina, más un margen por la volatilidad de la moneda — el día de pago nunca te sorprende.",
+      "Contextio reserva un colchón del tamaño de tu próxima nómina, más un margen por la volatilidad de la moneda — el día de pago nunca te sorprende.",
     b2Title: "Tu efectivo ocioso rinde",
     b2Body:
       "Los dólares que sobran generan rendimiento en pools verificados de Stellar en vez de quedarse quietos — como una cuenta de ahorro que se financia sola.",
@@ -306,7 +306,7 @@ const es: Dict = {
   feed: {
     eyebrow: "En vivo",
     title: "Lo que el asistente está haciendo ahora",
-    subtitle: "Actividad real y on-chain del agente autónomo de Contexta — funcionando 24/7 en la testnet de Stellar.",
+    subtitle: "Actividad real y on-chain del agente autónomo de Contextio — funcionando 24/7 en la testnet de Stellar.",
     agentLabel: "Wallet del agente",
     empty: "Despertando al asistente…",
     viewAll: "Ver toda la actividad",
@@ -316,19 +316,19 @@ const es: Dict = {
   },
   footer: {
     tagline:
-      "Contexta — tesorería y nómina inteligentes para Latinoamérica, sobre Stellar. Sin custodia · Demo en testnet · No es asesoría financiera.",
+      "Contextio — tesorería y nómina inteligentes para Latinoamérica, sobre Stellar. Sin custodia · Demo en testnet · No es asesoría financiera.",
     security: "Seguridad",
     docs: "Docs",
   },
   diagram: {
     laneCompany: "TU EMPRESA",
-    lanePlatform: "CONTEXTA (EL ASISTENTE)",
+    lanePlatform: "CONTEXTIO (EL ASISTENTE)",
     laneStellar: "RED STELLAR Y PAGOS",
     treasuryTitle: "Tu dinero",
     treasurySub: "dólares · XLM",
     agentTitle: "Asistente inteligente",
     agentSub: "planea y vigila",
-    engineTitle: "Motor de Contexta",
+    engineTitle: "Motor de Contextio",
     engineSub: "revisa tus reglas",
     recordsTitle: "Registros",
     recordsSub: "historial y auditoría",
@@ -360,7 +360,7 @@ const es: Dict = {
       statShareSub: "de tu total",
       allocTitle: "Efectivo listo vs. rindiendo",
       allocBody:
-        "Contexta mantiene lo necesario para el día de pago y pone el resto a trabajar. Tú defines el balance; se queda dentro.",
+        "Contextio mantiene lo necesario para el día de pago y pone el resto a trabajar. Tú defines el balance; se queda dentro.",
       liquid: "Efectivo listo",
       earning: "Rindiendo",
       posTitle: "Dónde está tu dinero",
@@ -384,7 +384,7 @@ const es: Dict = {
     payroll: {
       eyebrow: "Nómina",
       title: "Paga a tu equipo en LATAM",
-      desc: "Mira a quién pagas, cuándo es el día de pago y cómo Contexta cubrirá la próxima corrida.",
+      desc: "Mira a quién pagas, cuándo es el día de pago y cómo Contextio cubrirá la próxima corrida.",
       connectTitle: "Mira tu nómina",
       connectBody: "Conecta tu wallet de Stellar para ver tu equipo real y los próximos días de pago. Aquí nada es falso.",
       statPeople: "Personas que pagas",
@@ -405,7 +405,7 @@ const es: Dict = {
       active: "Activo",
       paused: "Pausado",
       fundTitle: "Cómo se cubre el próximo pago",
-      fundBody: "Contexta usa primero el efectivo libre y, solo si hace falta, lo que está rindiendo.",
+      fundBody: "Contextio usa primero el efectivo libre y, solo si hace falta, lo que está rindiendo.",
       fundGross: "Para pagar a tu equipo",
       fundBuffer: "Margen de seguridad (8.5%)",
       fundNeeded: "Total necesario",
@@ -431,7 +431,7 @@ const es: Dict = {
     },
     docs: {
       eyebrow: "Docs y SCF",
-      title: "Cómo funciona Contexta por dentro",
+      title: "Cómo funciona Contextio por dentro",
       desc: "Arquitectura, el Protocolo de Contexto Legal y cómo encaja en el track de la Stellar Community Fund.",
     },
   },
@@ -460,10 +460,10 @@ const pt: Dict = {
     badge2: "Suas chaves · seu dinheiro",
     title: "Pague seu time e faça seu caixa render — no piloto automático",
     subtitle:
-      "A Contexta é um assistente financeiro inteligente para empresas da América Latina. Mantém caixa pronto para o dia do pagamento, coloca o resto para render e paga seu time no Brasil, Argentina e Colômbia — enquanto você mantém o controle total dos seus fundos.",
+      "A Contextio é um assistente financeiro inteligente para empresas da América Latina. Mantém caixa pronto para o dia do pagamento, coloca o resto para render e paga seu time no Brasil, Argentina e Colômbia — enquanto você mantém o controle total dos seus fundos.",
     ctaPrimary: "Testar a demo",
     ctaSecondary: "Ver como funciona",
-    trust: "Sem custódia — a Contexta nunca guarda seu dinheiro. Você guarda.",
+    trust: "Sem custódia — a Contextio nunca guarda seu dinheiro. Você guarda.",
   },
   steps: {
     eyebrow: "Três passos simples",
@@ -473,17 +473,17 @@ const pt: Dict = {
       "Entre com sua carteira Stellar, como aproximar o cartão — mas as chaves são suas. Sem senhas, sem cadastros.",
     s2Title: "2 · Defina suas regras",
     s2Body:
-      "Diga à Contexta quanto caixa manter sempre pronto e quão ousada ser. É como um termostato: você define a faixa e ela fica dentro dela.",
+      "Diga à Contextio quanto caixa manter sempre pronto e quão ousada ser. É como um termostato: você define a faixa e ela fica dentro dela.",
     s3Title: "3 · Deixe rodar",
     s3Body:
       "Seu assistente acompanha o saldo 24/7 — cobre o pagamento, rende com a sobra e paga seu time em dia.",
   },
   benefits: {
-    eyebrow: "Por que usam a Contexta",
+    eyebrow: "Por que usam a Contextio",
     title: "Menos trabalho manual. Mais tranquilidade.",
     b1Title: "Sempre pronto para o pagamento",
     b1Body:
-      "A Contexta reserva uma folga do tamanho da sua próxima folha, mais uma margem para a oscilação do câmbio — o dia do pagamento nunca te pega de surpresa.",
+      "A Contextio reserva uma folga do tamanho da sua próxima folha, mais uma margem para a oscilação do câmbio — o dia do pagamento nunca te pega de surpresa.",
     b2Title: "Seu caixa parado rende",
     b2Body:
       "Os dólares que sobram rendem em pools verificados da Stellar em vez de ficar parados — como uma poupança que se financia sozinha.",
@@ -516,7 +516,7 @@ const pt: Dict = {
   feed: {
     eyebrow: "Ao vivo",
     title: "O que o assistente está fazendo agora",
-    subtitle: "Atividade real e on-chain do agente autônomo da Contexta — rodando 24/7 na testnet da Stellar.",
+    subtitle: "Atividade real e on-chain do agente autônomo da Contextio — rodando 24/7 na testnet da Stellar.",
     agentLabel: "Carteira do agente",
     empty: "Acordando o assistente…",
     viewAll: "Ver toda a atividade",
@@ -526,19 +526,19 @@ const pt: Dict = {
   },
   footer: {
     tagline:
-      "Contexta — tesouraria e folha inteligentes para a América Latina, na Stellar. Sem custódia · Demo na testnet · Não é consultoria financeira.",
+      "Contextio — tesouraria e folha inteligentes para a América Latina, na Stellar. Sem custódia · Demo na testnet · Não é consultoria financeira.",
     security: "Segurança",
     docs: "Docs",
   },
   diagram: {
     laneCompany: "SUA EMPRESA",
-    lanePlatform: "CONTEXTA (O ASSISTENTE)",
+    lanePlatform: "CONTEXTIO (O ASSISTENTE)",
     laneStellar: "REDE STELLAR E PAGAMENTOS",
     treasuryTitle: "Seu dinheiro",
     treasurySub: "dólares · XLM",
     agentTitle: "Assistente inteligente",
     agentSub: "planeja e monitora",
-    engineTitle: "Motor da Contexta",
+    engineTitle: "Motor da Contextio",
     engineSub: "checa suas regras",
     recordsTitle: "Registros",
     recordsSub: "histórico e auditoria",
@@ -570,7 +570,7 @@ const pt: Dict = {
       statShareSub: "do seu total",
       allocTitle: "Caixa pronto vs. rendendo",
       allocBody:
-        "A Contexta mantém o necessário para o pagamento e põe o resto para trabalhar. Você define o equilíbrio; ela fica dentro dele.",
+        "A Contextio mantém o necessário para o pagamento e põe o resto para trabalhar. Você define o equilíbrio; ela fica dentro dele.",
       liquid: "Caixa pronto",
       earning: "Rendendo",
       posTitle: "Onde está seu dinheiro",
@@ -594,7 +594,7 @@ const pt: Dict = {
     payroll: {
       eyebrow: "Folha",
       title: "Pague seu time na LATAM",
-      desc: "Veja quem recebe, quando é o pagamento e como a Contexta vai cobrir a próxima rodada.",
+      desc: "Veja quem recebe, quando é o pagamento e como a Contextio vai cobrir a próxima rodada.",
       connectTitle: "Veja sua folha",
       connectBody: "Conecte sua carteira Stellar para ver seu time real e os próximos pagamentos. Aqui nada é falso.",
       statPeople: "Pessoas que você paga",
@@ -615,7 +615,7 @@ const pt: Dict = {
       active: "Ativo",
       paused: "Pausado",
       fundTitle: "Como o próximo pagamento é coberto",
-      fundBody: "A Contexta usa primeiro o caixa livre e, só se preciso, o que está rendendo.",
+      fundBody: "A Contextio usa primeiro o caixa livre e, só se preciso, o que está rendendo.",
       fundGross: "Para pagar seu time",
       fundBuffer: "Margem de segurança (8,5%)",
       fundNeeded: "Total necessário",
@@ -641,7 +641,7 @@ const pt: Dict = {
     },
     docs: {
       eyebrow: "Docs e SCF",
-      title: "Como a Contexta funciona por dentro",
+      title: "Como a Contextio funciona por dentro",
       desc: "Arquitetura, o Protocolo de Contexto Legal e como isso se encaixa no track da Stellar Community Fund.",
     },
   },

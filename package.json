@@ -1,8 +1,8 @@
 {
-  "name": "contexta",
+  "name": "contextio",
   "version": "0.1.0",
   "private": true,
-  "description": "Agentic Treasury & Payroll for LATAM on Stellar (codename: Contexta)",
+  "description": "Agentic Treasury & Payroll for LATAM on Stellar (codename: Contextio)",
   "license": "Apache-2.0",
   "packageManager": "pnpm@10.6.0",
   "engines": {
@@ -12,13 +12,13 @@
   "scripts": {
     "build": "pnpm -r --filter \"./packages/*\" build && pnpm -r --filter \"./apps/*\" build",
     "dev": "pnpm -r --parallel dev",
-    "dev:api": "pnpm --filter @contexta/api dev",
-    "dev:web": "pnpm --filter @contexta/web dev",
-    "dev:worker": "pnpm --filter @contexta/worker dev",
+    "dev:api": "pnpm --filter @contextio/api dev",
+    "dev:web": "pnpm --filter @contextio/web dev",
+    "dev:worker": "pnpm --filter @contextio/worker dev",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "test:e2e": "pnpm --filter @contexta/web test:e2e",
+    "test:e2e": "pnpm --filter @contextio/web test:e2e",
     "contracts:build": "cargo build --release --target wasm32-unknown-unknown --manifest-path Cargo.toml",
     "contracts:test": "cargo test --manifest-path Cargo.toml",
     "clean": "pnpm -r exec rm -rf dist .next node_modules/.cache && rm -rf target",

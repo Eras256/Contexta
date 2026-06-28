@@ -5,7 +5,7 @@ import type { LegalContext } from "./types.js";
 /**
  * Deterministic JSON canonicalization (subset of RFC 8785 / JCS): object keys
  * sorted, no insignificant whitespace, arrays preserved in order, `undefined`
- * dropped. Byte-for-byte identical to the Contexta platform so an SDK consumer
+ * dropped. Byte-for-byte identical to the Contextio platform so an SDK consumer
  * can independently re-derive and verify a legal context's SHA-256.
  */
 export function canonicalize(value: unknown): string {

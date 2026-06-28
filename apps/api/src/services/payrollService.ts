@@ -1,11 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { type Logger, toBaseUnits, fromBaseUnits } from "@contexta/shared";
+import { type Logger, toBaseUnits, fromBaseUnits } from "@contextio/shared";
 import type {
   PayrollEmployee,
   PayrollRun,
   PayrollRunLine,
   PayrollSchedule,
-} from "@contexta/shared";
+} from "@contextio/shared";
 import type { Repository } from "../db/repository.js";
 import type { SorobanGateway } from "../integrations/soroban.js";
 import type { LegalContextService } from "./legalContextService.js";

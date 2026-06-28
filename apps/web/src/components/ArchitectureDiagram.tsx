@@ -42,7 +42,7 @@ export function ArchitectureDiagram() {
 
   return (
     <div className="card overflow-x-auto">
-      <svg viewBox="0 0 920 420" className="w-full min-w-[760px]" role="img" aria-label="Contexta flow diagram">
+      <svg viewBox="0 0 920 420" className="w-full min-w-[760px]" role="img" aria-label="Contextio flow diagram">
         <defs>
           <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
             <path d="M0,0 L8,3 L0,6 Z" fill="#475569" />

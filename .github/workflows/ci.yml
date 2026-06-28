@@ -29,9 +29,9 @@ jobs:
       - run: pnpm install --frozen-lockfile=false
 
       # Build workspace packages first so app typechecks resolve their d.ts.
-      - run: pnpm --filter @contexta/config build
-      - run: pnpm --filter @contexta/shared build
-      - run: pnpm --filter @contexta/tests build
+      - run: pnpm --filter @contextio/config build
+      - run: pnpm --filter @contextio/shared build
+      - run: pnpm --filter @contextio/tests build
 
       - name: Lint
         run: pnpm lint
@@ -91,8 +91,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile=false
-      - run: pnpm --filter @contexta/shared build
+      - run: pnpm --filter @contextio/shared build
       - name: Install Playwright browsers
-        run: pnpm --filter @contexta/web exec playwright install --with-deps chromium
+        run: pnpm --filter @contextio/web exec playwright install --with-deps chromium
       - name: Run E2E
-        run: pnpm --filter @contexta/web test:e2e
+        run: pnpm --filter @contextio/web test:e2e

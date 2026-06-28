@@ -1,5 +1,5 @@
-import { type Logger, type Result, ok, err, tryAsync } from "@contexta/shared";
-import { createDefindexMock, type DefindexMock, type MockVault } from "@contexta/tests/mocks";
+import { type Logger, type Result, ok, err, tryAsync } from "@contextio/shared";
+import { createDefindexMock, type DefindexMock, type MockVault } from "@contextio/tests/mocks";
 
 /**
  * DeFindex integration. When an API key is configured we talk to the live

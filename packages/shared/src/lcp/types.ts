@@ -60,7 +60,8 @@ export const legalContextSchema = z.object({
   tenantDomain: z.string().min(1),
   provider: lcpPartySchema,
   terms: lcpTermsSchema,
-  jurisdiction: z.string().min(2),
+  /** Operating jurisdictions this context covers (ISO 3166-1 alpha-2). */
+  jurisdictions: z.array(z.string().min(2)).min(1),
   consentRequirements: z.array(lcpConsentRequirementSchema).min(1),
   disputeChannels: z.array(lcpDisputeChannelSchema).min(1),
   /** Networks + assets this context authorizes agentic settlement on. */

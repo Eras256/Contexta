@@ -109,7 +109,7 @@ function getSimulatedLogs(d: Activity): string[] {
     `[${time}] INFO  [Agent] Initializing audit trace for action: ${d.action.toUpperCase()}`,
     `[${time}] VERIFY[LCP] Validating consent terms under Legal Context Protocol...`,
   ];
-  
+
   if (d.legalContextHash) {
     logs.push(`[${time}] OK    [LCP] Secure contract binding verified (hash: ${shortHash(d.legalContextHash, 8, 8)})`);
   } else {
@@ -194,7 +194,7 @@ export function LiveAgentFeed() {
 
       {/* Terminal window audit feed */}
       <div className="mt-6 overflow-hidden rounded-2xl border border-brand/20 bg-ink-950/80 shadow-[0_0_50px_-20px_rgba(45,212,191,0.4)] backdrop-blur-md relative before:absolute before:inset-0 before:bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.15)_50%)] before:bg-[length:100%_4px] before:pointer-events-none before:z-10">
-        
+
         {/* Terminal Header */}
         <div className="flex items-center justify-between gap-3 border-b border-brand/15 bg-brand/[0.03] px-4 py-3 relative z-20">
           <div className="flex items-center gap-3">
@@ -204,7 +204,7 @@ export function LiveAgentFeed() {
               <span className="w-3 h-3 rounded-full bg-amber-500/80 border border-amber-600/30" />
               <span className="w-3 h-3 rounded-full bg-emerald-500/80 border border-emerald-600/30" />
             </div>
-            
+
             <div className="flex min-w-0 items-center gap-2 font-mono text-[13px] font-semibold tracking-wide text-brand">
               <span className="text-brand/50 font-bold">{">_"}</span>
               <span className="truncate uppercase text-slate-300">
@@ -212,7 +212,7 @@ export function LiveAgentFeed() {
               </span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <span className="inline-flex items-center gap-1.5 rounded-md border border-brand/25 bg-brand/5 px-2 py-0.5 font-mono text-[11px] font-semibold text-brand">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand shadow-[0_0_6px_#2dd4bf]" /> {t("feed.online")}
@@ -229,14 +229,14 @@ export function LiveAgentFeed() {
             const st = statusToken(d.status);
             const realTx = d.stellarTxHash && !d.stellarTxHash.startsWith("sim:");
             const isExpanded = expandedId === d.id;
-            
+
             return (
-              <div 
-                key={d.id} 
+              <div
+                key={d.id}
                 className={`group rounded-lg border border-white/5 bg-white/[0.01] transition-all hover:bg-white/[0.03] hover:border-white/10 ${isExpanded ? "border-brand/20 bg-brand/[0.02]" : ""}`}
               >
                 {/* Header row / Trigger button */}
-                <div 
+                <div
                   onClick={() => toggleExpand(d.id)}
                   className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-3 py-2.5 cursor-pointer select-none"
                 >
@@ -250,20 +250,20 @@ export function LiveAgentFeed() {
                       {d.action.replace(/_/g, " ").toUpperCase()}
                     </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2 ml-auto">
                     <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-bold border ${st.bg} ${st.cls}`}>
                       <span className={`h-1.5 w-1.5 rounded-full ${st.dot}`} />
                       {st.label}
                     </span>
                     <span className="text-slate-600 transition group-hover:text-slate-400">
-                      <svg 
-                        width="14" 
-                        height="14" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        strokeWidth="2" 
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
                         className={`transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`}
                       >
                         <polyline points="6 9 12 15 18 9" />
@@ -280,11 +280,11 @@ export function LiveAgentFeed() {
                 {/* Details Footer */}
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-3 pb-3 pt-1 border-t border-white/[0.03] text-[11px] text-slate-500 select-none">
                   <span className="text-slate-400 font-medium">· {ago(d.createdAt)} ago</span>
-                  
+
                   {/* LCP Hash badge */}
                   {d.legalContextHash && (
                     <a
-                      href={`${API}/.well-known/legal-context.json?domain=acme.contexta.app`}
+                      href={`${API}/.well-known/legal-context.json?domain=contextio.xyz`}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-teal-500/20 bg-teal-950/20 text-teal-400 hover:bg-teal-900/40 hover:border-teal-500/40 transition hover:underline active:scale-95"
@@ -338,7 +338,7 @@ export function LiveAgentFeed() {
               </div>
             );
           })}
-          
+
           {items.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-slate-500">
               <span className="h-6 w-6 animate-spin rounded-full border-2 border-brand border-t-transparent mb-3" />

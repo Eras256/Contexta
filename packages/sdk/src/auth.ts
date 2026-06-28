@@ -1,4 +1,4 @@
-import type { ContextaClient } from "./client.js";
+import type { ContextioClient } from "./client.js";
 import type { WalletSession } from "./types.js";
 
 /**
@@ -13,10 +13,10 @@ export type SignMessageFn = (message: string) => Promise<string> | string;
 
 /**
  * Sign In With Stellar (SEP-53): request a challenge, have the wallet sign it,
- * and exchange the signature for a Contexta session JWT.
+ * and exchange the signature for a Contextio session JWT.
  */
 export async function signInWithStellar(opts: {
-  client: ContextaClient;
+  client: ContextioClient;
   address: string;
   signMessage: SignMessageFn;
 }): Promise<WalletSession> {

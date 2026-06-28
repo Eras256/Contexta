@@ -1,7 +1,7 @@
-import type { Logger } from "@contexta/shared";
+import type { Logger } from "@contextio/shared";
 
 /**
- * Calls the Contexta API as the internal agent, authenticating with the shared
+ * Calls the Contextio API as the internal agent, authenticating with the shared
  * INTERNAL_API_SECRET. The worker never writes to Supabase or Stellar directly
  * for agentic actions — it goes through the API so the same legal-context
  * enforcement, RBAC and audit logging apply to agent and human actors alike.

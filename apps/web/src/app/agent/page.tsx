@@ -19,7 +19,7 @@ const ACTION_LABEL: Record<string, string> = {
 
 interface LegalDoc {
   tenantDomain?: string;
-  jurisdiction?: string;
+  jurisdictions?: string[];
   consentRequirements?: { id: string; description: string }[];
   disputeChannels?: { governingLaw: string }[];
 }
@@ -81,7 +81,7 @@ export default function AgentPage() {
             v={
               countries.length
                 ? countries.map((c) => COUNTRY_FLAG[c] ?? c).join(" · ")
-                : (doc.jurisdiction ?? "—")
+                : (doc.jurisdictions?.map((c) => COUNTRY_FLAG[c] ?? c).join(" · ") ?? "—")
             }
           />
           <KeyValue
@@ -90,7 +90,7 @@ export default function AgentPage() {
               legal.data.hash ? (
                 <a
                   className="font-mono text-xs text-accent hover:underline hover:text-accent/80 transition inline-flex items-center gap-1"
-                  href={`${apiBaseUrl}/.well-known/legal-context.json?domain=${doc.tenantDomain ?? "acme.contexta.app"}`}
+                  href={`${apiBaseUrl}/.well-known/legal-context.json?domain=${doc.tenantDomain ?? "contextio.xyz"}`}
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -158,7 +158,7 @@ export default function AgentPage() {
                   {d.legalContextHash ? (
                     <a
                       className="font-mono text-accent hover:underline hover:text-accent/80 transition inline-flex items-center gap-1"
-                      href={`${apiBaseUrl}/.well-known/legal-context.json?domain=${doc.tenantDomain ?? "acme.contexta.app"}`}
+                      href={`${apiBaseUrl}/.well-known/legal-context.json?domain=${doc.tenantDomain ?? "contextio.xyz"}`}
                       target="_blank"
                       rel="noreferrer"
                     >

@@ -3,7 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { pinoHttp } from "pino-http";
-import { RATE_LIMIT, SECURITY_HEADERS, MAX_JSON_BODY_BYTES } from "@contexta/config";
+import { RATE_LIMIT, SECURITY_HEADERS, MAX_JSON_BODY_BYTES } from "@contextio/config";
 import { env } from "./env.js";
 import { createContainer, type Container } from "./container.js";
 import { authMiddleware } from "./http/middleware/auth.js";

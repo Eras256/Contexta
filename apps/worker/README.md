@@ -1,6 +1,6 @@
-# @contexta/worker
+# @contextio/worker
 
-Background workers for Contexta. A small in-process `Scheduler` runs three jobs
+Background workers for Contextio. A small in-process `Scheduler` runs three jobs
 on an interval (`AGENT_POLL_INTERVAL_SECONDS`, default 300s):
 
 | Job | What it does |
@@ -23,8 +23,8 @@ worker simply provides the cadence and the fan-out across tenants.
 
 ```bash
 # Requires the API running on API_BASE_URL (default http://localhost:8080)
-pnpm --filter @contexta/worker dev
-pnpm --filter @contexta/worker test
+pnpm --filter @contextio/worker dev
+pnpm --filter @contextio/worker test
 ```
 
 ## Deploy (Fly.io)

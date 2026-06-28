@@ -1,5 +1,5 @@
 {
-  "name": "@contexta/shared",
+  "name": "@contextio/shared",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -28,7 +28,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@contexta/config": "workspace:*",
+    "@contextio/config": "workspace:*",
     "@stellar/stellar-sdk": "^16.0.1",
     "@supabase/supabase-js": "^2.47.10",
     "pino": "^9.6.0",

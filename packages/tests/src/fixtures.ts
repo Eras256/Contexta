@@ -5,7 +5,7 @@ import type {
   Tenant,
   TreasuryConfig,
   TreasuryPosition,
-} from "@contexta/shared";
+} from "@contextio/shared";
 
 /**
  * Deterministic fixtures used across unit/integration tests and local seed data.

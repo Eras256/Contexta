@@ -1,5 +1,5 @@
-import { type Logger, type Result, ok, err, stellar } from "@contexta/shared";
-import type { LcpBinding } from "@contexta/shared/lcp";
+import { type Logger, type Result, ok, err, stellar } from "@contextio/shared";
+import type { LcpBinding } from "@contextio/shared/lcp";
 
 /**
  * Gateway over the Treasury and Payroll Soroban contracts. Translates domain

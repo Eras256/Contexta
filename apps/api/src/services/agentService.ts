@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { type Logger, fromBaseUnits, applyBps } from "@contexta/shared";
-import type { AgentDecision, Country } from "@contexta/shared";
+import { type Logger, fromBaseUnits, applyBps } from "@contextio/shared";
+import type { AgentDecision, Country } from "@contextio/shared";
 import type { Repository } from "../db/repository.js";
 import type { TreasuryService, TreasurySnapshot } from "./treasuryService.js";
 import type { PayrollService, UpcomingObligation } from "./payrollService.js";

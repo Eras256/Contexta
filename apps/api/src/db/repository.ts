@@ -10,7 +10,7 @@ import type {
   TenantUser,
   TreasuryConfig,
   TreasuryPosition,
-} from "@contexta/shared";
+} from "@contextio/shared";
 
 /**
  * Data access layer over Supabase (Postgres). Uses the service-role client and

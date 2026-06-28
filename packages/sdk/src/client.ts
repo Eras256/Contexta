@@ -8,8 +8,8 @@ import type {
   WalletSession,
 } from "./types.js";
 
-export interface ContextaClientOptions {
-  /** Base URL of the Contexta API, e.g. https://contexta-api.fly.dev */
+export interface ContextioClientOptions {
+  /** Base URL of the Contextio API, e.g. https://contexta-api.fly.dev */
   baseUrl: string;
   /** Session JWT (from wallet sign-in). Required for tenant-scoped endpoints. */
   accessToken?: string;
@@ -20,17 +20,17 @@ export interface ContextaClientOptions {
 }
 
 /**
- * Typed client for the Contexta API. Use the unauthenticated handshake
+ * Typed client for the Contextio API. Use the unauthenticated handshake
  * (`challenge`/`verify`, or the `signInWithStellar` helper) to obtain a session,
  * then `withSession()` to get an authenticated client for tenant-scoped reads.
  */
-export class ContextaClient {
+export class ContextioClient {
   private readonly baseUrl: string;
   private readonly accessToken?: string;
   private readonly tenantId?: string;
   private readonly fetchImpl: typeof fetch;
 
-  constructor(options: ContextaClientOptions) {
+  constructor(options: ContextioClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/+$/, "");
     this.accessToken = options.accessToken;
     this.tenantId = options.tenantId;
@@ -40,8 +40,8 @@ export class ContextaClient {
   }
 
   /** Return a new client carrying the given session (token + tenant). */
-  withSession(session: Pick<WalletSession, "token" | "tenantId">): ContextaClient {
-    return new ContextaClient({
+  withSession(session: Pick<WalletSession, "token" | "tenantId">): ContextioClient {
+    return new ContextioClient({
       baseUrl: this.baseUrl,
       accessToken: session.token,
       tenantId: session.tenantId,
@@ -90,7 +90,7 @@ export class ContextaClient {
       `${this.baseUrl}/.well-known/legal-context.json?domain=${encodeURIComponent(domain)}`,
       { headers: { accept: "application/json" } },
     );
-    if (!res.ok) throw new ContextaApiError(res.status, `.well-known -> ${res.status}`);
+    if (!res.ok) throw new ContextioApiError(res.status, `.well-known -> ${res.status}`);
     return (await res.json()) as LegalContext;
   }
 
@@ -119,18 +119,18 @@ export class ContextaClient {
       if (json && typeof json === "object" && "error" in json) {
         msg = String((json as { error: unknown }).error);
       }
-      throw new ContextaApiError(res.status, msg);
+      throw new ContextioApiError(res.status, msg);
     }
     return json as T;
   }
 }
 
-export class ContextaApiError extends Error {
+export class ContextioApiError extends Error {
   constructor(
     public readonly status: number,
     message: string,
   ) {
     super(message);
-    this.name = "ContextaApiError";
+    this.name = "ContextioApiError";
   }
 }

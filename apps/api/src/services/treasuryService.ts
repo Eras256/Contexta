@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { type Logger, fromBaseUnits } from "@contexta/shared";
-import type { TreasuryConfig, TreasuryPosition } from "@contexta/shared";
+import { type Logger, fromBaseUnits } from "@contextio/shared";
+import type { TreasuryConfig, TreasuryPosition } from "@contextio/shared";
 import type { Repository } from "../db/repository.js";
 import type { DefindexClient } from "../integrations/defindex.js";
 import type { BlendClient } from "../integrations/blend.js";

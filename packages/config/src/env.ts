@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Single source of truth for environment configuration across every Contexta
+ * Single source of truth for environment configuration across every Contextio
  * service. Each app calls `loadEnv()` once at boot; an invalid environment
  * fails fast with a readable error instead of surfacing as a runtime null.
  */
@@ -42,7 +42,7 @@ export const baseEnvSchema = z.object({
   STELLAR_NETWORK_PASSPHRASE: z.string().min(1),
 
   // LCP
-  LCP_PLATFORM_DOMAIN: z.string().min(1).default("contexta.app"),
+  LCP_PLATFORM_DOMAIN: z.string().min(1).default("contextio.xyz"),
 });
 
 /** Server-side (API + worker) schema: adds secrets that must never reach the browser. */

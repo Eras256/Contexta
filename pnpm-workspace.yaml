@@ -2,6 +2,6 @@ packages:
   - "apps/*"
   - "packages/*"
 
-# Contexta — Agentic Treasury & Payroll for LATAM on Stellar
+# Contextio — Agentic Treasury & Payroll for LATAM on Stellar
 # Rust Soroban contracts under contracts/* are managed by the Cargo workspace
 # (see ./Cargo.toml), not pnpm.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createLogger } from "@contexta/shared";
+import { createLogger } from "@contextio/shared";
 import { DefindexClient } from "../src/integrations/defindex.js";
 import { BlendClient } from "../src/integrations/blend.js";
 

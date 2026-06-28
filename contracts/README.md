@@ -1,4 +1,4 @@
-# Contexta Soroban contracts
+# Contextio Soroban contracts
 
 Two Rust/Soroban contracts settle the platform's agentic actions on Stellar and
 bind each to a Legal Context Protocol (LCP) hash.

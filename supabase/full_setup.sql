@@ -1,13 +1,13 @@
 -- ============================================================================
--- Contexta — FULL Supabase setup (single file). Idempotent: safe to re-run.
+-- Contextio — FULL Supabase setup (single file). Idempotent: safe to re-run.
 -- Paste into the Supabase SQL Editor (or psql). Order: schema → RLS → seed.
 -- Generated 2026-06-28T02:36:45Z from migrations 0001+0002+seed.
 -- NOTE: on a project that already has a DIFFERENT 'audit_logs' table, drop it
---       first (it must have a tenant_id column for Contexta).
+--       first (it must have a tenant_id column for Contextio).
 -- ============================================================================
 
 -- ████ 1/3 SCHEMA (0001_init.sql) ███████████████████████████████████████████
--- Contexta — initial schema.
+-- Contextio — initial schema.
 -- Postgres / Supabase. Base-unit monetary values are stored as text to preserve
 -- exact bigint fidelity (7-dp Stellar base units), matching the API repository
 -- which parses them via BigInt(). Decimal salary values are also text.
@@ -305,7 +305,7 @@ create policy schedules_write on public.payroll_schedules
   with check (public.has_tenant_role(tenant_id, 'admin'));
 
 -- ████ 3/3 SEED DATA (seed.sql) — demo tenant/employees; skip if not wanted ██
--- Demo seed data for Contexta. Mirrors @contexta/tests fixtures so the API,
+-- Demo seed data for Contextio. Mirrors @contextio/tests fixtures so the API,
 -- worker, and UI tell the same story. Safe to run against a fresh local DB:
 --   supabase db reset   (runs migrations then this seed)
 
@@ -316,7 +316,7 @@ on conflict (id) do nothing;
 
 -- Tenant
 insert into public.tenants (id, name, domain, country)
-values ('00000000-0000-4000-8000-000000000001', 'Acme LATAM', 'acme.contexta.app', 'BR')
+values ('00000000-0000-4000-8000-000000000001', 'Contextio', 'contextio.xyz', 'BR')
 on conflict (id) do nothing;
 
 insert into public.tenant_users (tenant_id, user_id, role)
@@ -335,15 +335,15 @@ values (
     "specVersion": "0.1.0",
     "contextId": "11111111-1111-4111-8111-111111111111",
     "version": 1,
-    "tenantDomain": "acme.contexta.app",
+    "tenantDomain": "contextio.xyz",
     "provider": {"legalName": "Acme Treasury Ltda", "jurisdiction": "BR", "contactEmail": "legal@acme.example"},
-    "terms": {"url": "https://acme.contexta.app/legal/terms", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "effectiveDate": "2026-01-01"},
-    "jurisdiction": "BR",
+    "terms": {"url": "https://contextio.xyz/legal/terms", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "effectiveDate": "2026-01-01"},
+    "jurisdictions": ["BR", "AR", "CO"],
     "consentRequirements": [
       {"id": "treasury-management", "description": "Authorize agents to allocate idle treasury.", "required": true, "scope": ["treasury","yield"]},
       {"id": "payroll-execution", "description": "Authorize scheduled payroll settlement.", "required": true, "scope": ["payroll","offramp"]}
     ],
-    "disputeChannels": [{"type": "arbitration", "provider": "Contexta default arbitration", "venue": "https://acme.contexta.app/legal/disputes", "governingLaw": "BR", "language": "en"}],
+    "disputeChannels": [{"type": "arbitration", "provider": "Contextio default arbitration", "venue": "https://contextio.xyz/legal/disputes", "governingLaw": "BR", "language": "en"}],
     "settlement": {"networks": ["stellar:testnet","stellar:pubnet"], "assets": ["USDC","XLM"]},
     "publishedAt": "2026-01-04T10:02:00.000Z"
   }'::jsonb

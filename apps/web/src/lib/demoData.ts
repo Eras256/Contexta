@@ -1,5 +1,5 @@
 /**
- * Demo data for standalone UI rendering. Mirrors @contexta/tests fixtures so the
+ * Demo data for standalone UI rendering. Mirrors @contextio/tests fixtures so the
  * frontend is fully explorable without the API running. In a connected
  * deployment these are replaced by fetches to `apps/api` (see lib/api.ts).
  */
@@ -14,7 +14,7 @@ export interface DemoPosition {
 
 export const demoTenant = {
   name: "Acme LATAM",
-  domain: "acme.contexta.app",
+  domain: "contextio.xyz",
   country: "BR",
   legalContextId: "11111111-1111-4111-8111-111111111111",
   legalContextHash: "b3f1c0a9d2e4f5a6b7c8d9e0f1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d",

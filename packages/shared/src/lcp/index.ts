@@ -85,7 +85,7 @@ export interface BuildLegalContextInput {
   termsUrl: string;
   termsSha256: string;
   termsEffectiveDate: string;
-  jurisdiction: string;
+  jurisdictions: string[];
 }
 
 export function buildLegalContext(input: BuildLegalContextInput): LegalContext {
@@ -105,7 +105,7 @@ export function buildLegalContext(input: BuildLegalContextInput): LegalContext {
       sha256: input.termsSha256,
       effectiveDate: input.termsEffectiveDate,
     },
-    jurisdiction: input.jurisdiction,
+    jurisdictions: input.jurisdictions,
     consentRequirements: [
       {
         id: "treasury-management",
@@ -120,26 +120,26 @@ export function buildLegalContext(input: BuildLegalContextInput): LegalContext {
         scope: ["payroll", "offramp"],
       },
     ],
-    // Coverage across the three LATAM markets Contexta operates in: a dispute
+    // Coverage across the three LATAM markets Contextio operates in: a dispute
     // channel per jurisdiction (Brazil, Argentina, Colombia).
     disputeChannels: [
       {
         type: "arbitration",
-        provider: "Contexta arbitration — Brazil",
+        provider: "Contextio arbitration — Brazil",
         venue: `https://${input.tenantDomain}/legal/disputes/br`,
         governingLaw: "BR",
         language: "pt",
       },
       {
         type: "arbitration",
-        provider: "Contexta arbitration — Argentina",
+        provider: "Contextio arbitration — Argentina",
         venue: `https://${input.tenantDomain}/legal/disputes/ar`,
         governingLaw: "AR",
         language: "es",
       },
       {
         type: "arbitration",
-        provider: "Contexta arbitration — Colombia",
+        provider: "Contextio arbitration — Colombia",
         venue: `https://${input.tenantDomain}/legal/disputes/co`,
         governingLaw: "CO",
         language: "es",

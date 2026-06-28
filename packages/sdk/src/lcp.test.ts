@@ -18,7 +18,7 @@ const doc: LegalContext = {
   tenantDomain: "acme.contexta.app",
   provider: { legalName: "Acme", jurisdiction: "BR", contactEmail: "legal@acme.example" },
   terms: { url: "https://acme.contexta.app/legal/terms", sha256: "0".repeat(64), effectiveDate: "2026-01-01" },
-  jurisdiction: "BR",
+  jurisdictions: ["BR", "AR", "CO"],
   consentRequirements: [
     { id: "treasury-management", description: "x", required: true, scope: ["treasury", "yield"] },
   ],

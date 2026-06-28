@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createLogger } from "@contexta/shared";
+import { createLogger } from "@contextio/shared";
 import { Scheduler } from "./scheduler.js";
 
 const logger = createLogger({ service: "worker-test", pretty: false, level: "silent" });

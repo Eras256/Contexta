@@ -11,7 +11,7 @@ const baseInput = {
   termsUrl: "https://acme.contexta.app/legal/terms",
   termsSha256: "a".repeat(64),
   termsEffectiveDate: "2026-01-01",
-  jurisdiction: "BR",
+  jurisdictions: ["BR", "AR", "CO"],
 };
 
 describe("LCP", () => {

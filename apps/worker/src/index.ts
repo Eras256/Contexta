@@ -1,4 +1,4 @@
-import { createServiceClient, createLogger } from "@contexta/shared";
+import { createServiceClient, createLogger } from "@contextio/shared";
 import { env } from "./env.js";
 import { ApiClient } from "./apiClient.js";
 import { Scheduler } from "./scheduler.js";

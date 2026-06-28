@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createLogger } from "@contexta/shared";
+import { createLogger } from "@contextio/shared";
 import { AgentService } from "../src/services/agentService.js";
 import type { TreasuryService } from "../src/services/treasuryService.js";
 import type { PayrollService } from "../src/services/payrollService.js";

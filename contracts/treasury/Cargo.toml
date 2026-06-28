@@ -5,7 +5,7 @@ edition = { workspace = true }
 license = { workspace = true }
 authors = { workspace = true }
 repository = { workspace = true }
-description = "Contexta treasury Soroban contract: records LCP-bound treasury flows across DeFindex/Blend strategies."
+description = "Contextio treasury Soroban contract: records LCP-bound treasury flows across DeFindex/Blend strategies."
 
 [lib]
 crate-type = ["cdylib", "rlib"]
