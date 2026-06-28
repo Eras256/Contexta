@@ -67,6 +67,8 @@ export const serverEnvSchema = baseEnvSchema.extend({
   DEFINDEX_API_URL: z.string().url().default("https://api.defindex.io"),
   DEFINDEX_API_KEY: z.string().optional().or(z.literal("")),
   DEFINDEX_FACTORY_CONTRACT_ID: z.string().optional().or(z.literal("")),
+  DEFINDEX_VAULT_ID: z.string().optional().or(z.literal("")),
+  DEFINDEX_NETWORK: z.string().default("testnet"),
 
   BLEND_POOL_CONTRACT_ID: z.string().optional().or(z.literal("")),
   BLEND_BACKSTOP_CONTRACT_ID: z.string().optional().or(z.literal("")),

@@ -52,7 +52,14 @@ export function createContainer(): Container {
   });
 
   const defindex = new DefindexClient(
-    { apiUrl: config.DEFINDEX_API_URL, apiKey: config.DEFINDEX_API_KEY || undefined },
+    {
+      apiUrl: config.DEFINDEX_API_URL,
+      apiKey: config.DEFINDEX_API_KEY || undefined,
+      network: config.DEFINDEX_NETWORK,
+      vaultId: config.DEFINDEX_VAULT_ID || undefined,
+      signerSecret: config.STELLAR_SERVICE_SECRET || undefined,
+      networkPassphrase: config.STELLAR_NETWORK_PASSPHRASE,
+    },
     logger,
   );
   const blend = new BlendClient(

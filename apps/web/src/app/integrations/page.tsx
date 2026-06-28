@@ -1,14 +1,47 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Badge, Card, SectionHeader } from "@/components/ui";
-import { demoVaults } from "@/lib/demoData";
-import { bps, usdBase } from "@/lib/format";
+import { bps } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 
 type Status = "live" | "mock" | "ready";
 
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+
+interface LiveVault {
+  vaultId: string;
+  name: string;
+  asset: string;
+  strategy: string;
+  apyBps: number;
+  tvlBaseUnits: string;
+  positionBaseUnits: string;
+  network: string;
+}
+
+const xlm = (stroops: string) =>
+  `${(Number(stroops) / 1e7).toLocaleString(undefined, { maximumFractionDigits: 4 })}`;
+
 export default function IntegrationsPage() {
   const t = useT();
+  const [vault, setVault] = useState<LiveVault | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    fetch(`${API}/api/v1/public/defindex`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (alive && j?.live && j.vault) setVault(j.vault as LiveVault);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const explorer = (id: string, net: string) =>
+    `https://stellar.expert/explorer/${net === "mainnet" ? "public" : "testnet"}/contract/${id}`;
 
   return (
     <div className="space-y-10">
@@ -22,17 +55,37 @@ export default function IntegrationsPage() {
       <section className="space-y-4">
         <Header title={t("pages.integrations.yieldTitle")} body={t("pages.integrations.yieldBody")} />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {demoVaults.map((v) => (
-            <IntegrationCard
-              key={v.vaultId}
-              t={t}
-              name={`${t("pages.integrations.defindexName")} · ${v.name}`}
-              body={t("pages.integrations.defindexBody")}
-              status="mock"
-              metric={`${bps(v.apyBps)} APY`}
-              sub={`${v.asset} · ${usdBase(v.tvlBaseUnits)} TVL`}
-            />
-          ))}
+          {/* Real DeFindex vault */}
+          <Card className="flex flex-col sm:col-span-2 lg:col-span-1">
+            <div className="flex items-start justify-between gap-2">
+              <span className="font-medium text-white">{t("pages.integrations.defindexName")}</span>
+              <Badge tone={vault ? "success" : "warn"}>
+                {t(vault ? "pages.integrations.statusLive" : "pages.integrations.statusReady")}
+              </Badge>
+            </div>
+            <p className="mt-2 text-xs leading-relaxed text-slate-400">
+              {t("pages.integrations.defindexBody")}
+            </p>
+            {vault ? (
+              <div className="mt-3 space-y-1.5 border-t border-white/5 pt-3 text-xs">
+                <Row k={t("pages.integrations.dfxApy")} v={<span className="font-semibold text-brand">{bps(vault.apyBps)}</span>} />
+                <Row k={t("pages.integrations.dfxTvl")} v={<span className="font-mono text-slate-300">{xlm(vault.tvlBaseUnits)} {vault.asset}</span>} />
+                <Row k={t("pages.integrations.dfxPosition")} v={<span className="font-mono text-slate-300">{xlm(vault.positionBaseUnits)} {vault.asset}</span>} />
+                <Row k="Strategy" v={<span className="text-slate-300">{vault.strategy}</span>} />
+                <a
+                  className="mt-2 inline-flex font-mono text-accent hover:underline"
+                  href={explorer(vault.vaultId, vault.network)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t("pages.integrations.dfxView")} ↗
+                </a>
+              </div>
+            ) : (
+              <div className="mt-3 border-t border-white/5 pt-3 text-xs text-slate-500">{t("auth.connecting")}</div>
+            )}
+          </Card>
+
           <IntegrationCard
             t={t}
             name={t("pages.integrations.blendName")}
@@ -81,11 +134,16 @@ function Header({ title, body }: { title: string; body: string }) {
   );
 }
 
-const STATUS_TONE: Record<Status, "success" | "warn" | "info"> = {
-  live: "success",
-  mock: "warn",
-  ready: "info",
-};
+function Row({ k, v }: { k: string; v: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-slate-500">{k}</span>
+      {v}
+    </div>
+  );
+}
+
+const STATUS_TONE: Record<Status, "success" | "warn" | "info"> = { live: "success", mock: "warn", ready: "info" };
 const STATUS_KEY: Record<Status, string> = {
   live: "pages.integrations.statusLive",
   mock: "pages.integrations.statusMock",

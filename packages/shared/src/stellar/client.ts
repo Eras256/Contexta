@@ -169,3 +169,19 @@ export class StellarClient {
 }
 
 export { xdr, nativeToScVal, scValToNative, Address, Keypair };
+
+/**
+ * Sign a base-64 transaction envelope XDR with a Stellar secret and return the
+ * signed envelope XDR. Used for integrations (e.g. DeFindex) whose API returns
+ * an unsigned transaction we must sign locally and hand back for submission.
+ * Pure offline signing — no RPC needed.
+ */
+export function signEnvelopeXdr(
+  envelopeXdr: string,
+  secret: string,
+  networkPassphrase: string,
+): string {
+  const tx = TransactionBuilder.fromXDR(envelopeXdr, networkPassphrase);
+  tx.sign(Keypair.fromSecret(secret));
+  return tx.toXDR();
+}

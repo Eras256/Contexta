@@ -104,13 +104,19 @@ export class TreasuryService {
       "treasury-management",
     ]);
 
-    // 1. Integration side-effects (mocked or live).
-    if (req.to === "defindex_vault") {
-      const r = await this.defindex.deposit(req.strategyRef, req.amountBaseUnits);
-      if (!r.ok) throw r.error;
-    } else if (req.from === "defindex_vault") {
-      const r = await this.defindex.withdraw(req.strategyRef, req.amountBaseUnits);
-      if (!r.ok) throw r.error;
+    // 1. Integration side-effects. The agent's treasury band is denominated in
+    // the tenant's accounting asset (USD), so we only drive the demo DeFindex
+    // mock from here. Real DeFindex deposits (XLM-denominated, on its own vault)
+    // are executed via the dedicated /integrations/defindex/deposit path so the
+    // 24/7 band-rebalance loop never fires wrong-denomination on-chain writes.
+    if (!this.defindex.live) {
+      if (req.to === "defindex_vault") {
+        const r = await this.defindex.deposit(req.strategyRef, req.amountBaseUnits);
+        if (!r.ok) throw r.error;
+      } else if (req.from === "defindex_vault") {
+        const r = await this.defindex.withdraw(req.strategyRef, req.amountBaseUnits);
+        if (!r.ok) throw r.error;
+      }
     }
     if (req.to === "blend_pool") {
       const r = await this.blend.supply(req.asset, req.amountBaseUnits);

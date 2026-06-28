@@ -42,5 +42,29 @@ export function publicRouter(): Router {
     }
   });
 
+  /**
+   * Public, read-only snapshot of the live DeFindex vault the platform uses for
+   * real yield (APY, TVL, our position). Powers the Integrations page. Returns
+   * { live:false } when DeFindex runs in mock mode.
+   */
+  router.get("/defindex", async (req, res, next) => {
+    try {
+      const dfx = req.container.defindex;
+      if (!dfx.live) {
+        res.json({ live: false });
+        return;
+      }
+      const r = await dfx.getVaultData();
+      res.setHeader("cache-control", "public, max-age=30");
+      if (!r.ok) {
+        res.json({ live: true, vault: null, error: r.error.message });
+        return;
+      }
+      res.json({ live: true, vault: r.value });
+    } catch (e) {
+      next(e);
+    }
+  });
+
   return router;
 }
