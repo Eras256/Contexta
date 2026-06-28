@@ -156,7 +156,7 @@ export class BlendClient {
     const tvlBaseUnits = BigInt(Math.round(reserve.totalSupplyFloat() * 1e7)).toString();
     return {
       poolId,
-      asset: asset === XLM_SAC ? "XLM" : asset,
+      asset: asset === XLM_SAC ? "XLM" : (asset === "CAQCFVLOBK5GIULPNZRGATJJMIZL5BSP7X5YJVMGCPTUEPFM4AVSRCJU" ? "USDC" : asset),
       supplyApyBps: Math.round(reserve.estSupplyApy * 100),
       tvlBaseUnits,
       positionBaseUnits,

@@ -141,17 +141,18 @@ export class AgentService {
     }
 
     const apyPct = (apyBps / 100).toFixed(2);
+    const assetName = snap.ok ? snap.value.asset : "XLM";
     const decision: AgentDecision = {
       id: randomUUID(),
       tenantId,
       action: supply ? "blend_supply" : "blend_withdraw",
       rationale: supply
-        ? `Lent 1 XLM into the Blend pool (~${apyPct}% supply APY) — real, on-chain lending.`
-        : `Pulled 1 XLM back from the Blend pool to keep the lending position within band.`,
+        ? `Lent 1 ${assetName} into the Blend pool (~${apyPct}% supply APY) — real, on-chain lending.`
+        : `Pulled 1 ${assetName} back from the Blend pool to keep the lending position within band.`,
       payload: {
         from: supply ? "liquidity" : "blend_pool",
         to: supply ? "blend_pool" : "liquidity",
-        asset: "XLM",
+        asset: assetName,
         amountBaseUnits: STEP.toString(),
         amount: "1",
         strategyRef: this.blend.poolId,
