@@ -243,6 +243,50 @@ Clearly-bounded scaffolding (marked in code) rather than full implementations:
 - **On-chain settlement** records LCP-bound events + balances; moving actual SAC
   token value is the next contract milestone.
 
+## Contributing
+
+Contributions, issues, and reviews are welcome — whether you're a judge
+evaluating the project or a developer extending it.
+
+**Getting started**
+1. Fork & clone, then follow [Quickstart](#quickstart) (`pnpm install` → build
+   workspace packages → `cp .env.example .env.local`). Everything runs in
+   deterministic mock mode with blank credentials, so you can review offline.
+2. Create a feature branch: `git checkout -b feat/your-change`.
+
+**Before opening a PR**, keep CI green:
+```bash
+pnpm lint && pnpm typecheck && pnpm test && pnpm build
+cargo fmt --all -- --check && cargo clippy --target wasm32-unknown-unknown -- -D warnings && cargo test --all
+```
+
+**Conventions**
+- **TypeScript**: strict types (no `any`; prefer `unknown`); explicit `.js`
+  extensions on relative imports in backend ESM packages; validate every
+  state-changing HTTP body with `zod`; log via the structured `@contexta/shared`
+  logger and redact secrets.
+- **Architecture rules**: all agentic actions go through `apps/api`; the worker
+  never writes on-chain/DB directly (it calls the API with `x-internal-secret`);
+  treasury/payroll state-changers must carry a valid **LCP** binding (return
+  **HTTP 412** otherwise); new Postgres tables get **RLS** policies.
+- **Soroban**: persistent storage with `extend_ttl`; payroll idempotency on
+  `run_id`; emitted events always include the canonical LCP SHA-256 hash.
+- **Commits**: short, imperative messages; small, focused PRs; never commit
+  secrets — `.env*` files are gitignored (see [.env.example](.env.example)).
+
+**Security**: please report vulnerabilities privately to the maintainers rather
+than opening a public issue.
+
 ## License
 
-Apache-2.0.
+Licensed under the **Apache License 2.0** — see [LICENSE](LICENSE).
+
+```
+Copyright 2026 Contexta
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+```
