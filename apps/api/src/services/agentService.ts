@@ -18,6 +18,9 @@ export interface RebalancePlan {
 const LIQUIDITY_HORIZON_DAYS = 7;
 /** Default yield vault the agent moves excess liquidity into. */
 const DEFAULT_YIELD_VAULT = "vault_cetes_rwa_001";
+/** Heartbeat size (bps of total) for the band-rebalance cycle that keeps the
+ *  agent actively settling on-chain even when the treasury is within target. */
+const HEARTBEAT_BPS = 100;
 
 /**
  * The agent. This is the orchestration layer — deterministic, auditable, and
@@ -76,32 +79,18 @@ export class AgentService {
       const excess = liquid - requiredLiquidity;
       const yieldRoom = maxYield > currentYield ? maxYield - currentYield : 0n;
       const moveAmount = bigMin(excess, yieldRoom);
-      if (moveAmount <= 0n) {
+      if (moveAmount > 0n) {
         return {
-          action: "noop",
-          rationale: `Liquidity healthy but yield cap (${snapshot.config.maxYieldBps}bps) reached; holding.`,
-          payload: { liquid: fromBaseUnits(liquid), requiredLiquidity: fromBaseUnits(requiredLiquidity) },
+          action: "deposit_vault",
+          rationale:
+            `Liquid ${fromBaseUnits(liquid)} exceeds required ${fromBaseUnits(requiredLiquidity)} ` +
+            `(payroll due ${fromBaseUnits(obligationSum)} + ${fromBaseUnits(volBuffer)} ${fx.pair} ` +
+            `volatility buffer). Allocating ${fromBaseUnits(moveAmount)} to CETES vault for yield.`,
+          payload: this.movePayload("liquidity", "defindex_vault", moveAmount, fx),
         };
       }
-      return {
-        action: "deposit_vault",
-        rationale:
-          `Liquid ${fromBaseUnits(liquid)} exceeds required ${fromBaseUnits(requiredLiquidity)} ` +
-          `(payroll due ${fromBaseUnits(obligationSum)} + ${fromBaseUnits(volBuffer)} ${fx.pair} ` +
-          `volatility buffer). Allocating ${fromBaseUnits(moveAmount)} to CETES vault for yield.`,
-        payload: {
-          from: "liquidity",
-          to: "defindex_vault",
-          asset: "USDC",
-          amountBaseUnits: moveAmount.toString(),
-          amount: fromBaseUnits(moveAmount),
-          strategyRef: DEFAULT_YIELD_VAULT,
-          fx: { pair: fx.pair, rate: fx.rate, volatility: fx.volatility },
-        },
-      };
-    }
-
-    if (liquid < requiredLiquidity && currentYield > 0n) {
+      // At the yield cap — fall through to the band heartbeat below.
+    } else if (liquid < requiredLiquidity && currentYield > 0n) {
       const shortfall = requiredLiquidity - liquid;
       const moveAmount = bigMin(shortfall, currentYield);
       return {
@@ -109,22 +98,52 @@ export class AgentService {
         rationale:
           `Liquid ${fromBaseUnits(liquid)} below required ${fromBaseUnits(requiredLiquidity)} ` +
           `for upcoming payroll. Withdrawing ${fromBaseUnits(moveAmount)} from CETES vault to cover obligations.`,
-        payload: {
-          from: "defindex_vault",
-          to: "liquidity",
-          asset: "USDC",
-          amountBaseUnits: moveAmount.toString(),
-          amount: fromBaseUnits(moveAmount),
-          strategyRef: DEFAULT_YIELD_VAULT,
-          fx: { pair: fx.pair, rate: fx.rate, volatility: fx.volatility },
-        },
+        payload: this.movePayload("defindex_vault", "liquidity", moveAmount, fx),
+      };
+    }
+
+    // Band rebalance heartbeat: keep funds actively cycling inside the safe band
+    // (above the liquidity floor, below the yield cap) so the agent is always
+    // working and settling a real on-chain transaction every cycle.
+    const heartbeat = bigMax(applyBps(total, HEARTBEAT_BPS), 1n);
+    const yieldHeadroom = maxYield > currentYield ? maxYield - currentYield : 0n;
+    const liquidHeadroom = liquid > requiredLiquidity ? liquid - requiredLiquidity : 0n;
+    if (yieldHeadroom >= heartbeat && liquidHeadroom >= heartbeat) {
+      return {
+        action: "deposit_vault",
+        rationale: `Band rebalance: moving ${fromBaseUnits(heartbeat)} into yield, keeping allocation inside the target band.`,
+        payload: this.movePayload("liquidity", "defindex_vault", heartbeat, fx),
+      };
+    }
+    if (currentYield >= heartbeat) {
+      return {
+        action: "withdraw_vault",
+        rationale: `Band rebalance: returning ${fromBaseUnits(heartbeat)} to the liquid reserve, keeping allocation inside the target band.`,
+        payload: this.movePayload("defindex_vault", "liquidity", heartbeat, fx),
       };
     }
 
     return {
       action: "noop",
-      rationale: "Treasury allocation within target band; no action required.",
+      rationale: "Treasury within the target band and at its limits; holding this cycle.",
       payload: { liquid: fromBaseUnits(liquid), requiredLiquidity: fromBaseUnits(requiredLiquidity) },
+    };
+  }
+
+  private movePayload(
+    from: "liquidity" | "defindex_vault" | "blend_pool",
+    to: "liquidity" | "defindex_vault" | "blend_pool",
+    amount: bigint,
+    fx: { pair: string; rate: number; volatility: number },
+  ): Record<string, unknown> {
+    return {
+      from,
+      to,
+      asset: "USDC",
+      amountBaseUnits: amount.toString(),
+      amount: fromBaseUnits(amount),
+      strategyRef: DEFAULT_YIELD_VAULT,
+      fx: { pair: fx.pair, rate: fx.rate, volatility: fx.volatility },
     };
   }
 
