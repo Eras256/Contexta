@@ -308,8 +308,10 @@ export function LiveAgentFeed() {
                       <span className="underline decoration-sky-400/40">{shortHash(d.stellarTxHash as string, 6, 6)}</span>
                       <span>↗</span>
                     </a>
-                  ) : (
+                  ) : d.stellarTxHash ? (
                     <span className="text-slate-600">TX: SIMULATED</span>
+                  ) : (
+                    <span className="text-slate-600">TX: —</span>
                   )}
                 </div>
 
