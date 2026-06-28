@@ -1,7 +1,7 @@
 "use client";
 
 import { AllocationBar, Badge, Card, DataBadge, SectionHeader, Stat } from "@/components/ui";
-import { bps, shortHash, usdBase } from "@/lib/format";
+import { bps, shortHash, usdBase, localDateTime } from "@/lib/format";
 import { api, type Decision, type TreasurySnapshot } from "@/lib/api";
 import { useLiveData } from "@/lib/useLiveData";
 import { useT } from "@/lib/i18n";
@@ -133,7 +133,7 @@ export default function TreasuryPage() {
                     {d.status}
                   </Badge>
                   <span className="font-mono text-xs text-slate-500">
-                    {d.createdAt.replace("T", " ").slice(0, 16)}
+                    {localDateTime(d.createdAt)}
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-slate-300">{d.rationale}</p>

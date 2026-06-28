@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useT } from "@/lib/i18n";
-import { shortHash } from "@/lib/format";
+import { shortHash, localTimeOnly } from "@/lib/format";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
@@ -25,10 +25,6 @@ interface Feed {
 
 const EXPLORER = (net: string) =>
   `https://stellar.expert/explorer/${net === "mainnet" ? "public" : "testnet"}`;
-
-function clock(iso: string): string {
-  return iso.slice(11, 19) || "--:--:--";
-}
 
 function ago(iso: string): string {
   const s = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
@@ -108,7 +104,7 @@ function ActionIcon({ action }: { action: string }) {
 }
 
 function getSimulatedLogs(d: Activity): string[] {
-  const time = clock(d.createdAt);
+  const time = localTimeOnly(d.createdAt);
   const logs = [
     `[${time}] INFO  [Agent] Initializing audit trace for action: ${d.action.toUpperCase()}`,
     `[${time}] VERIFY[LCP] Validating consent terms under Legal Context Protocol...`,
@@ -245,7 +241,7 @@ export function LiveAgentFeed() {
                   className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 px-3 py-2.5 cursor-pointer select-none"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-slate-500 text-xs font-normal">[{clock(d.createdAt)}]</span>
+                    <span className="text-slate-500 text-xs font-normal">[{localTimeOnly(d.createdAt)}]</span>
                     <ActionIcon action={d.action} />
                     <span className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[11px] font-medium tracking-wide text-slate-300">
                       {tagFor(d.action)}

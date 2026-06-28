@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge, Card, KeyValue, SectionHeader } from "@/components/ui";
-import { shortHash } from "@/lib/format";
+import { shortHash, localDateTime } from "@/lib/format";
 import { api, apiBaseUrl, type Decision, type LegalState } from "@/lib/api";
 import { useLiveData } from "@/lib/useLiveData";
 import { useT } from "@/lib/i18n";
@@ -149,7 +149,7 @@ export default function AgentPage() {
                     {d.status}
                   </Badge>
                 </div>
-                <span className="font-mono text-xs text-slate-500">{d.createdAt.replace("T", " ").slice(0, 16)}</span>
+                <span className="font-mono text-xs text-slate-500">{localDateTime(d.createdAt)}</span>
               </div>
               <p className="mt-3 text-sm text-slate-300">{d.rationale}</p>
               <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-xs">

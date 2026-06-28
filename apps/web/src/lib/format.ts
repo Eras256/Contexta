@@ -50,3 +50,30 @@ export const RAIL_LABEL: Record<string, string> = {
   SEP24: "Anchor SEP-24",
   SEP31: "Anchor SEP-31",
 };
+
+export function localDateTime(iso: string): string {
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso.replace("T", " ").slice(0, 16);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth() + 1);
+    const dd = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const min = pad(d.getMinutes());
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+  } catch {
+    return iso.replace("T", " ").slice(0, 16);
+  }
+}
+
+export function localTimeOnly(iso: string): string {
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso.slice(11, 19) || "--:--:--";
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  } catch {
+    return iso.slice(11, 19) || "--:--:--";
+  }
+}
