@@ -120,18 +120,34 @@ export function buildLegalContext(input: BuildLegalContextInput): LegalContext {
         scope: ["payroll", "offramp"],
       },
     ],
+    // Coverage across the three LATAM markets Contexta operates in: a dispute
+    // channel per jurisdiction (Brazil, Argentina, Colombia).
     disputeChannels: [
       {
         type: "arbitration",
-        provider: "Contexta default arbitration",
-        venue: `https://${input.tenantDomain}/legal/disputes`,
-        governingLaw: input.jurisdiction,
-        language: "en",
+        provider: "Contexta arbitration — Brazil",
+        venue: `https://${input.tenantDomain}/legal/disputes/br`,
+        governingLaw: "BR",
+        language: "pt",
+      },
+      {
+        type: "arbitration",
+        provider: "Contexta arbitration — Argentina",
+        venue: `https://${input.tenantDomain}/legal/disputes/ar`,
+        governingLaw: "AR",
+        language: "es",
+      },
+      {
+        type: "arbitration",
+        provider: "Contexta arbitration — Colombia",
+        venue: `https://${input.tenantDomain}/legal/disputes/co`,
+        governingLaw: "CO",
+        language: "es",
       },
     ],
     settlement: {
       networks: ["stellar:testnet", "stellar:pubnet"],
-      assets: ["USDC", "XLM"],
+      assets: ["USDC", "XLM", "BRL", "ARS", "COP"],
     },
     publishedAt: now,
   });

@@ -21,7 +21,10 @@ interface LegalDoc {
   tenantDomain?: string;
   jurisdiction?: string;
   consentRequirements?: { id: string; description: string }[];
+  disputeChannels?: { governingLaw: string }[];
 }
+
+const COUNTRY_FLAG: Record<string, string> = { BR: "🇧🇷 Brazil", AR: "🇦🇷 Argentina", CO: "🇨🇴 Colombia" };
 
 export default function AgentPage() {
   const t = useT();
@@ -53,6 +56,7 @@ export default function AgentPage() {
 
   const doc = (legal.data.document ?? {}) as LegalDoc;
   const consents = doc.consentRequirements ?? [];
+  const countries = Array.from(new Set((doc.disputeChannels ?? []).map((c) => c.governingLaw)));
 
   return (
     <div className="space-y-8">
@@ -72,7 +76,14 @@ export default function AgentPage() {
             </Badge>
           </div>
           <KeyValue k="Domain" v={<span className="font-mono text-xs">{doc.tenantDomain ?? "—"}</span>} />
-          <KeyValue k="Jurisdiction" v={doc.jurisdiction ?? "—"} />
+          <KeyValue
+            k="Active in"
+            v={
+              countries.length
+                ? countries.map((c) => COUNTRY_FLAG[c] ?? c).join(" · ")
+                : (doc.jurisdiction ?? "—")
+            }
+          />
           <KeyValue
             k="Document hash"
             v={<span className="font-mono text-xs text-accent">{shortHash(legal.data.hash ?? null)}</span>}
