@@ -1,4 +1,7 @@
+"use client";
+
 import { Badge, Card, SectionHeader } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 
 const SCANS = [
   { target: "contracts/treasury", tool: "cargo audit + clippy", result: "0 high", at: "2026-06-25", tone: "success" as const },
@@ -15,12 +18,13 @@ const RBAC = [
 ];
 
 export default function SecurityPage() {
+  const t = useT();
   return (
     <div className="space-y-8">
       <SectionHeader
-        eyebrow="Security & Compliance"
-        title="Security, risk & compliance"
-        description="How Contexta keeps custody with the company, discloses DeFi risk, and resolves disputes through the Legal Context Protocol."
+        eyebrow={t("pages.security.eyebrow")}
+        title={t("pages.security.title")}
+        description={t("pages.security.desc")}
       />
 
       <div className="grid gap-4 lg:grid-cols-3">

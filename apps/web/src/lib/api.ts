@@ -41,6 +41,17 @@ export interface Obligation {
   employeeCount?: number;
 }
 
+export interface PayrollEmployee {
+  id: string;
+  fullName: string;
+  email: string | null;
+  country: string;
+  payoutAsset: string;
+  preferredRail: string;
+  salaryAmount: string;
+  active: boolean;
+}
+
 export interface Decision {
   id: string;
   action: string;
@@ -75,6 +86,7 @@ async function request<T>(path: string, auth: ApiAuth, init?: RequestInit): Prom
 export const api = {
   treasury: (auth: ApiAuth) => request<TreasurySnapshot>("/treasury", auth),
   obligations: (auth: ApiAuth) => request<Obligation[]>("/payroll/obligations", auth),
+  employees: (auth: ApiAuth) => request<PayrollEmployee[]>("/payroll/employees", auth),
   decisions: (auth: ApiAuth) => request<Decision[]>("/agent/decisions", auth),
   legal: (auth: ApiAuth) => request<LegalState>("/legal", auth),
   propose: (auth: ApiAuth, execute: boolean) =>

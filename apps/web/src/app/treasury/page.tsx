@@ -1,39 +1,45 @@
 "use client";
 
 import { AllocationBar, Badge, Card, DataBadge, SectionHeader, Stat } from "@/components/ui";
-import { demoPositions, totals } from "@/lib/demoData";
 import { bps, shortHash, usdBase } from "@/lib/format";
-import { api, type TreasurySnapshot } from "@/lib/api";
+import { api, type Decision, type TreasurySnapshot } from "@/lib/api";
 import { useLiveData } from "@/lib/useLiveData";
+import { useT } from "@/lib/i18n";
+import { useAuth } from "@/lib/auth";
 
-const STRATEGY_LABEL: Record<string, string> = {
-  liquidity: "Liquid reserve",
-  defindex_vault: "DeFindex vault",
-  blend_pool: "Blend pool",
+const EMPTY: TreasurySnapshot = {
+  config: null,
+  positions: [],
+  totals: { liquidBaseUnits: "0", yieldBaseUnits: "0", totalBaseUnits: "0", yieldShareBps: 0 },
 };
 
-const HISTORY = [
-  { ts: "2026-06-26 09:12", actor: "Agent", asset: "USDC", amount: "+20,000", method: "DeFindex · CETES vault", lcp: "b3f1c0a9…2b3c4d" },
-  { ts: "2026-06-20 09:12", actor: "Agent", asset: "USDC", amount: "−25,000", method: "DeFindex withdraw", lcp: "b3f1c0a9…2b3c4d" },
-  { ts: "2026-06-15 14:40", actor: "Admin", asset: "USDC", amount: "+50,000", method: "Anchor SEP-24 · PIX on-ramp", lcp: "b3f1c0a9…2b3c4d" },
-  { ts: "2026-06-10 11:05", actor: "Agent", asset: "USDC", amount: "+15,000", method: "Blend supply", lcp: "b3f1c0a9…2b3c4d" },
-];
-
-const demoSnapshot: TreasurySnapshot = {
-  config: {
-    minLiquidityBaseUnits: "500000000000",
-    maxYieldBps: 6000,
-    volatilitySensitivity: 60,
-    countryLimitsBps: { BR: 5000, AR: 3000, CO: 3000 },
-  },
-  positions: demoPositions,
-  totals: totals(demoPositions),
+const PLACE_KEY: Record<string, string> = {
+  liquidity: "pages.treasury.placeLiquidity",
+  defindex_vault: "pages.treasury.placeVault",
+  blend_pool: "pages.treasury.placeBlend",
 };
 
 export default function TreasuryPage() {
-  const { data: snap, live, loading } = useLiveData(api.treasury, demoSnapshot, {
+  const tr = useT();
+  const { accessToken, connect, connecting } = useAuth();
+  const { data: snap, live, loading } = useLiveData(api.treasury, EMPTY, {
     realtimeTable: "treasury_positions",
   });
+  const activity = useLiveData<Decision[]>(api.decisions, [], { realtimeTable: "agent_decisions" });
+
+  if (!accessToken) {
+    return (
+      <div className="space-y-8">
+        <SectionHeader
+          eyebrow={tr("pages.treasury.eyebrow")}
+          title={tr("pages.treasury.title")}
+          description={tr("pages.treasury.desc")}
+        />
+        <ConnectGate connect={connect} connecting={connecting} tr={tr} />
+      </div>
+    );
+  }
+
   const t = snap.totals;
   const cfg = snap.config;
   const weightedApy =
@@ -41,61 +47,62 @@ export default function TreasuryPage() {
       .filter((p) => p.apyBps)
       .reduce((acc, p) => acc + (p.apyBps ?? 0) * Number(BigInt(p.amountBaseUnits)), 0) /
     Math.max(1, Number(BigInt(t.yieldBaseUnits)));
+  const recent = activity.data.slice(0, 6);
 
   return (
     <div className="space-y-8">
       <SectionHeader
-        eyebrow="Treasury"
-        title="Treasury dashboard"
-        description="Live view of balances across liquidity, DeFindex vaults and Blend pools, with the agent's allocation between liquid reserves and yield."
+        eyebrow={tr("pages.treasury.eyebrow")}
+        title={tr("pages.treasury.title")}
+        description={tr("pages.treasury.desc")}
         action={<DataBadge live={live} loading={loading} />}
       />
 
-      {/* Top stats */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card><Stat label="Total treasury" value={usdBase(t.totalBaseUnits)} sub="USDC-equivalent" /></Card>
-        <Card><Stat label="Liquid reserve" value={usdBase(t.liquidBaseUnits)} sub="available for payroll" /></Card>
-        <Card><Stat label="In yield" value={usdBase(t.yieldBaseUnits)} sub={`blended APY ${bps(weightedApy)}`} /></Card>
-        <Card><Stat label="Yield allocation" value={bps(t.yieldShareBps)} sub="of total treasury" /></Card>
+        <Card><Stat label={tr("pages.treasury.statTotal")} value={usdBase(t.totalBaseUnits)} sub={tr("pages.treasury.statTotalSub")} /></Card>
+        <Card><Stat label={tr("pages.treasury.statReady")} value={usdBase(t.liquidBaseUnits)} sub={tr("pages.treasury.statReadySub")} /></Card>
+        <Card><Stat label={tr("pages.treasury.statEarning")} value={usdBase(t.yieldBaseUnits)} sub={`${bps(weightedApy)} APY`} /></Card>
+        <Card><Stat label={tr("pages.treasury.statShare")} value={bps(t.yieldShareBps)} sub={tr("pages.treasury.statShareSub")} /></Card>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
-        {/* Allocation */}
         <Card className="lg:col-span-1">
-          <h3 className="mb-4 text-sm font-semibold text-white">Liquidity vs yield</h3>
+          <h3 className="mb-4 text-sm font-semibold text-white">{tr("pages.treasury.allocTitle")}</h3>
           <AllocationBar yieldShareBps={t.yieldShareBps} />
-          <p className="mt-4 text-xs text-slate-400">
-            Target band is set by your risk profile. The agent keeps a liquidity floor sized to
-            upcoming payroll plus an FX-volatility buffer before allocating the rest to yield.
-          </p>
+          <div className="mt-3 flex justify-between text-xs text-slate-400">
+            <span>{tr("pages.treasury.liquid")}</span>
+            <span>{tr("pages.treasury.earning")}</span>
+          </div>
+          <p className="mt-4 text-xs text-slate-400">{tr("pages.treasury.allocBody")}</p>
         </Card>
 
-        {/* Positions */}
         <Card className="lg:col-span-2">
-          <h3 className="mb-4 text-sm font-semibold text-white">Positions</h3>
+          <h3 className="mb-4 text-sm font-semibold text-white">{tr("pages.treasury.posTitle")}</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
-                  <th className="pb-2">Asset</th>
-                  <th className="pb-2">Strategy</th>
-                  <th className="pb-2">Reference</th>
-                  <th className="pb-2 text-right">APY</th>
-                  <th className="pb-2 text-right">Value</th>
+                  <th className="pb-2">{tr("pages.treasury.colAsset")}</th>
+                  <th className="pb-2">{tr("pages.treasury.colWhere")}</th>
+                  <th className="pb-2 text-right">{tr("pages.treasury.colYield")}</th>
+                  <th className="pb-2 text-right">{tr("pages.treasury.colAmount")}</th>
                 </tr>
               </thead>
               <tbody>
                 {snap.positions.map((p, i) => (
                   <tr key={i} className="table-row">
                     <td className="py-2 font-medium text-white">{p.asset}</td>
-                    <td className="py-2 text-slate-300">{STRATEGY_LABEL[p.strategy] ?? p.strategy}</td>
-                    <td className="py-2 font-mono text-xs text-slate-400">{p.strategyRef ?? "—"}</td>
+                    <td className="py-2 text-slate-300">{tr(PLACE_KEY[p.strategy] ?? "pages.treasury.placeLiquidity")}</td>
                     <td className="py-2 text-right text-slate-300">{p.apyBps ? bps(p.apyBps) : "—"}</td>
                     <td className="py-2 text-right font-medium text-white">{usdBase(p.amountBaseUnits)}</td>
                   </tr>
                 ))}
                 {snap.positions.length === 0 && (
-                  <tr><td colSpan={5} className="py-4 text-center text-slate-500">No positions yet.</td></tr>
+                  <tr>
+                    <td colSpan={4} className="py-6 text-center text-slate-500">
+                      {loading ? tr("pages.treasury.loading") : tr("pages.treasury.posEmpty")}
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
@@ -103,84 +110,81 @@ export default function TreasuryPage() {
         </Card>
       </div>
 
-      {/* Configuration */}
       <div className="grid gap-4 lg:grid-cols-3">
         <Card>
-          <h3 className="mb-1 text-sm font-semibold text-white">Risk profile</h3>
-          <p className="mb-4 text-xs text-slate-400">Hard constraints the agent must respect.</p>
-          <ConfigRow k="Liquidity floor" v={cfg ? usdBase(cfg.minLiquidityBaseUnits) : "—"} />
-          <ConfigRow k="Max allocation to yield" v={cfg ? bps(cfg.maxYieldBps) : "—"} />
-          <ConfigRow k="Country limit · BR" v={cfg ? bps(cfg.countryLimitsBps.BR ?? 0) : "—"} />
-          <ConfigRow k="Country limit · AR" v={cfg ? bps(cfg.countryLimitsBps.AR ?? 0) : "—"} />
-          <ConfigRow k="Country limit · CO" v={cfg ? bps(cfg.countryLimitsBps.CO ?? 0) : "—"} />
+          <h3 className="mb-1 text-sm font-semibold text-white">{tr("pages.treasury.rulesTitle")}</h3>
+          <p className="mb-4 text-xs text-slate-400">{tr("pages.treasury.rulesBody")}</p>
+          <Rule k={tr("pages.treasury.ruleFloor")} v={cfg ? usdBase(cfg.minLiquidityBaseUnits) : "—"} />
+          <Rule k={tr("pages.treasury.ruleMaxYield")} v={cfg ? bps(cfg.maxYieldBps) : "—"} />
+          <Rule k={tr("pages.treasury.ruleSensitivity")} v={cfg ? `${cfg.volatilitySensitivity} / 100` : "—"} />
+          <Rule k="🇧🇷 BR" v={cfg ? bps(cfg.countryLimitsBps.BR ?? 0) : "—"} />
+          <Rule k="🇦🇷 AR" v={cfg ? bps(cfg.countryLimitsBps.AR ?? 0) : "—"} />
+          <Rule k="🇨🇴 CO" v={cfg ? bps(cfg.countryLimitsBps.CO ?? 0) : "—"} />
         </Card>
-        <Card>
-          <h3 className="mb-1 text-sm font-semibold text-white">Agent parameters</h3>
-          <p className="mb-4 text-xs text-slate-400">How aggressively the agent reacts.</p>
-          <ConfigRow k="Update frequency" v="Every 5 min" />
-          <ConfigRow k="Volatility sensitivity" v={cfg ? `${cfg.volatilitySensitivity} / 100` : "—"} />
-          <ConfigRow k="Execution mode" v={<Badge tone="warn">Dry-run</Badge>} />
-        </Card>
-        <Card>
-          <h3 className="mb-1 text-sm font-semibold text-white">Anchors &amp; local rails</h3>
-          <p className="mb-4 text-xs text-slate-400">On/off-ramp connections (placeholder).</p>
-          <ConfigRow k="Brazil" v={<Badge tone="info">PIX · SEP-24</Badge>} />
-          <ConfigRow k="Argentina" v={<Badge tone="info">Transferencias 3.0</Badge>} />
-          <ConfigRow k="Colombia" v={<Badge tone="info">Bre-B</Badge>} />
-          <button className="btn-ghost mt-4 w-full" disabled>
-            Connect anchor (demo)
-          </button>
+
+        <Card className="lg:col-span-2">
+          <h3 className="mb-1 text-sm font-semibold text-white">{tr("pages.treasury.activityTitle")}</h3>
+          <p className="mb-4 text-xs text-slate-400">{tr("pages.treasury.activityBody")}</p>
+          <div className="space-y-3">
+            {recent.map((d) => (
+              <div key={d.id} className="rounded-lg border border-white/10 bg-ink-900/60 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <Badge tone={d.status === "executed" ? "success" : d.status === "proposed" ? "warn" : "default"}>
+                    {d.status}
+                  </Badge>
+                  <span className="font-mono text-xs text-slate-500">
+                    {d.createdAt.replace("T", " ").slice(0, 16)}
+                  </span>
+                </div>
+                <p className="mt-2 text-sm text-slate-300">{d.rationale}</p>
+                {d.stellarTxHash && (
+                  <p className="mt-1 font-mono text-xs text-brand">tx {shortHash(d.stellarTxHash, 10, 6)}</p>
+                )}
+              </div>
+            ))}
+            {recent.length === 0 && (
+              <p className="py-4 text-center text-sm text-slate-500">{tr("pages.treasury.activityEmpty")}</p>
+            )}
+          </div>
         </Card>
       </div>
-
-      {/* History */}
-      <Card>
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-white">Transaction history</h3>
-          <div className="flex gap-2">
-            <Badge>All</Badge>
-            <Badge tone="agent">Agent</Badge>
-            <Badge tone="info">Manual</Badge>
-          </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
-                <th className="pb-2">Time</th>
-                <th className="pb-2">Actor</th>
-                <th className="pb-2">Asset</th>
-                <th className="pb-2 text-right">Amount</th>
-                <th className="pb-2">Method / strategy</th>
-                <th className="pb-2">Legal context</th>
-              </tr>
-            </thead>
-            <tbody>
-              {HISTORY.map((h, i) => (
-                <tr key={i} className="table-row">
-                  <td className="py-2 font-mono text-xs text-slate-400">{h.ts}</td>
-                  <td className="py-2">
-                    <Badge tone={h.actor === "Agent" ? "agent" : "info"}>{h.actor}</Badge>
-                  </td>
-                  <td className="py-2 text-slate-200">{h.asset}</td>
-                  <td className="py-2 text-right font-medium text-white">{h.amount}</td>
-                  <td className="py-2 text-slate-300">{h.method}</td>
-                  <td className="py-2 font-mono text-xs text-accent">{shortHash(h.lcp, 8, 6)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
     </div>
   );
 }
 
-function ConfigRow({ k, v }: { k: string; v: React.ReactNode }) {
+function Rule({ k, v }: { k: string; v: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between py-2 table-row">
       <span className="text-sm text-slate-400">{k}</span>
       <span className="text-sm font-medium text-slate-100">{v}</span>
+    </div>
+  );
+}
+
+function ConnectGate({
+  connect,
+  connecting,
+  tr,
+}: {
+  connect: () => void | Promise<void>;
+  connecting: boolean;
+  tr: (k: string) => string;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand/10 via-ink-900/40 to-accent/10 px-6 py-16 text-center">
+      <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-brand/20 blur-3xl" />
+      <div className="relative mx-auto max-w-md">
+        <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl border border-brand/30 bg-brand/10 text-brand">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="6" width="18" height="13" rx="2" /><path d="M3 10h18" /><circle cx="17" cy="14" r="1" />
+          </svg>
+        </span>
+        <h3 className="mt-5 text-xl font-semibold text-white">{tr("pages.treasury.connectTitle")}</h3>
+        <p className="mx-auto mt-2 max-w-sm text-sm text-slate-300">{tr("pages.treasury.connectBody")}</p>
+        <button className="btn-primary mt-6 px-5 py-2.5" onClick={() => void connect()} disabled={connecting}>
+          {connecting ? tr("auth.connecting") : tr("auth.connect")}
+        </button>
+      </div>
     </div>
   );
 }

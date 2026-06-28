@@ -1,26 +1,41 @@
 import type { Metadata } from "next";
+import { Bricolage_Grotesque, Hanken_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { AuthProvider } from "@/lib/auth";
+import { I18nProvider } from "@/lib/i18n";
+
+const display = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+const body = Hanken_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "Contexta — Agentic Treasury & Payroll on Stellar for LATAM",
+  title: "Contexta — Smart Treasury & Payroll for LATAM on Stellar",
   description:
-    "Non-custodial treasury and payroll platform where AI agents manage liquidity, yield, and payroll for teams in Brazil, Argentina, and Colombia — settled on Stellar, governed by the Legal Context Protocol.",
+    "A smart money assistant for Latin American businesses: keep payday covered, earn yield on idle cash, and pay your team in Brazil, Argentina, and Colombia — non-custodial, on Stellar.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body className="min-h-screen">
-        <AuthProvider>
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
-            <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">{children}</main>
-            <Footer />
-          </div>
-        </AuthProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <div className="flex min-h-screen flex-col">
+              <Navbar />
+              <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">{children}</main>
+              <Footer />
+            </div>
+          </AuthProvider>
+        </I18nProvider>
       </body>
     </html>
   );

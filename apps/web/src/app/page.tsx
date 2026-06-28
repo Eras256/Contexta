@@ -1,102 +1,178 @@
+"use client";
+
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
-import { Badge, Card } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 
-const EXPLAINERS = [
-  {
-    title: "Treasury Autopilot",
-    body: "AI agents continuously rebalance idle dollars between liquid reserves and yield, sized to upcoming payroll and FX volatility — never touching custody of your keys.",
-    accent: "success" as const,
-  },
-  {
-    title: "Payroll in BR / AR / CO",
-    body: "Pay teams in Brazil, Argentina and Colombia using digital dollars on Stellar, off-ramped through anchors to PIX, Transferencias 3.0 and Bre-B.",
-    accent: "info" as const,
-  },
-  {
-    title: "Legal Context & Compliance",
-    body: "Every agent-driven transaction is bound to a verifiable legal context (LCP) published at /.well-known/legal-context.json — terms, consent and dispute channels, on-chain.",
-    accent: "agent" as const,
-  },
-  {
-    title: "DeFi & RWA Yield",
-    body: "Yield comes from DeFindex vaults (CETES / RWA) and Blend lending pools on Stellar, with per-country exposure limits and a hard liquidity floor.",
-    accent: "warn" as const,
-  },
-];
+// 3D hero: client-only, lazy chunk, with a gradient poster while it loads.
+const Hero3D = dynamic(() => import("@/components/Hero3D").then((m) => m.Hero3D), {
+  ssr: false,
+  loading: () => <div className="absolute inset-0 hero-poster" />,
+});
 
-export default function OverviewPage() {
+export default function HomePage() {
+  const t = useT();
+
   return (
-    <div className="space-y-16">
-      {/* Hero */}
-      <section className="relative">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="mb-5 flex justify-center gap-2">
-            <Badge tone="success">Stellar · Soroban testnet</Badge>
-            <Badge tone="agent">SCF Integration Track</Badge>
+    <div className="space-y-24 sm:space-y-28">
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      <section className="relative grid items-center gap-10 pt-2 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
+        <div className="relative z-10">
+          <div className="mb-5 flex flex-wrap gap-2">
+            <span className="pill border-brand/30 bg-brand/10 text-brand">● {t("hero.badge1")}</span>
+            <span className="pill border-accent/30 bg-accent/10 text-accent">{t("hero.badge2")}</span>
           </div>
-          <h1 className="text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-            Agentic Treasury &amp; Payroll on Stellar for LATAM
+          <h1 className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+            {t("hero.title")}
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-pretty text-base text-slate-300 sm:text-lg">
-            Contexta is a non-custodial platform where AI agents manage liquidity, yield, and
-            payroll for companies paying teams in Brazil, Argentina, and Colombia. Treasury settles
-            in digital dollars and XLM on Stellar, earns yield via DeFindex &amp; Blend, on/off-ramps
-            through anchors and local rails, and binds every agentic action to the Legal Context
-            Protocol.
+          <p className="mt-6 max-w-xl text-pretty text-base leading-relaxed text-slate-300 sm:text-lg">
+            {t("hero.subtitle")}
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link href="/docs" className="btn-primary">
-              Request demo
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/treasury" className="btn-primary px-5 py-2.5 text-[15px]">
+              {t("hero.ctaPrimary")}
             </Link>
-            <Link href="/treasury" className="btn-ghost">
-              Launch testnet workspace
-            </Link>
+            <a href="#how" className="btn-ghost px-5 py-2.5 text-[15px]">
+              {t("hero.ctaSecondary")}
+            </a>
+          </div>
+          <p className="mt-5 flex items-center gap-2 text-xs text-slate-400">
+            <LockIcon />
+            {t("hero.trust")}
+          </p>
+        </div>
+
+        {/* 3D panel */}
+        <div className="relative">
+          <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[28px] border border-white/10 bg-ink-900/40 sm:max-w-lg lg:aspect-[4/5]">
+            <div className="pointer-events-none absolute inset-0 hero-poster" />
+            <Hero3D className="absolute inset-0" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-950/70 to-transparent" />
           </div>
         </div>
       </section>
 
-      {/* Explainer cards */}
-      <section>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {EXPLAINERS.map((e) => (
-            <Card key={e.title} className="flex flex-col">
-              <Badge tone={e.accent}>{e.title}</Badge>
-              <p className="mt-3 text-sm leading-relaxed text-slate-300">{e.body}</p>
-            </Card>
-          ))}
+      {/* ── How it works ─────────────────────────────────────────────────── */}
+      <section id="how">
+        <SectionEyebrow eyebrow={t("steps.eyebrow")} title={t("steps.title")} />
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          <StepCard n="1" tone="brand" title={t("steps.s1Title")} body={t("steps.s1Body")} icon={<WalletIcon />} />
+          <StepCard n="2" tone="accent" title={t("steps.s2Title")} body={t("steps.s2Body")} icon={<SlidersIcon />} />
+          <StepCard n="3" tone="sky" title={t("steps.s3Title")} body={t("steps.s3Body")} icon={<BoltIcon />} />
         </div>
       </section>
 
-      {/* Architecture */}
+      {/* ── Benefits ─────────────────────────────────────────────────────── */}
       <section>
-        <div className="mb-6">
-          <div className="label text-brand">How it fits together</div>
-          <h2 className="mt-1 text-2xl font-semibold tracking-tight text-white">
-            One control plane, non-custodial settlement
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm text-slate-400">
-            The company keeps custody. Contexta&apos;s agents propose moves; the API and worker
-            enforce risk limits and legal context, then settle through Soroban contracts into
-            DeFindex, Blend, and anchor rails — with every step audited in Supabase.
-          </p>
+        <SectionEyebrow eyebrow={t("benefits.eyebrow")} title={t("benefits.title")} />
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <BenefitCard icon={<ShieldCheckIcon />} title={t("benefits.b1Title")} body={t("benefits.b1Body")} />
+          <BenefitCard icon={<CoinsIcon />} title={t("benefits.b2Title")} body={t("benefits.b2Body")} />
+          <BenefitCard icon={<GlobeIcon />} title={t("benefits.b3Title")} body={t("benefits.b3Body")} />
+          <BenefitCard icon={<KeyIcon />} title={t("benefits.b4Title")} body={t("benefits.b4Body")} />
         </div>
-        <ArchitectureDiagram />
       </section>
 
-      {/* Trust strip */}
+      {/* ── Flow / diagram ───────────────────────────────────────────────── */}
+      <section>
+        <SectionEyebrow eyebrow={t("flow.eyebrow")} title={t("flow.title")} />
+        <p className="mt-2 max-w-2xl text-sm text-slate-400">{t("flow.subtitle")}</p>
+        <div className="mt-6">
+          <ArchitectureDiagram />
+        </div>
+      </section>
+
+      {/* ── Why / trust strip ────────────────────────────────────────────── */}
       <section className="grid gap-4 sm:grid-cols-3">
         {[
-          { k: "Non-custodial", v: "Keys stay with the company; agents only propose and execute within signed limits." },
-          { k: "Verifiable terms", v: "LCP context hash is embedded in every on-chain treasury & payroll event." },
-          { k: "LATAM-native", v: "PIX, Transferencias 3.0 and Bre-B off-ramps via SEP-24/31 anchors." },
+          { k: t("why.t1"), v: t("why.b1") },
+          { k: t("why.t2"), v: t("why.b2") },
+          { k: t("why.t3"), v: t("why.b3") },
         ].map((x) => (
-          <Card key={x.k}>
+          <div key={x.k} className="card">
             <div className="label text-brand">{x.k}</div>
             <p className="mt-2 text-sm text-slate-300">{x.v}</p>
-          </Card>
+          </div>
         ))}
+      </section>
+
+      {/* ── CTA ──────────────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand/10 via-ink-900/40 to-accent/10 px-6 py-12 text-center sm:px-12 sm:py-16">
+        <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-brand/20 blur-3xl" />
+        <h2 className="relative mx-auto max-w-2xl text-balance text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+          {t("cta.title")}
+        </h2>
+        <p className="relative mx-auto mt-3 max-w-xl text-sm text-slate-300 sm:text-base">{t("cta.body")}</p>
+        <div className="relative mt-7 flex justify-center">
+          <Link href="/treasury" className="btn-primary px-6 py-3 text-[15px]">
+            {t("cta.button")}
+          </Link>
+        </div>
       </section>
     </div>
   );
 }
+
+function SectionEyebrow({ eyebrow, title }: { eyebrow: string; title: string }) {
+  return (
+    <div className="max-w-2xl">
+      <div className="label text-brand">{eyebrow}</div>
+      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">{title}</h2>
+    </div>
+  );
+}
+
+const TONES: Record<string, string> = {
+  brand: "text-brand border-brand/30 bg-brand/10",
+  accent: "text-accent border-accent/30 bg-accent/10",
+  sky: "text-sky-300 border-sky-400/30 bg-sky-400/10",
+};
+
+function StepCard({
+  n,
+  tone,
+  title,
+  body,
+  icon,
+}: {
+  n: string;
+  tone: keyof typeof TONES;
+  title: string;
+  body: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="group relative card transition hover:border-white/20 hover:bg-ink-850">
+      <div className="flex items-center gap-3">
+        <span className={`grid h-10 w-10 place-items-center rounded-xl border ${TONES[tone]}`}>{icon}</span>
+        <span className="font-display text-3xl font-semibold text-white/15">{n}</span>
+      </div>
+      <h3 className="mt-4 text-base font-semibold text-white">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-slate-300">{body}</p>
+    </div>
+  );
+}
+
+function BenefitCard({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  return (
+    <div className="card flex flex-col transition hover:border-white/20 hover:bg-ink-850">
+      <span className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/5 text-brand">
+        {icon}
+      </span>
+      <h3 className="mt-4 text-[15px] font-semibold text-white">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-slate-300">{body}</p>
+    </div>
+  );
+}
+
+/* ── Minimal inline icons ───────────────────────────────────────────────── */
+const ic = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.7, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+function WalletIcon() { return <svg {...ic}><path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1H5a2 2 0 0 0-2 2z" /><path d="M3 8v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6" /><circle cx="16.5" cy="13" r="1.2" /></svg>; }
+function SlidersIcon() { return <svg {...ic}><path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h8M16 18h4" /><circle cx="16" cy="6" r="2" /><circle cx="8" cy="12" r="2" /><circle cx="14" cy="18" r="2" /></svg>; }
+function BoltIcon() { return <svg {...ic}><path d="M13 2 4 14h7l-1 8 9-12h-7z" /></svg>; }
+function ShieldCheckIcon() { return <svg {...ic}><path d="M12 3 5 6v6c0 4 3 6.5 7 9 4-2.5 7-5 7-9V6z" /><path d="M9.5 12.5 11 14l3.5-3.5" /></svg>; }
+function CoinsIcon() { return <svg {...ic}><ellipse cx="9" cy="7" rx="5" ry="2.6" /><path d="M4 7v4c0 1.4 2.2 2.6 5 2.6s5-1.2 5-2.6V7" /><path d="M10 14.4v2.6c0 1.4 2.2 2.6 5 2.6s5-1.2 5-2.6v-4c0-1.4-2.2-2.6-5-2.6" /></svg>; }
+function GlobeIcon() { return <svg {...ic}><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" /></svg>; }
+function KeyIcon() { return <svg {...ic}><circle cx="8" cy="8" r="4" /><path d="M11 11l8 8M16 16l2-2M18 18l2-2" /></svg>; }
+function LockIcon() { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className="text-brand"><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>; }

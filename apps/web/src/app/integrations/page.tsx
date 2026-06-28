@@ -1,14 +1,18 @@
+"use client";
+
 import { Badge, Card, KeyValue, SectionHeader, Stat } from "@/components/ui";
 import { demoVaults } from "@/lib/demoData";
 import { bps, usdBase } from "@/lib/format";
+import { useT } from "@/lib/i18n";
 
 export default function IntegrationsPage() {
+  const t = useT();
   return (
     <div className="space-y-8">
       <SectionHeader
-        eyebrow="Integrations"
-        title="DeFi, Stellar & infrastructure"
-        description="Connect treasury strategies to DeFindex vaults and Blend pools, monitor Stellar network health, and check platform infrastructure."
+        eyebrow={t("pages.integrations.eyebrow")}
+        title={t("pages.integrations.title")}
+        description={t("pages.integrations.desc")}
       />
 
       {/* DeFindex */}

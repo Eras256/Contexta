@@ -4,6 +4,7 @@
 
 :root {
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-sans);
   --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 }
 
@@ -23,9 +24,39 @@
   }
 }
 
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display), var(--font-sans);
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(100deg, #5eead4 0%, #a78bfa 55%, #38bdf8 100%);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+  .hero-poster {
+    background:
+      radial-gradient(40% 40% at 50% 42%, rgba(45, 212, 191, 0.22), transparent 70%),
+      radial-gradient(50% 50% at 70% 70%, rgba(167, 139, 250, 0.16), transparent 70%),
+      radial-gradient(45% 45% at 25% 65%, rgba(56, 189, 248, 0.14), transparent 70%);
+  }
+}
+
 @layer components {
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+  }
   .card {
     @apply rounded-xl border border-white/10 bg-ink-850/70 p-5 shadow-card backdrop-blur;
+  }
+  .glass {
+    @apply rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl;
   }
   .stat-value {
     @apply text-2xl font-semibold tracking-tight text-white;

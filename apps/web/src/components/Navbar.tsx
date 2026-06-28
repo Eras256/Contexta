@@ -3,19 +3,22 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AuthControls } from "@/components/AuthControls";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { useT } from "@/lib/i18n";
 
 const SECTIONS = [
-  { href: "/", label: "Overview" },
-  { href: "/treasury", label: "Treasury" },
-  { href: "/payroll", label: "Payroll" },
-  { href: "/agent", label: "Agent & Legal" },
-  { href: "/integrations", label: "Integrations" },
-  { href: "/security", label: "Security" },
-  { href: "/docs", label: "Docs & SCF" },
+  { href: "/", key: "nav.home" },
+  { href: "/treasury", key: "nav.treasury" },
+  { href: "/payroll", key: "nav.payroll" },
+  { href: "/agent", key: "nav.agent" },
+  { href: "/integrations", key: "nav.integrations" },
+  { href: "/security", key: "nav.security" },
+  { href: "/docs", key: "nav.docs" },
 ] as const;
 
 export function Navbar() {
   const pathname = usePathname();
+  const t = useT();
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
@@ -29,7 +32,7 @@ export function Navbar() {
           <span className="text-sm font-semibold tracking-tight text-white">
             Contexta
             <span className="ml-2 hidden text-xs font-normal text-slate-400 sm:inline">
-              Agentic Treasury · Stellar
+              Smart Treasury · Stellar
             </span>
           </span>
         </Link>
@@ -41,15 +44,16 @@ export function Navbar() {
               href={s.href}
               className={`nav-link ${isActive(s.href) ? "nav-link-active" : ""}`}
             >
-              {s.label}
+              {t(s.key)}
             </Link>
           ))}
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
           <Link href="/treasury" className="btn-ghost hidden sm:inline-flex">
-            Launch testnet workspace
+            {t("nav.workspace")}
           </Link>
+          <LanguageSelector />
           <AuthControls />
         </div>
       </div>
@@ -62,7 +66,7 @@ export function Navbar() {
             href={s.href}
             className={`nav-link whitespace-nowrap ${isActive(s.href) ? "nav-link-active" : ""}`}
           >
-            {s.label}
+            {t(s.key)}
           </Link>
         ))}
       </div>

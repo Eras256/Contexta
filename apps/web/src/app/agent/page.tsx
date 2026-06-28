@@ -5,6 +5,7 @@ import { demoDecisions, demoTenant } from "@/lib/demoData";
 import { shortHash } from "@/lib/format";
 import { api, type Decision, type LegalState } from "@/lib/api";
 import { useLiveData } from "@/lib/useLiveData";
+import { useT } from "@/lib/i18n";
 
 const ACTION_LABEL: Record<string, string> = {
   deposit_vault: "Deposit to vault",
@@ -33,13 +34,14 @@ export default function AgentPage() {
   });
   const legal = useLiveData<LegalState>(api.legal, demoLegal);
   const doc = (legal.data.document ?? {}) as { tenantDomain?: string; jurisdiction?: string };
+  const t = useT();
 
   return (
     <div className="space-y-8">
       <SectionHeader
-        eyebrow="Agent & Legal Context"
-        title="Agent monitoring & Legal Context Protocol"
-        description="Configure the legal context that governs agentic commerce, then watch every agent decision link back to its terms, consents, and on-chain settlement."
+        eyebrow={t("pages.agent.eyebrow")}
+        title={t("pages.agent.title")}
+        description={t("pages.agent.desc")}
         action={<DataBadge live={decisions.live} loading={decisions.loading} />}
       />
 

@@ -1,9 +1,15 @@
+"use client";
+
+import { useT } from "@/lib/i18n";
+
 /**
- * Architecture diagram (pure SVG, no deps). Shows the flow:
- * Company treasury → Agents → Soroban contracts, with Supabase, DeFindex/Blend,
- * anchors/local rails, and the Legal Context Protocol binding.
+ * "How the money moves" diagram (pure SVG, no deps). Plain-language, localized
+ * labels: your money → smart assistant + engine → Stellar contracts, savings,
+ * lending and local payouts, with your signed rules on every action.
  */
 export function ArchitectureDiagram() {
+  const t = useT();
+
   const Box = ({
     x,
     y,
@@ -22,7 +28,7 @@ export function ArchitectureDiagram() {
     accent?: string;
   }) => (
     <g>
-      <rect x={x} y={y} width={w} height={h} rx={10} fill="#0f1628" stroke={accent} strokeOpacity={0.5} />
+      <rect x={x} y={y} width={w} height={h} rx={10} fill="#0f1628" stroke={accent} strokeOpacity={0.55} />
       <text x={x + w / 2} y={y + (subtitle ? h / 2 - 4 : h / 2 + 4)} textAnchor="middle" fill="#fff" fontSize="13" fontWeight="600">
         {title}
       </text>
@@ -36,7 +42,7 @@ export function ArchitectureDiagram() {
 
   return (
     <div className="card overflow-x-auto">
-      <svg viewBox="0 0 920 420" className="w-full min-w-[760px]" role="img" aria-label="Contexta architecture diagram">
+      <svg viewBox="0 0 920 420" className="w-full min-w-[760px]" role="img" aria-label="Contexta flow diagram">
         <defs>
           <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
             <path d="M0,0 L8,3 L0,6 Z" fill="#475569" />
@@ -45,30 +51,30 @@ export function ArchitectureDiagram() {
 
         {/* Lane labels */}
         <text x={20} y={30} fill="#64748b" fontSize="11" fontWeight="600" letterSpacing="1">
-          COMPANY
+          {t("diagram.laneCompany")}
         </text>
         <text x={20} y={170} fill="#64748b" fontSize="11" fontWeight="600" letterSpacing="1">
-          CONTEXTA PLATFORM
+          {t("diagram.lanePlatform")}
         </text>
         <text x={20} y={330} fill="#64748b" fontSize="11" fontWeight="600" letterSpacing="1">
-          STELLAR / DEFI / RAILS
+          {t("diagram.laneStellar")}
         </text>
 
-        <Box x={360} y={45} w={200} h={56} title="Company Treasury" subtitle="USDC · XLM · RWA" accent="#38bdf8" />
+        <Box x={360} y={45} w={200} h={56} title={t("diagram.treasuryTitle")} subtitle={t("diagram.treasurySub")} accent="#38bdf8" />
 
-        <Box x={120} y={150} w={170} h={60} title="AI Agents" subtitle="rebalance · forecast" accent="#a78bfa" />
-        <Box x={375} y={150} w={170} h={60} title="API / Worker" subtitle="Fly.io · Node/TS" accent="#2dd4bf" />
-        <Box x={630} y={150} w={170} h={60} title="Supabase" subtitle="accounts · audit · LCP refs" accent="#34d399" />
+        <Box x={120} y={150} w={170} h={60} title={t("diagram.agentTitle")} subtitle={t("diagram.agentSub")} accent="#a78bfa" />
+        <Box x={375} y={150} w={170} h={60} title={t("diagram.engineTitle")} subtitle={t("diagram.engineSub")} accent="#2dd4bf" />
+        <Box x={630} y={150} w={170} h={60} title={t("diagram.recordsTitle")} subtitle={t("diagram.recordsSub")} accent="#34d399" />
 
-        <Box x={70} y={300} w={150} h={60} title="Soroban" subtitle="Treasury + Payroll" accent="#2dd4bf" />
-        <Box x={255} y={300} w={150} h={60} title="DeFindex" subtitle="CETES / RWA vaults" accent="#f5b54a" />
-        <Box x={440} y={300} w={150} h={60} title="Blend" subtitle="lending pools" accent="#f5b54a" />
-        <Box x={625} y={300} w={175} h={60} title="Anchors + Rails" subtitle="SEP-24/31 · PIX · Bre-B" accent="#38bdf8" />
+        <Box x={70} y={300} w={150} h={60} title={t("diagram.contractsTitle")} subtitle={t("diagram.contractsSub")} accent="#2dd4bf" />
+        <Box x={255} y={300} w={150} h={60} title={t("diagram.savingsTitle")} subtitle={t("diagram.savingsSub")} accent="#f5b54a" />
+        <Box x={440} y={300} w={150} h={60} title={t("diagram.lendingTitle")} subtitle={t("diagram.lendingSub")} accent="#f5b54a" />
+        <Box x={625} y={300} w={175} h={60} title={t("diagram.payoutsTitle")} subtitle={t("diagram.payoutsSub")} accent="#38bdf8" />
 
-        {/* Legal Context binding (cross-cutting) */}
-        <rect x={360} y={232} width={200} height={28} rx={14} fill="#a78bfa" fillOpacity={0.12} stroke="#a78bfa" strokeOpacity={0.5} />
+        {/* Your-rules binding (cross-cutting) */}
+        <rect x={330} y={232} width={260} height={28} rx={14} fill="#a78bfa" fillOpacity={0.12} stroke="#a78bfa" strokeOpacity={0.5} />
         <text x={460} y={250} textAnchor="middle" fill="#c4b5fd" fontSize="11" fontWeight="600">
-          Legal Context Protocol binding
+          {t("diagram.binding")}
         </text>
 
         {/* Edges */}

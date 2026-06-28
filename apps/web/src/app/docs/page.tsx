@@ -1,4 +1,7 @@
+"use client";
+
 import { Badge, Card, SectionHeader } from "@/components/ui";
+import { useT } from "@/lib/i18n";
 
 const BUILDING_BLOCKS = [
   { name: "Stellar / Soroban", use: "Settlement layer; Treasury + Payroll contracts emit LCP-bound events." },
@@ -18,12 +21,13 @@ const SCF_MAP = [
 ];
 
 export default function DocsPage() {
+  const t = useT();
   return (
     <div className="space-y-8">
       <SectionHeader
-        eyebrow="Docs & SCF"
-        title="Documentation & SCF Integration Track"
-        description="How Contexta composes Stellar building blocks and maps to Stellar Community Fund Integration Track expectations."
+        eyebrow={t("pages.docs.eyebrow")}
+        title={t("pages.docs.title")}
+        description={t("pages.docs.desc")}
       />
 
       <Card>
