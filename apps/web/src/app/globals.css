@@ -38,6 +38,23 @@
   .text-pretty {
     text-wrap: pretty;
   }
+  .audit-grid {
+    background-image:
+      linear-gradient(rgba(45, 212, 191, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(45, 212, 191, 0.04) 1px, transparent 1px);
+    background-size: 100% 1.6rem, 2rem 100%;
+  }
+  .audit-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(45, 212, 191, 0.4) transparent;
+  }
+  .audit-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .audit-scroll::-webkit-scrollbar-thumb {
+    background: rgba(45, 212, 191, 0.35);
+    border-radius: 9999px;
+  }
   .hero-poster {
     background:
       radial-gradient(40% 40% at 50% 42%, rgba(45, 212, 191, 0.22), transparent 70%),

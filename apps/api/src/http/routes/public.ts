@@ -15,6 +15,10 @@ export function publicRouter(): Router {
       const base = {
         agentAddress: config.AGENT_PUBLIC_ADDRESS || null,
         network: config.STELLAR_NETWORK,
+        contracts: {
+          treasury: config.TREASURY_CONTRACT_ID || null,
+          payroll: config.PAYROLL_CONTRACT_ID || null,
+        },
       };
       const tenantId = config.AUTH_DEMO_TENANT_ID;
       if (!tenantId) {

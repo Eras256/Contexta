@@ -100,6 +100,9 @@ const en: Dict = {
     agentLabel: "Agent wallet",
     empty: "Waking up the assistant…",
     viewAll: "See all activity",
+    connection: "CONNECTION",
+    online: "ONLINE",
+    title2: "Agent audit feed",
   },
   footer: {
     tagline:
@@ -307,6 +310,9 @@ const es: Dict = {
     agentLabel: "Wallet del agente",
     empty: "Despertando al asistente…",
     viewAll: "Ver toda la actividad",
+    connection: "CONEXIÓN",
+    online: "EN LÍNEA",
+    title2: "Feed de auditoría del agente",
   },
   footer: {
     tagline:
@@ -514,6 +520,9 @@ const pt: Dict = {
     agentLabel: "Carteira do agente",
     empty: "Acordando o assistente…",
     viewAll: "Ver toda a atividade",
+    connection: "CONEXÃO",
+    online: "ONLINE",
+    title2: "Feed de auditoria do agente",
   },
   footer: {
     tagline:

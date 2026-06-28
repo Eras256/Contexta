@@ -2,7 +2,7 @@
 
 import { Badge, Card, KeyValue, SectionHeader } from "@/components/ui";
 import { shortHash } from "@/lib/format";
-import { api, type Decision, type LegalState } from "@/lib/api";
+import { api, apiBaseUrl, type Decision, type LegalState } from "@/lib/api";
 import { useLiveData } from "@/lib/useLiveData";
 import { useT } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
@@ -86,13 +86,26 @@ export default function AgentPage() {
           />
           <KeyValue
             k="Document hash"
-            v={<span className="font-mono text-xs text-accent">{shortHash(legal.data.hash ?? null)}</span>}
+            v={
+              legal.data.hash ? (
+                <a
+                  className="font-mono text-xs text-accent hover:underline hover:text-accent/80 transition inline-flex items-center gap-1"
+                  href={`${apiBaseUrl}/.well-known/legal-context.json?domain=${doc.tenantDomain ?? "acme.contexta.app"}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {shortHash(legal.data.hash)} ↗
+                </a>
+              ) : (
+                <span className="font-mono text-xs text-slate-500">—</span>
+              )
+            }
           />
           {legal.data.published && doc.tenantDomain && (
             <div className="mt-4">
               <a
                 className="btn-ghost"
-                href={`https://contexta-api.fly.dev/.well-known/legal-context.json?domain=${doc.tenantDomain}`}
+                href={`${apiBaseUrl}/.well-known/legal-context.json?domain=${doc.tenantDomain}`}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -141,7 +154,19 @@ export default function AgentPage() {
               <p className="mt-3 text-sm text-slate-300">{d.rationale}</p>
               <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-xs">
                 <span className="text-slate-400">
-                  LCP: <span className="font-mono text-accent">{shortHash(d.legalContextHash)}</span>
+                  LCP:{" "}
+                  {d.legalContextHash ? (
+                    <a
+                      className="font-mono text-accent hover:underline hover:text-accent/80 transition inline-flex items-center gap-1"
+                      href={`${apiBaseUrl}/.well-known/legal-context.json?domain=${doc.tenantDomain ?? "acme.contexta.app"}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {shortHash(d.legalContextHash)} ↗
+                    </a>
+                  ) : (
+                    <span className="font-mono text-slate-500">—</span>
+                  )}
                 </span>
                 <span className="text-slate-400">
                   tx:{" "}
