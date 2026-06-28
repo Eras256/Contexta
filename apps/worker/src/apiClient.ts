@@ -51,4 +51,8 @@ export class ApiClient {
   stellarStatus(tenantId: string): Promise<unknown> {
     return this.call(tenantId, "GET", "/integrations/stellar/status");
   }
+
+  yieldCycle(tenantId: string): Promise<{ id?: string; skipped?: boolean }> {
+    return this.call(tenantId, "POST", "/agent/yield-cycle", {});
+  }
 }

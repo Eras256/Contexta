@@ -16,10 +16,11 @@ all code in this monorepo is original.
 
 | Surface | URL |
 | :-- | :-- |
-| Web app (Vercel) | **https://contextio-stellar.vercel.app** |
+| Web app | **https://www.contextio.xyz** |
 | API (Fly.io · region GRU) | **https://contextio-api.fly.dev** |
 | Client SDK (npm) | **`contextio-sdk`** — `npm i contextio-sdk` |
 | Soroban contracts (testnet) | treasury `CASGAQQVHDF4Q2XTK3QWYHRABYX7JUIO6HCLEOZZR7V3TIMVHMXPTA7I` · payroll `CDXML4PU5RVXQ7DSM7UO5OURKFUJMPGI57PRZCQ3NZTKFGPOIDIOIRCT` |
+| DeFindex vault (testnet · real yield) | `CDR4WRWLHN2KNAEWT4ZFOL42WDQAHF3N7TLYB7QA5IORUS7XP4UJGTHS` |
 
 Connect Freighter (on **Testnet**) at the web app → sign the message → explore live treasury, agent, and payroll data.
 

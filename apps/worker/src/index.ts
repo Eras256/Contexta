@@ -5,6 +5,7 @@ import { Scheduler } from "./scheduler.js";
 import { runAgentRebalance } from "./jobs/agentRebalance.js";
 import { runScheduledPayroll } from "./jobs/scheduledPayroll.js";
 import { runRefreshMarketData } from "./jobs/refreshMarketData.js";
+import { runDefindexYield } from "./jobs/defindexYield.js";
 
 /**
  * Worker entrypoint. Loads active tenants from Supabase, then schedules the
@@ -54,6 +55,17 @@ async function main(): Promise<void> {
     intervalMs: Math.max(60_000, Math.floor(intervalMs / 2)),
     run: async () => runRefreshMarketData(api, await activeTenantIds(), logger),
   });
+
+  // Real DeFindex yield moves on a slower cadence (~every 6 ticks, min 30 min)
+  // so the agent visibly allocates idle cash into on-chain yield without paying
+  // Soroban fees every poll. Only when settling for real (not dry-run).
+  if (!config.AGENT_DRY_RUN) {
+    scheduler.add({
+      name: "defindex-yield",
+      intervalMs: Math.max(1_800_000, intervalMs * 6),
+      run: async () => runDefindexYield(api, await activeTenantIds(), logger),
+    });
+  }
 
   const shutdown = (signal: string) => {
     logger.info({ signal }, "Worker shutting down");

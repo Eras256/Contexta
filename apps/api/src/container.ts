@@ -84,7 +84,7 @@ export function createContainer(): Container {
   const legal = new LegalContextService(repo, logger);
   const treasury = new TreasuryService(repo, defindex, blend, soroban, legal, audit, logger);
   const payroll = new PayrollService(repo, soroban, legal, audit, logger);
-  const agent = new AgentService(repo, treasury, payroll, oracle, legal, audit, logger);
+  const agent = new AgentService(repo, treasury, defindex, payroll, oracle, legal, audit, logger);
   const walletAuth = new WalletAuthService(repo, config, logger);
 
   return {

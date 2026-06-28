@@ -43,6 +43,21 @@ export function agentRouter(): Router {
     }
   });
 
+  /**
+   * Run one real DeFindex yield cycle (deposit/withdraw a fixed step into the
+   * platform's live vault, recording an executed decision with the tx). Routed
+   * here so the worker can drive it on a slow cadence via the internal secret.
+   */
+  router.post("/yield-cycle", requireCapability("treasury.rebalance"), async (req, res, next) => {
+    try {
+      const ctx = requireCtx(req);
+      const decision = await req.container.agent.runYieldCycle(ctx.tenantId);
+      res.json(decision ?? { skipped: true });
+    } catch (e) {
+      next(e);
+    }
+  });
+
   router.post("/decisions/:id/execute", requireCapability("treasury.rebalance"), async (req, res, next) => {
     try {
       const ctx = requireCtx(req);

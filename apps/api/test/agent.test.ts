@@ -60,6 +60,7 @@ function buildAgent(opts: {
   return new AgentService(
     {} as never,
     treasury,
+    {} as never, // defindex (unused in plan tests)
     payroll,
     oracle,
     {} as never,

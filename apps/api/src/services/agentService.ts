@@ -7,6 +7,7 @@ import type { PayrollService, UpcomingObligation } from "./payrollService.js";
 import type { Oracle } from "../integrations/oracle.js";
 import type { LegalContextService } from "./legalContextService.js";
 import type { AuditService } from "./auditService.js";
+import type { DefindexClient } from "../integrations/defindex.js";
 
 export interface RebalancePlan {
   action: AgentDecision["action"];
@@ -32,12 +33,82 @@ export class AgentService {
   constructor(
     private readonly repo: Repository,
     private readonly treasury: TreasuryService,
+    private readonly defindex: DefindexClient,
     private readonly payroll: PayrollService,
     private readonly oracle: Oracle,
     private readonly legal: LegalContextService,
     private readonly audit: AuditService,
     private readonly logger: Logger,
   ) {}
+
+  /**
+   * Real DeFindex yield cycle: keep a live position in the platform's DeFindex
+   * vault inside a small band by depositing (or withdrawing) a fixed step on
+   * each call — a genuine, verifiable on-chain yield move. Records an executed
+   * agent decision (with the Stellar tx + LCP binding) so it shows in the feed.
+   * No-op when DeFindex isn't live. Routed through the API like every agent
+   * action; the worker calls it on a slow cadence.
+   */
+  async runYieldCycle(tenantId: string): Promise<AgentDecision | null> {
+    const vaultId = this.defindex.vaultId;
+    if (!this.defindex.live || !vaultId) return null;
+
+    const STEP = 10_000_000n; // 1 XLM (7 decimals)
+    const BAND_CEILING = 500_000_000n; // ~50 XLM — keep the position bounded
+
+    const snap = await this.defindex.getVaultData();
+    const position = snap.ok ? BigInt(snap.value.positionBaseUnits || "0") : 0n;
+    const apyBps = snap.ok ? snap.value.apyBps : 0;
+    const deposit = position < BAND_CEILING;
+
+    const binding = await this.legal.bindForAction(tenantId, ["treasury-management"]);
+    const current = await this.legal.getForTenant(tenantId);
+
+    const r = deposit
+      ? await this.defindex.deposit(vaultId, STEP.toString())
+      : await this.defindex.withdraw(vaultId, STEP.toString());
+    if (!r.ok) {
+      this.logger.warn({ tenantId, err: r.error.message }, "DeFindex yield cycle deferred");
+      return null;
+    }
+
+    const apyPct = (apyBps / 100).toFixed(2);
+    const decision: AgentDecision = {
+      id: randomUUID(),
+      tenantId,
+      action: deposit ? "deposit_vault" : "withdraw_vault",
+      rationale: deposit
+        ? `Allocated 1 XLM of idle cash into the DeFindex Blend vault (~${apyPct}% APY) — real, on-chain yield.`
+        : `Pulled 1 XLM back from the DeFindex vault to keep the yield position within band.`,
+      payload: {
+        from: deposit ? "liquidity" : "defindex_vault",
+        to: deposit ? "defindex_vault" : "liquidity",
+        asset: "XLM",
+        amountBaseUnits: STEP.toString(),
+        amount: "1",
+        strategyRef: vaultId,
+        venue: "defindex",
+        apyBps,
+      },
+      status: "executed",
+      legalContextId: current?.document.contextId ?? null,
+      legalContextHash: binding.hash,
+      stellarTxHash: r.value.txHash ?? null,
+      createdAt: new Date().toISOString(),
+      decidedAt: new Date().toISOString(),
+    };
+    const saved = await this.repo.insertDecision(decision);
+    await this.audit.record({
+      tenantId,
+      actorId: null,
+      actorType: "agent",
+      action: "integration.defindex.deposit",
+      detail: { decisionId: saved.id, txHash: r.value.txHash, deposit },
+      legalContextId: saved.legalContextId,
+    });
+    this.logger.info({ tenantId, decisionId: saved.id, txHash: r.value.txHash, deposit }, "DeFindex yield cycle settled");
+    return saved;
+  }
 
   /**
    * Pure-ish planner: given the current snapshot, obligations and FX volatility,
