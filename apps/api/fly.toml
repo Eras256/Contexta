@@ -28,6 +28,8 @@ primary_region = "gru"
   # Wallet sign-in: a freshly-connected wallet auto-joins this demo tenant.
   AUTH_DEMO_TENANT_ID = "00000000-0000-4000-8000-000000000001"
   AUTH_DEMO_ROLE = "owner"
+  # Autonomous agent wallet shown in the Home live feed.
+  AGENT_PUBLIC_ADDRESS = "GCTULX2PTHVMEYSNLCCDTN7GEDVFP4AZHQOXVLA3FNU4X3EVDHHY254U"
 
 # Run Supabase migrations on each deploy before swapping traffic.
 # (Provide DATABASE_URL as a secret; uses the supabase CLI image in CI, or a

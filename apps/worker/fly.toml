@@ -7,7 +7,7 @@
 # the shared INTERNAL_API_SECRET. Keep exactly one machine running so the simple
 # in-process scheduler doesn't double-fire jobs.
 
-app = "contexta-worker"
+app = "contexta-agent"
 primary_region = "gru"
 
 [build]
@@ -16,7 +16,7 @@ primary_region = "gru"
 [env]
   NODE_ENV = "production"
   AGENT_POLL_INTERVAL_SECONDS = "300"
-  AGENT_DRY_RUN = "true"
+  AGENT_DRY_RUN = "false"
   API_BASE_URL = "https://contexta-api.fly.dev"
   STELLAR_NETWORK = "testnet"
   STELLAR_RPC_URL = "https://soroban-testnet.stellar.org"

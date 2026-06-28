@@ -3,6 +3,7 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
+import { LiveAgentFeed } from "@/components/LiveAgentFeed";
 import { useT } from "@/lib/i18n";
 
 // 3D hero: client-only, lazy chunk, with a gradient poster while it loads.
@@ -51,6 +52,11 @@ export default function HomePage() {
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-950/70 to-transparent" />
           </div>
         </div>
+      </section>
+
+      {/* ── Live agent feed ──────────────────────────────────────────────── */}
+      <section>
+        <LiveAgentFeed />
       </section>
 
       {/* ── How it works ─────────────────────────────────────────────────── */}

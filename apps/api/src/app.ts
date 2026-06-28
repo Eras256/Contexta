@@ -13,6 +13,7 @@ import { treasuryRouter } from "./http/routes/treasury.js";
 import { payrollRouter } from "./http/routes/payroll.js";
 import { legalRouter, wellKnownRouter } from "./http/routes/legal.js";
 import { authRouter } from "./http/routes/auth.js";
+import { publicRouter } from "./http/routes/public.js";
 import { agentRouter } from "./http/routes/agent.js";
 import { integrationsRouter } from "./http/routes/integrations.js";
 import { auditRouter } from "./http/routes/audit.js";
@@ -64,6 +65,8 @@ export function createApp(container: Container = createContainer()): Express {
     rateLimit({ windowMs: RATE_LIMIT.sensitive.windowMs, max: RATE_LIMIT.sensitive.max }),
     authRouter(),
   );
+  // Public, read-only agent activity feed (no auth).
+  app.use("/api/v1/public", rateLimit({ windowMs: RATE_LIMIT.windowMs, max: RATE_LIMIT.max }), publicRouter());
 
   // ── Authenticated API ────────────────────────────────────────────────────
   const api = express.Router();

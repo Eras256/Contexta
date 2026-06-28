@@ -83,6 +83,9 @@ export const serverEnvSchema = baseEnvSchema.extend({
   AUTH_DEMO_TENANT_ID: z.string().optional().or(z.literal("")),
   AUTH_DEMO_ROLE: z.enum(["owner", "admin", "member", "viewer"]).default("owner"),
   AUTH_SESSION_TTL_SECONDS: z.coerce.number().int().positive().default(3600),
+
+  // Public Stellar address of the autonomous agent (shown in the Home live feed).
+  AGENT_PUBLIC_ADDRESS: z.string().optional().or(z.literal("")),
 });
 
 /** Worker-only extras layered on top of the server schema. */

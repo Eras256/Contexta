@@ -93,6 +93,14 @@ const en: Dict = {
     body: "Connect a Stellar wallet on testnet and explore the full experience — no money at risk.",
     button: "Try the live demo",
   },
+  feed: {
+    eyebrow: "Live",
+    title: "What the assistant is doing right now",
+    subtitle: "Real, on-chain activity from Contexta's autonomous agent — running 24/7 on Stellar testnet.",
+    agentLabel: "Agent wallet",
+    empty: "Waking up the assistant…",
+    viewAll: "See all activity",
+  },
   footer: {
     tagline:
       "Contexta — smart treasury & payroll for Latin America, on Stellar. Non-custodial · Testnet demo · Not financial advice.",
@@ -292,6 +300,14 @@ const es: Dict = {
     body: "Conecta una wallet de Stellar en testnet y explora toda la experiencia — sin dinero en riesgo.",
     button: "Probar la demo",
   },
+  feed: {
+    eyebrow: "En vivo",
+    title: "Lo que el asistente está haciendo ahora",
+    subtitle: "Actividad real y on-chain del agente autónomo de Contexta — funcionando 24/7 en la testnet de Stellar.",
+    agentLabel: "Wallet del agente",
+    empty: "Despertando al asistente…",
+    viewAll: "Ver toda la actividad",
+  },
   footer: {
     tagline:
       "Contexta — tesorería y nómina inteligentes para Latinoamérica, sobre Stellar. Sin custodia · Demo en testnet · No es asesoría financiera.",
@@ -490,6 +506,14 @@ const pt: Dict = {
     title: "Pronto para colocar sua tesouraria no piloto automático?",
     body: "Conecte uma carteira Stellar na testnet e explore a experiência completa — sem dinheiro em risco.",
     button: "Testar a demo",
+  },
+  feed: {
+    eyebrow: "Ao vivo",
+    title: "O que o assistente está fazendo agora",
+    subtitle: "Atividade real e on-chain do agente autônomo da Contexta — rodando 24/7 na testnet da Stellar.",
+    agentLabel: "Carteira do agente",
+    empty: "Acordando o assistente…",
+    viewAll: "Ver toda a atividade",
   },
   footer: {
     tagline:
