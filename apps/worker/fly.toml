@@ -16,7 +16,9 @@ primary_region = "gru"
 [env]
   NODE_ENV = "production"
   AGENT_POLL_INTERVAL_SECONDS = "300"
-  AGENT_DRY_RUN = "false"
+  # Propose-only for now: the agent generates real decisions every tick. On-chain
+  # execution is gated until StellarClient handles archived-entry restore.
+  AGENT_DRY_RUN = "true"
   API_BASE_URL = "https://contexta-api.fly.dev"
   STELLAR_NETWORK = "testnet"
   STELLAR_RPC_URL = "https://soroban-testnet.stellar.org"

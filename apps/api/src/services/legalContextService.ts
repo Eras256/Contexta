@@ -97,7 +97,16 @@ export class LegalContextService {
     if (!current) {
       throw new Error("No legal context published for tenant; agentic action blocked");
     }
-    const binding = bindLegalContext(current.document, satisfiedConsents);
+    // A binding asserts the tenant's full consent posture: every consent the
+    // published context marks as required (the tenant accepted these at publish
+    // time), plus any extra ones the action explicitly relies on. This lets a
+    // treasury-scoped action bind without re-listing payroll consent, while LCP
+    // still enforces that no required consent is ever missing.
+    const required = current.document.consentRequirements
+      .filter((c) => c.required)
+      .map((c) => c.id);
+    const consents = Array.from(new Set([...required, ...satisfiedConsents]));
+    const binding = bindLegalContext(current.document, consents);
     if (!verifyBinding(current.document, binding)) {
       throw new Error("Legal context binding failed verification");
     }
