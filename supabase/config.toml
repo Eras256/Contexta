@@ -1,0 +1,18 @@
+# Minimal Supabase CLI config for local development.
+# `supabase start` boots Postgres + Auth; `supabase db reset` runs migrations + seed.
+
+project_id = "contexta"
+
+[db]
+port = 54322
+major_version = 15
+
+[api]
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+max_rows = 1000
+
+[auth]
+enable_signup = true
+site_url = "http://localhost:3000"

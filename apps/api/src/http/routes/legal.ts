@@ -1,0 +1,81 @@
+import { Router } from "express";
+import { requireCapability } from "../middleware/rbac.js";
+import { requireCtx, HttpError } from "../context.js";
+import { publishLegalSchema } from "../schemas.js";
+
+/**
+ * Tenant-scoped legal context management. The public `.well-known` document is
+ * served by a separate, unauthenticated router (wellKnownRouter) so that agents
+ * and counterparties can fetch terms without credentials.
+ */
+export function legalRouter(): Router {
+  const router = Router();
+
+  router.get("/", requireCapability("legal.read"), async (req, res, next) => {
+    try {
+      const ctx = requireCtx(req);
+      const current = await req.container.legal.getForTenant(ctx.tenantId);
+      if (!current) {
+        res.json({ published: false });
+        return;
+      }
+      res.json({ published: true, hash: current.hash, document: current.document });
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  router.post("/publish", requireCapability("legal.publish"), async (req, res, next) => {
+    try {
+      const ctx = requireCtx(req);
+      const body = publishLegalSchema.parse(req.body);
+      const tenant = await req.container.repo.getTenant(ctx.tenantId);
+      const result = await req.container.legal.publish({
+        tenantId: ctx.tenantId,
+        tenantDomain: tenant.domain,
+        actorId: ctx.userId,
+        ...body,
+      });
+      await req.container.audit.record({
+        tenantId: ctx.tenantId,
+        actorId: ctx.userId,
+        actorType: "user",
+        action: "legal.context.published",
+        detail: { hash: result.hash, url: result.url },
+        legalContextId: result.document.contextId,
+      });
+      res.json(result);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  return router;
+}
+
+/**
+ * Serves `https://{tenant-domain}/.well-known/legal-context.json`. In this
+ * platform we resolve the tenant by the Host header (or `?domain=` for local
+ * testing) — in production each tenant maps this path on their own domain.
+ */
+export function wellKnownRouter(): Router {
+  const router = Router();
+
+  router.get("/legal-context.json", async (req, res, next) => {
+    try {
+      const domain =
+        (req.query.domain as string | undefined) ?? req.hostname ?? req.header("host") ?? "";
+      const doc = await req.container.legal.getForDomain(domain);
+      if (!doc) {
+        throw new HttpError(404, `No legal context published for domain '${domain}'`);
+      }
+      res.setHeader("content-type", "application/json");
+      res.setHeader("cache-control", "public, max-age=300");
+      res.send(JSON.stringify(doc, null, 2));
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  return router;
+}

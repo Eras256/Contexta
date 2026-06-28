@@ -1,0 +1,56 @@
+# Fly.io config for the Contexta API.
+#
+# Deploy (from the monorepo root):
+#   fly deploy --config apps/api/fly.toml --dockerfile apps/api/Dockerfile
+#
+# First-time setup:
+#   fly apps create contexta-api
+#   fly secrets set SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
+#       SUPABASE_JWT_SECRET=... INTERNAL_API_SECRET=... STELLAR_SERVICE_SECRET=...
+#
+# GRU (São Paulo) keeps latency low for BR/AR/CO users and anchors.
+
+app = "contexta-api"
+primary_region = "gru"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  API_PORT = "8080"
+  API_HOST = "0.0.0.0"
+  STELLAR_NETWORK = "testnet"
+  STELLAR_RPC_URL = "https://soroban-testnet.stellar.org"
+  STELLAR_HORIZON_URL = "https://horizon-testnet.stellar.org"
+  STELLAR_NETWORK_PASSPHRASE = "Test SDF Network ; September 2015"
+  LCP_PLATFORM_DOMAIN = "contexta.app"
+
+# Run Supabase migrations on each deploy before swapping traffic.
+# (Provide DATABASE_URL as a secret; uses the supabase CLI image in CI, or a
+#  one-off psql release task. Left as a documented hook for production.)
+# [deploy]
+#   release_command = "node dist/scripts/migrate.js"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 200
+    hard_limit = 250
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "10s"
+    method = "get"
+    path = "/healthz"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

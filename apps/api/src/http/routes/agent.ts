@@ -1,0 +1,68 @@
+import { Router } from "express";
+import { requireCapability } from "../middleware/rbac.js";
+import { requireCtx, HttpError } from "../context.js";
+import { proposeSchema } from "../schemas.js";
+
+export function agentRouter(): Router {
+  const router = Router();
+
+  router.get("/decisions", requireCapability("agent.read"), async (req, res, next) => {
+    try {
+      const ctx = requireCtx(req);
+      res.json(await req.container.agent.listDecisions(ctx.tenantId));
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  /**
+   * Ask the agent to evaluate the treasury and produce a proposal. With
+   * `execute: true` (and sufficient role) the proposal is also settled — this is
+   * the path the worker uses on its polling tick when AGENT_DRY_RUN is false.
+   */
+  router.post("/propose", requireCapability("agent.configure"), async (req, res, next) => {
+    try {
+      const ctx = requireCtx(req);
+      const body = proposeSchema.parse(req.body);
+      const tenant = await req.container.repo.getTenant(ctx.tenantId);
+      const decision = await req.container.agent.propose(ctx.tenantId, tenant.country);
+
+      if (body.execute && decision.action !== "noop") {
+        const executed = await req.container.agent.execute(
+          ctx.tenantId,
+          decision,
+          ctx.userId,
+          ctx.isAgent ? "agent" : "user",
+        );
+        res.json(executed);
+        return;
+      }
+      res.json(decision);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  router.post("/decisions/:id/execute", requireCapability("treasury.rebalance"), async (req, res, next) => {
+    try {
+      const ctx = requireCtx(req);
+      const decisions = await req.container.agent.listDecisions(ctx.tenantId);
+      const decision = decisions.find((d) => d.id === req.params.id);
+      if (!decision) throw new HttpError(404, "Decision not found");
+      if (decision.status !== "proposed") {
+        throw new HttpError(409, `Decision already ${decision.status}`);
+      }
+      const executed = await req.container.agent.execute(
+        ctx.tenantId,
+        decision,
+        ctx.userId,
+        ctx.isAgent ? "agent" : "user",
+      );
+      res.json(executed);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  return router;
+}

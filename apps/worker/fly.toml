@@ -1,0 +1,32 @@
+# Fly.io config for the Contexta agent worker (no public HTTP service).
+#
+# Deploy (from the monorepo root):
+#   fly deploy --config apps/worker/fly.toml --dockerfile apps/worker/Dockerfile
+#
+# The worker drives agent rebalances + scheduled payroll by calling the API with
+# the shared INTERNAL_API_SECRET. Keep exactly one machine running so the simple
+# in-process scheduler doesn't double-fire jobs.
+
+app = "contexta-worker"
+primary_region = "gru"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  AGENT_POLL_INTERVAL_SECONDS = "300"
+  AGENT_DRY_RUN = "true"
+  API_BASE_URL = "https://contexta-api.fly.dev"
+  STELLAR_NETWORK = "testnet"
+  STELLAR_RPC_URL = "https://soroban-testnet.stellar.org"
+  STELLAR_HORIZON_URL = "https://horizon-testnet.stellar.org"
+  STELLAR_NETWORK_PASSPHRASE = "Test SDF Network ; September 2015"
+
+# Background worker: no [http_service]. Single always-on machine.
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+
+[processes]
+  worker = "node dist/index.js"
