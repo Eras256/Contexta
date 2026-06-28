@@ -18,7 +18,7 @@ export interface ScheduledTask {
  * worker machine; swap for a distributed queue (e.g. pg-boss) when scaling out.
  */
 export class Scheduler {
-  private timers: NodeJS.Timeout[] = [];
+  private timers: (NodeJS.Timeout | number)[] = [];
   private running = new Set<string>();
   private stopped = false;
 
@@ -38,24 +38,29 @@ export class Scheduler {
         this.logger.debug({ task: task.name, ms: Date.now() - start }, "Task completed");
       }
     };
-    // Kick off after the optional initial delay, then on the interval.
+
     if (task.initialDelayMs && task.initialDelayMs > 0) {
-      this.timers.push(
-        setTimeout(() => {
-          if (this.stopped) return;
-          void tick();
-          this.timers.push(setInterval(tick, task.intervalMs));
-        }, task.initialDelayMs),
-      );
+      const delayTimer = setTimeout(() => {
+        if (this.stopped) return;
+        void tick();
+        const intervalTimer = setInterval(tick, task.intervalMs);
+        this.timers.push(intervalTimer);
+      }, task.initialDelayMs);
+      this.timers.push(delayTimer);
     } else {
+      // Kick off immediately, then on the interval.
       void tick();
-      this.timers.push(setInterval(tick, task.intervalMs));
+      const intervalTimer = setInterval(tick, task.intervalMs);
+      this.timers.push(intervalTimer);
     }
   }
 
   stop(): void {
     this.stopped = true;
-    for (const t of this.timers) clearInterval(t);
+    for (const t of this.timers) {
+      // Node timer objects are safe to pass to both clearTimeout and clearInterval
+      clearTimeout(t as NodeJS.Timeout);
+    }
     this.timers = [];
   }
 }
