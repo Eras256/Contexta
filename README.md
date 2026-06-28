@@ -16,7 +16,7 @@ all code in this monorepo is original.
 
 | Surface | URL |
 | :-- | :-- |
-| Web app (Vercel) | **https://contexta-stellar.vercel.app** |
+| Web app (Vercel) | **https://contextio-stellar.vercel.app** |
 | API (Fly.io · region GRU) | **https://contexta-api.fly.dev** |
 | Client SDK (npm) | **`contextio-sdk`** — `npm i contextio-sdk` |
 | Soroban contracts (testnet) | treasury `CASGAQQVHDF4Q2XTK3QWYHRABYX7JUIO6HCLEOZZR7V3TIMVHMXPTA7I` · payroll `CDXML4PU5RVXQ7DSM7UO5OURKFUJMPGI57PRZCQ3NZTKFGPOIDIOIRCT` |
