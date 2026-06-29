@@ -5,7 +5,7 @@ import { Badge, Card, SectionHeader } from "@/components/ui";
 import { bps } from "@/lib/format";
 import { useT } from "@/lib/i18n";
 
-type Status = "live" | "mock" | "ready";
+type Status = "live" | "mock" | "ready" | "prod";
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
@@ -45,6 +45,7 @@ export default function IntegrationsPage() {
   const [vault, setVault] = useState<LiveVault | null>(null);
   const [blend, setBlend] = useState<BlendVault | null>(null);
   const [anchor, setAnchor] = useState<AnchorInfo | null>(null);
+  const [offramp, setOfframp] = useState<{ loading: boolean; error: string | null }>({ loading: false, error: null });
 
   useEffect(() => {
     let alive = true;
@@ -70,6 +71,25 @@ export default function IntegrationsPage() {
 
   const explorer = (id: string, net: string) =>
     `https://stellar.expert/explorer/${net === "mainnet" ? "public" : "testnet"}/contract/${id}`;
+
+  // Real SEP-24 off-ramp: the API does SEP-10 auth + interactive withdraw and
+  // returns the anchor's hosted page, which we open in a new tab.
+  const startOfframp = async () => {
+    setOfframp({ loading: true, error: null });
+    try {
+      const r = (await fetch(`${API}/api/v1/public/anchor/withdraw?asset=USDC`, { cache: "no-store" }).then((x) =>
+        x.json(),
+      )) as { ok?: boolean; url?: string; error?: string };
+      if (r?.ok && r.url) {
+        window.open(r.url, "_blank", "noopener");
+        setOfframp({ loading: false, error: null });
+      } else {
+        setOfframp({ loading: false, error: r?.error ?? "Off-ramp failed" });
+      }
+    } catch (e) {
+      setOfframp({ loading: false, error: e instanceof Error ? e.message : "Network error" });
+    }
+  };
 
   return (
     <div className="space-y-10">
@@ -164,12 +184,20 @@ export default function IntegrationsPage() {
               <Row k="Protocols" v={<span className="font-mono text-slate-300">{anchor.protocols.join(" · ")}</span>} />
             </div>
           )}
+          <button
+            onClick={() => void startOfframp()}
+            disabled={offramp.loading}
+            className="btn-primary mt-3 self-start px-4 py-2 text-xs disabled:opacity-40"
+          >
+            {offramp.loading ? t("auth.connecting") : t("pages.integrations.offrampCta")}
+          </button>
+          {offramp.error && <p className="mt-2 break-words text-[11px] text-red-400">{offramp.error}</p>}
         </Card>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <IntegrationCard t={t} name={t("pages.integrations.pixName")} body={t("pages.integrations.pixBody")} status="mock" />
-          <IntegrationCard t={t} name={t("pages.integrations.transfersName")} body={t("pages.integrations.transfersBody")} status="mock" />
-          <IntegrationCard t={t} name={t("pages.integrations.brebName")} body={t("pages.integrations.brebBody")} status="mock" />
+          <IntegrationCard t={t} name={t("pages.integrations.pixName")} body={t("pages.integrations.pixBody")} status="prod" />
+          <IntegrationCard t={t} name={t("pages.integrations.transfersName")} body={t("pages.integrations.transfersBody")} status="prod" />
+          <IntegrationCard t={t} name={t("pages.integrations.brebName")} body={t("pages.integrations.brebBody")} status="prod" />
         </div>
       </section>
 
@@ -209,11 +237,12 @@ function Row({ k, v }: { k: string; v: React.ReactNode }) {
   );
 }
 
-const STATUS_TONE: Record<Status, "success" | "warn" | "info"> = { live: "success", mock: "warn", ready: "info" };
+const STATUS_TONE: Record<Status, "success" | "warn" | "info"> = { live: "success", mock: "warn", ready: "info", prod: "info" };
 const STATUS_KEY: Record<Status, string> = {
   live: "pages.integrations.statusLive",
   mock: "pages.integrations.statusMock",
   ready: "pages.integrations.statusReady",
+  prod: "pages.integrations.statusProd",
 };
 
 function IntegrationCard({

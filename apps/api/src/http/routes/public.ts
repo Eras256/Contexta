@@ -140,5 +140,21 @@ export function publicRouter(): Router {
     }
   });
 
+  /**
+   * Start a REAL SEP-24 off-ramp on testnet: SEP-10 auth (challenge → sign →
+   * JWT) + SEP-24 interactive withdraw → the anchor's hosted off-ramp URL. This
+   * is the genuine mechanism that settles to PIX/Bre-B via a licensed anchor in
+   * production. No funds move here — KYC + amount happen on the anchor's page.
+   */
+  router.get("/anchor/withdraw", async (req, res) => {
+    try {
+      const asset = typeof req.query.asset === "string" ? req.query.asset : "USDC";
+      const r = await req.container.anchor.initiateWithdraw(asset);
+      res.json({ ok: true, ...r });
+    } catch (e) {
+      res.status(400).json({ ok: false, error: e instanceof Error ? e.message : String(e) });
+    }
+  });
+
   return router;
 }

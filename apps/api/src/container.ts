@@ -5,6 +5,7 @@ import { Repository } from "./db/repository.js";
 import { DefindexClient } from "./integrations/defindex.js";
 import { BlendClient } from "./integrations/blend.js";
 import { AiAdvisor } from "./integrations/ai.js";
+import { AnchorClient } from "./integrations/anchor.js";
 import { SorobanGateway } from "./integrations/soroban.js";
 import { createOracle, type Oracle } from "./integrations/oracle.js";
 import { AuditService } from "./services/auditService.js";
@@ -28,6 +29,7 @@ export interface Container {
   soroban: SorobanGateway;
   oracle: Oracle;
   ai: AiAdvisor;
+  anchor: AnchorClient;
   audit: AuditService;
   legal: LegalContextService;
   treasury: TreasuryService;
@@ -103,6 +105,15 @@ export function createContainer(): Container {
     logger,
   );
 
+  const anchor = new AnchorClient(
+    {
+      sep24Url: config.ANCHOR_SEP24_URL,
+      signerSecret: config.BLEND_SIGNER_SECRET || config.STELLAR_SERVICE_SECRET || undefined,
+      networkPassphrase: config.STELLAR_NETWORK_PASSPHRASE,
+    },
+    logger,
+  );
+
   const audit = new AuditService(repo);
   const legal = new LegalContextService(repo, logger);
   const treasury = new TreasuryService(repo, defindex, blend, soroban, legal, audit, logger);
@@ -119,6 +130,7 @@ export function createContainer(): Container {
     soroban,
     oracle,
     ai,
+    anchor,
     audit,
     legal,
     treasury,
