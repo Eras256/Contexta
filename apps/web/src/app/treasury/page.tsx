@@ -140,9 +140,18 @@ export default function TreasuryPage() {
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-slate-300">{d.rationale}</p>
-                {d.stellarTxHash && (
-                  <p className="mt-1 font-mono text-xs text-brand">tx {shortHash(d.stellarTxHash, 10, 6)}</p>
-                )}
+                {d.stellarTxHash && !d.stellarTxHash.startsWith("sim:") ? (
+                  <a
+                    href={`https://stellar.expert/explorer/testnet/tx/${d.stellarTxHash}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-1 inline-block font-mono text-xs text-brand hover:underline"
+                  >
+                    tx {shortHash(d.stellarTxHash, 10, 6)} ↗
+                  </a>
+                ) : d.stellarTxHash ? (
+                  <p className="mt-1 font-mono text-xs text-slate-500">{d.stellarTxHash}</p>
+                ) : null}
               </div>
             ))}
             {recent.length === 0 && (
