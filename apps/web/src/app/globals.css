@@ -71,9 +71,10 @@
   .animate-fade-up {
     animation: fade-up 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+  /* Opacity-only so it never clobbers an element's own transform (centering). */
   @keyframes glow-pulse {
-    0%, 100% { opacity: 0.5; transform: translate(-50%, 0) scale(1); }
-    50%      { opacity: 0.9; transform: translate(-50%, 0) scale(1.08); }
+    0%, 100% { opacity: 0.4; }
+    50%      { opacity: 0.85; }
   }
   .animate-glow {
     animation: glow-pulse 7s ease-in-out infinite;

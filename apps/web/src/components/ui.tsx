@@ -16,15 +16,20 @@ export function Stat({
   label,
   value,
   sub,
+  accent = false,
 }: {
   label: string;
   value: ReactNode;
   sub?: ReactNode;
+  /** Emphasize as the primary KPI (larger value). */
+  accent?: boolean;
 }) {
   return (
     <div>
       <div className="label">{label}</div>
-      <div className="stat-value mt-1">{value}</div>
+      <div className={`mt-1 font-semibold tracking-tight text-white ${accent ? "text-3xl" : "stat-value"}`}>
+        {value}
+      </div>
       {sub ? <div className="mt-1 text-xs text-slate-400">{sub}</div> : null}
     </div>
   );

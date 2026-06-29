@@ -60,10 +60,13 @@ export default function TreasuryPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card><Stat label={tr("pages.treasury.statTotal")} value={usdBase(t.totalBaseUnits)} sub={tr("pages.treasury.statTotalSub")} /></Card>
-        <Card><Stat label={tr("pages.treasury.statReady")} value={usdBase(t.liquidBaseUnits)} sub={tr("pages.treasury.statReadySub")} /></Card>
-        <Card><Stat label={tr("pages.treasury.statEarning")} value={usdBase(t.yieldBaseUnits)} sub={`${bps(weightedApy)} APY`} /></Card>
-        <Card><Stat label={tr("pages.treasury.statShare")} value={bps(t.yieldShareBps)} sub={tr("pages.treasury.statShareSub")} /></Card>
+        <Card className="relative overflow-hidden border-brand/25 bg-gradient-to-br from-brand/[0.08] via-transparent to-transparent transition hover:border-brand/40">
+          <div className="animate-glow pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-brand/20 blur-2xl" />
+          <Stat accent label={tr("pages.treasury.statTotal")} value={usdBase(t.totalBaseUnits)} sub={tr("pages.treasury.statTotalSub")} />
+        </Card>
+        <Card className="transition hover:border-white/20"><Stat label={tr("pages.treasury.statReady")} value={usdBase(t.liquidBaseUnits)} sub={tr("pages.treasury.statReadySub")} /></Card>
+        <Card className="transition hover:border-white/20"><Stat label={tr("pages.treasury.statEarning")} value={usdBase(t.yieldBaseUnits)} sub={`${bps(weightedApy)} APY`} /></Card>
+        <Card className="transition hover:border-white/20"><Stat label={tr("pages.treasury.statShare")} value={bps(t.yieldShareBps)} sub={tr("pages.treasury.statShareSub")} /></Card>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
