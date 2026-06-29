@@ -178,6 +178,13 @@ export class PayrollService {
 
     if (input.dryRun) return run;
 
+    // Real per-employee USDC payouts: settle salaries on-chain to each employee's
+    // Stellar wallet (testnet demo-scaled 1:100 to stay within faucet funds).
+    const isStellar = (a: string) => /^G[A-Z2-7]{55}$/.test(a);
+    const payouts = lines
+      .filter((l) => isStellar(l.destination))
+      .map((l) => ({ destination: l.destination, amount: (Number(l.amount) / 100).toFixed(2) }));
+
     const onchain = await this.soroban.executePayrollRun({
       tenantId: input.tenantId,
       runId: run.id,
@@ -185,16 +192,20 @@ export class PayrollService {
       asset: schedule.asset,
       employeeCount: lines.length,
       binding,
+      payouts,
     });
     if (!onchain.ok) {
       await this.repo.updatePayrollRun(run.id, { status: "failed" });
       throw onchain.error;
     }
 
+    // The real-money tx (USDC payout) is the most meaningful for the feed; fall
+    // back to the contract execute_run tx when there were no Stellar-wallet lines.
+    const settledTxHash = onchain.value.payoutTxHash ?? onchain.value.txHash;
     const executedAt = new Date().toISOString();
     await this.repo.updatePayrollRun(run.id, {
       status: "completed",
-      stellarTxHash: onchain.value.txHash,
+      stellarTxHash: settledTxHash,
       executedAt,
     });
     await this.audit.record({
@@ -202,15 +213,21 @@ export class PayrollService {
       actorId: input.actorId,
       actorType: input.actorType,
       action: "payroll.run.executed",
-      detail: { runId: run.id, total: run.totalAmount, txHash: onchain.value.txHash },
+      detail: {
+        runId: run.id,
+        total: run.totalAmount,
+        payoutTxHash: onchain.value.payoutTxHash ?? null,
+        recordTxHash: onchain.value.txHash,
+        paid: payouts.length,
+      },
       legalContextId: binding.contextId,
     });
 
     this.logger.info(
-      { tenantId: input.tenantId, runId: run.id, txHash: onchain.value.txHash },
+      { tenantId: input.tenantId, runId: run.id, payoutTxHash: onchain.value.payoutTxHash, recordTxHash: onchain.value.txHash, paid: payouts.length },
       "Payroll run executed",
     );
-    return { ...run, status: "completed", stellarTxHash: onchain.value.txHash, executedAt };
+    return { ...run, status: "completed", stellarTxHash: settledTxHash, executedAt };
   }
 
   listRuns(tenantId: string): Promise<PayrollRun[]> {

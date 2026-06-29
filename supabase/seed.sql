@@ -62,9 +62,9 @@ on conflict do nothing;
 
 -- Employees
 insert into public.payroll_employees (id, tenant_id, full_name, email, country, wallet_address, bank_reference, payout_asset, preferred_rail, salary_amount) values
-  ('00000000-0000-4000-8000-000000000030','00000000-0000-4000-8000-000000000001','Ana Souza','ana@acme.example','BR',null,'ana.souza@pix.example','BRL','PIX','4500.00'),
-  ('00000000-0000-4000-8000-000000000031','00000000-0000-4000-8000-000000000001','Bruno Díaz','bruno@acme.example','AR','GBRUNOEXAMPLE',null,'USDC','STELLAR','3800.00'),
-  ('00000000-0000-4000-8000-000000000032','00000000-0000-4000-8000-000000000001','Carolina Gómez','caro@acme.example','CO',null,'bre-b:caro.gomez','COP','BRE_B','3200.00')
+  ('00000000-0000-4000-8000-000000000030','00000000-0000-4000-8000-000000000001','Ana Souza','ana@acme.example','BR','GA6NLHV2M4DEYN6W4EFAL5Y2SBN4VRURLXYVWUGB4GOZFNA3DGVACD37','ana.souza@pix.example','USDC','PIX','4500.00'),
+  ('00000000-0000-4000-8000-000000000031','00000000-0000-4000-8000-000000000001','Bruno Díaz','bruno@acme.example','AR','GAA7WTDM5U654ANX7EUFPEVZIPVDZUVTLZCK4ZVMFQMB4AS3NNOR44QU',null,'USDC','STELLAR','3800.00'),
+  ('00000000-0000-4000-8000-000000000032','00000000-0000-4000-8000-000000000001','Carolina Gómez','caro@acme.example','CO','GC6HMXXYURNXEFU5K75JQM25CQQ3HP2XSXSNRAMFK4GJRZDCEZVXEMUY','bre-b:caro.gomez','USDC','BRE_B','3200.00')
 on conflict (id) do nothing;
 
 -- Schedule

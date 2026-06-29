@@ -83,6 +83,10 @@ export function createContainer(): Container {
       treasuryContractId: config.TREASURY_CONTRACT_ID || undefined,
       payrollContractId: config.PAYROLL_CONTRACT_ID || undefined,
       serviceSecret: config.STELLAR_SERVICE_SECRET || undefined,
+      // Payroll payouts are funded by the account that holds the USDC (the agent
+      // wallet, BLEND_SIGNER_SECRET); falls back to the service key.
+      payoutSecret: config.BLEND_SIGNER_SECRET || config.STELLAR_SERVICE_SECRET || undefined,
+      usdcIssuer: config.USDC_ISSUER || undefined,
     },
     logger,
   );

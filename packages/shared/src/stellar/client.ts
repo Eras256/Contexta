@@ -1,8 +1,11 @@
 import {
   Address,
+  Asset,
   Contract,
+  Horizon,
   Keypair,
   nativeToScVal,
+  Operation,
   rpc,
   scValToNative,
   TransactionBuilder,
@@ -143,6 +146,37 @@ export class StellarClient {
       returnValue: confirmed.returnValue ? scValToNative(confirmed.returnValue) : null,
       ledger: confirmed.ledger,
     };
+  }
+
+  /**
+   * Send one or more classic asset payments in a single transaction via Horizon
+   * (used for real payroll payouts — e.g. USDC to each employee's wallet).
+   * `amount` is a decimal string (e.g. "45.0000000"). Returns the tx hash.
+   */
+  async sendPayments(
+    sourceSecret: string,
+    payments: { destination: string; assetCode: string; assetIssuer: string; amount: string }[],
+  ): Promise<{ txHash: string }> {
+    const horizon = new Horizon.Server(this.config.horizonUrl);
+    const keypair = Keypair.fromSecret(sourceSecret);
+    const account = await horizon.loadAccount(keypair.publicKey());
+    const builder = new TransactionBuilder(account, {
+      fee: (Number(BASE_FEE) * Math.max(1, payments.length)).toString(),
+      networkPassphrase: this.config.networkPassphrase,
+    });
+    for (const p of payments) {
+      builder.addOperation(
+        Operation.payment({
+          destination: p.destination,
+          asset: new Asset(p.assetCode, p.assetIssuer),
+          amount: p.amount,
+        }),
+      );
+    }
+    const tx = builder.setTimeout(60).build();
+    tx.sign(keypair);
+    const res = await horizon.submitTransaction(tx);
+    return { txHash: res.hash };
   }
 
   /**

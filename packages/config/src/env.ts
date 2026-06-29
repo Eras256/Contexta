@@ -63,6 +63,8 @@ export const serverEnvSchema = baseEnvSchema.extend({
   TREASURY_CONTRACT_ID: z.string().optional().or(z.literal("")),
   PAYROLL_CONTRACT_ID: z.string().optional().or(z.literal("")),
   USDC_CONTRACT_ID: z.string().optional().or(z.literal("")),
+  /** Classic issuer (G…) of the USDC used for real payroll payouts. */
+  USDC_ISSUER: z.string().optional().or(z.literal("")),
 
   DEFINDEX_API_URL: z.string().url().default("https://api.defindex.io"),
   DEFINDEX_API_KEY: z.string().optional().or(z.literal("")),

@@ -12,6 +12,10 @@ export interface SorobanConfig {
   treasuryContractId?: string;
   payrollContractId?: string;
   serviceSecret?: string;
+  /** Stellar secret that funds real payroll payouts (the account holding USDC). */
+  payoutSecret?: string;
+  /** Classic issuer (G…) of the USDC used for payouts. */
+  usdcIssuer?: string;
 }
 
 export interface RecordFlowParams {
@@ -29,6 +33,8 @@ export interface PayrollRunParams {
   asset: string;
   employeeCount: number;
   binding: LcpBinding;
+  /** Real per-employee USDC payouts (decimal amount, e.g. "45.00"). */
+  payouts?: { destination: string; amount: string }[];
 }
 
 export class SorobanGateway {
@@ -88,14 +94,34 @@ export class SorobanGateway {
     }
   }
 
-  async executePayrollRun(params: PayrollRunParams): Promise<Result<{ txHash: string }>> {
+  async executePayrollRun(params: PayrollRunParams): Promise<Result<{ txHash: string; payoutTxHash?: string }>> {
     if (!this.enabled || !this.config.payrollContractId) {
       return ok({ txHash: this.simulatedHash("payroll", params.runId) });
     }
     const { StellarClient, Keypair } = stellar;
     try {
-      // The agent triggers runs as the admin (service) account; the contract
-      // distinguishes agent vs operator callers and records the provenance.
+      // 1. Real USDC payouts to each employee's Stellar wallet — the actual money.
+      let payoutTxHash: string | undefined;
+      const payouts = params.payouts ?? [];
+      if (payouts.length > 0 && this.config.payoutSecret && this.config.usdcIssuer) {
+        const sent = await this.client.sendPayments(
+          this.config.payoutSecret,
+          payouts.map((p) => ({
+            destination: p.destination,
+            assetCode: "USDC",
+            assetIssuer: this.config.usdcIssuer as string,
+            amount: p.amount,
+          })),
+        );
+        payoutTxHash = sent.txHash;
+        this.logger.info(
+          { runId: params.runId, payoutTxHash, count: payouts.length },
+          "Payroll USDC payouts sent on-chain",
+        );
+      }
+
+      // 2. Record the run on-chain (LCP-bound). The agent triggers as the admin
+      // (service) account; the contract records agent vs operator provenance.
       const caller = Keypair.fromSecret(this.config.serviceSecret!).publicKey();
       const res = await this.client.invoke({
         contractId: this.config.payrollContractId,
@@ -111,7 +137,7 @@ export class SorobanGateway {
           StellarClient.toScVal(params.binding.hash, { type: "string" }),
         ],
       });
-      return ok({ txHash: res.txHash });
+      return ok({ txHash: res.txHash, payoutTxHash });
     } catch (e) {
       return err(e instanceof Error ? e : new Error(String(e)));
     }
