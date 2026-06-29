@@ -26,10 +26,8 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-ink-950/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-brand-500 text-sm font-bold text-ink-950">
-            Cx
-          </span>
+        <Link href="/" className="flex items-center gap-2.5">
+          <img src="/logo-icon.svg" className="h-8 w-8" alt="Contextio Logo" />
           <span className="text-sm font-semibold tracking-tight text-white">
             Contextio
             <span className="ml-2 hidden text-xs font-normal text-slate-400 sm:inline">

@@ -12,6 +12,12 @@ export const treasuryConfigSchema = z.object({
   maxYieldBps: z.number().int().min(0).max(10_000),
   countryLimitsBps: z.record(country, z.number().int().min(0).max(10_000)).default({}),
   volatilitySensitivity: z.number().int().min(0).max(100),
+  agentEnabled: z.boolean().default(true),
+});
+
+/** Toggle the autonomous agent on/off for the tenant (dashboard switch). */
+export const agentToggleSchema = z.object({
+  enabled: z.boolean(),
 });
 
 export const rebalanceSchema = z.object({

@@ -95,6 +95,29 @@ export class TreasuryService {
   }
 
   /**
+   * Toggle the autonomous agent on/off for a tenant (dashboard switch). Persists
+   * `agentEnabled` on the treasury config, creating a default config if none
+   * exists yet. Manual agent runs are unaffected by this flag.
+   */
+  async setAgentEnabled(tenantId: string, enabled: boolean, actorId: string | null): Promise<TreasuryConfig> {
+    const existing = await this.repo.getTreasuryConfig(tenantId);
+    const saved = await this.saveConfig(
+      {
+        id: existing?.id,
+        tenantId,
+        minLiquidityBaseUnits: existing?.minLiquidityBaseUnits ?? "0",
+        maxYieldBps: existing?.maxYieldBps ?? 0,
+        countryLimitsBps: existing?.countryLimitsBps ?? {},
+        volatilitySensitivity: existing?.volatilitySensitivity ?? 50,
+        agentEnabled: enabled,
+      },
+      actorId,
+    );
+    this.logger.info({ tenantId, enabled }, "Agent autonomy toggled");
+    return saved;
+  }
+
+  /**
    * Execute a rebalance: move `amount` from one strategy bucket to another.
    * Enforces the legal-context binding, performs the integration call
    * (DeFindex/Blend), records the on-chain treasury event, and updates positions.

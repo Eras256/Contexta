@@ -30,6 +30,7 @@ export const treasuryConfigAcme: TreasuryConfig = {
   maxYieldBps: 6000, // up to 60% in yield
   countryLimitsBps: { BR: 5000, AR: 3000, CO: 3000 },
   volatilitySensitivity: 60,
+  agentEnabled: true,
   updatedAt: "2026-01-01T00:00:00.000Z",
 };
 

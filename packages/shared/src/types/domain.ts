@@ -55,6 +55,9 @@ export interface TreasuryConfig {
   countryLimitsBps: Partial<Record<Country, number>>;
   /** Agent sensitivity to FX volatility (0–100). Higher = more conservative. */
   volatilitySensitivity: number;
+  /** Whether the autonomous agent is allowed to act for this tenant (the
+   *  dashboard activate/deactivate toggle). Manual runs are unaffected. */
+  agentEnabled: boolean;
   updatedAt: string;
 }
 

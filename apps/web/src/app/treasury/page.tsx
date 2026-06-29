@@ -3,6 +3,7 @@
 import { AllocationBar, Badge, Card, DataBadge, SectionHeader, Stat } from "@/components/ui";
 import { bps, shortHash, usdBase, localDateTime } from "@/lib/format";
 import { api, type Decision, type TreasurySnapshot } from "@/lib/api";
+import { TreasuryControls } from "@/components/TreasuryControls";
 import { useLiveData } from "@/lib/useLiveData";
 import { useT } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
@@ -21,7 +22,7 @@ const PLACE_KEY: Record<string, string> = {
 
 export default function TreasuryPage() {
   const tr = useT();
-  const { accessToken, connect, connecting } = useAuth();
+  const { accessToken, tenantId, connect, connecting } = useAuth();
   const { data: snap, live, loading } = useLiveData(api.treasury, EMPTY, {
     realtimeTable: "treasury_positions",
   });
@@ -109,6 +110,8 @@ export default function TreasuryPage() {
           </div>
         </Card>
       </div>
+
+      {tenantId && <TreasuryControls auth={{ accessToken, tenantId }} config={snap.config} />}
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card>

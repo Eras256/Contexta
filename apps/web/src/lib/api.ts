@@ -16,6 +16,7 @@ export interface TreasurySnapshot {
     maxYieldBps: number;
     volatilitySensitivity: number;
     countryLimitsBps: Record<string, number>;
+    agentEnabled: boolean;
   } | null;
   positions: {
     asset: string;
@@ -98,6 +99,48 @@ export const api = {
         ...(ai?.model ? { aiModel: ai.model } : {}),
         ...(ai?.apiKey ? { aiApiKey: ai.apiKey } : {}),
       }),
+    }),
+
+  // ── Manual treasury controls (dashboard) ──────────────────────────────────
+  /** Persist the risk config (min liquidity, max-yield %, FX sensitivity). */
+  saveConfig: (
+    auth: ApiAuth,
+    cfg: {
+      minLiquidityBaseUnits: string;
+      maxYieldBps: number;
+      volatilitySensitivity: number;
+      countryLimitsBps?: Record<string, number>;
+      agentEnabled?: boolean;
+    },
+  ) => request<unknown>("/treasury/config", auth, { method: "PUT", body: JSON.stringify(cfg) }),
+
+  /** Move capital between liquidity and a yield venue — real on-chain rebalance. */
+  rebalance: (
+    auth: ApiAuth,
+    move: {
+      from: "liquidity" | "defindex_vault" | "blend_pool";
+      to: "liquidity" | "defindex_vault" | "blend_pool";
+      asset: string;
+      amountBaseUnits: string;
+      strategyRef: string;
+    },
+  ) => request<{ txHash: string; legalContextHash: string }>("/treasury/rebalance", auth, {
+    method: "POST",
+    body: JSON.stringify(move),
+  }),
+
+  /** Activate / deactivate the autonomous agent for this tenant. */
+  toggleAgent: (auth: ApiAuth, enabled: boolean) =>
+    request<{ agentEnabled: boolean }>("/treasury/agent", auth, {
+      method: "POST",
+      body: JSON.stringify({ enabled }),
+    }),
+
+  /** Create / register a yield vault (DeFindex factory; returns the live vault). */
+  createVault: (auth: ApiAuth, vault: { name: string; asset: string; strategy: string }) =>
+    request<{ vaultId?: string; name?: string }>("/integrations/defindex/vaults", auth, {
+      method: "POST",
+      body: JSON.stringify(vault),
     }),
 };
 

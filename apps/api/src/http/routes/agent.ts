@@ -1,7 +1,18 @@
-import { Router } from "express";
+import { Router, type Request } from "express";
 import { requireCapability } from "../middleware/rbac.js";
 import { requireCtx, HttpError } from "../context.js";
 import { proposeSchema } from "../schemas.js";
+
+/**
+ * Autonomous runs (the worker, `ctx.isAgent`) are suppressed when the tenant
+ * has flipped the dashboard agent toggle off. Manual runs (a signed-in user)
+ * always proceed — the toggle governs autonomy, not the human override.
+ */
+async function autonomyDisabled(req: Request, tenantId: string, isAgent: boolean): Promise<boolean> {
+  if (!isAgent) return false;
+  const cfg = await req.container.repo.getTreasuryConfig(tenantId);
+  return Boolean(cfg && cfg.agentEnabled === false);
+}
 
 export function agentRouter(): Router {
   const router = Router();
@@ -23,6 +34,10 @@ export function agentRouter(): Router {
   router.post("/propose", requireCapability("agent.configure"), async (req, res, next) => {
     try {
       const ctx = requireCtx(req);
+      if (await autonomyDisabled(req, ctx.tenantId, ctx.isAgent)) {
+        res.json({ skipped: true, reason: "agent_disabled" });
+        return;
+      }
       const body = proposeSchema.parse(req.body);
       const tenant = await req.container.repo.getTenant(ctx.tenantId);
       const decision = await req.container.agent.propose(ctx.tenantId, tenant.country, {
@@ -55,6 +70,10 @@ export function agentRouter(): Router {
   router.post("/yield-cycle", requireCapability("treasury.rebalance"), async (req, res, next) => {
     try {
       const ctx = requireCtx(req);
+      if (await autonomyDisabled(req, ctx.tenantId, ctx.isAgent)) {
+        res.json({ skipped: true, reason: "agent_disabled" });
+        return;
+      }
       const decision = await req.container.agent.runYieldCycle(ctx.tenantId);
       res.json(decision ?? { skipped: true });
     } catch (e) {
@@ -66,6 +85,10 @@ export function agentRouter(): Router {
   router.post("/blend-cycle", requireCapability("treasury.rebalance"), async (req, res, next) => {
     try {
       const ctx = requireCtx(req);
+      if (await autonomyDisabled(req, ctx.tenantId, ctx.isAgent)) {
+        res.json({ skipped: true, reason: "agent_disabled" });
+        return;
+      }
       const decision = await req.container.agent.runBlendCycle(ctx.tenantId);
       res.json(decision ?? { skipped: true });
     } catch (e) {

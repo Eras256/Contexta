@@ -121,6 +121,7 @@ export class Repository {
         max_yield_bps: config.maxYieldBps,
         country_limits_bps: config.countryLimitsBps,
         volatility_sensitivity: config.volatilitySensitivity,
+        agent_enabled: config.agentEnabled,
         updated_at: new Date().toISOString(),
       })
       .select("*")
@@ -434,6 +435,7 @@ function mapTreasuryConfig(r: any): TreasuryConfig {
     maxYieldBps: r.max_yield_bps,
     countryLimitsBps: r.country_limits_bps ?? {},
     volatilitySensitivity: r.volatility_sensitivity,
+    agentEnabled: r.agent_enabled ?? true,
     updatedAt: r.updated_at,
   };
 }

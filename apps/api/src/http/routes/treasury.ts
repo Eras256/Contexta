@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireCapability } from "../middleware/rbac.js";
 import { requireCtx } from "../context.js";
-import { rebalanceSchema, treasuryConfigSchema } from "../schemas.js";
+import { agentToggleSchema, rebalanceSchema, treasuryConfigSchema } from "../schemas.js";
 
 export function treasuryRouter(): Router {
   const router = Router();
@@ -24,6 +24,18 @@ export function treasuryRouter(): Router {
         ctx.userId,
       );
       res.json(saved);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Activate / deactivate the autonomous agent for this tenant (dashboard toggle).
+  router.post("/agent", requireCapability("treasury.configure"), async (req, res, next) => {
+    try {
+      const ctx = requireCtx(req);
+      const { enabled } = agentToggleSchema.parse(req.body);
+      const saved = await req.container.treasury.setAgentEnabled(ctx.tenantId, enabled, ctx.userId);
+      res.json({ agentEnabled: saved.agentEnabled });
     } catch (e) {
       next(e);
     }
