@@ -80,7 +80,18 @@ async function request<T>(path: string, auth: ApiAuth, init?: RequestInit): Prom
     },
     cache: "no-store",
   });
-  if (!res.ok) throw new Error(`API ${path} -> ${res.status}`);
+  if (!res.ok) {
+    // Surface the API's real reason (the generic 500 handler hides it, but our
+    // operational routes return { error } / { message }).
+    let detail = `${res.status}`;
+    try {
+      const j = (await res.json()) as { error?: string; message?: string; issues?: { message: string }[] };
+      detail = j.error || j.message || j.issues?.map((i) => i.message).join("; ") || detail;
+    } catch {
+      /* non-JSON body */
+    }
+    throw new Error(detail);
+  }
   return (await res.json()) as T;
 }
 
@@ -136,10 +147,16 @@ export const api = {
       body: JSON.stringify({ enabled }),
     }),
 
-  /** Step 1 of a self-custody move: get an unsigned Blend tx for the user to sign. */
+  /** Step 1 of a self-custody move: get an unsigned tx for the user to sign. */
   prepareMove: (
     auth: ApiAuth,
-    body: { direction: "supply" | "withdraw"; asset: "XLM" | "USDC"; amountBaseUnits: string; address: string },
+    body: {
+      venue: "blend" | "defindex";
+      direction: "supply" | "withdraw";
+      asset: "XLM" | "USDC";
+      amountBaseUnits: string;
+      address: string;
+    },
   ) => request<{ xdr: string }>("/treasury/prepare", auth, { method: "POST", body: JSON.stringify(body) }),
 
   /** Step 2: submit the user-signed envelope. */

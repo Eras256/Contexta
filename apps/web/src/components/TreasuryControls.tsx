@@ -87,52 +87,56 @@ const toBase = (usd: string) => {
   return BigInt(Math.round(n * 1e7)).toString();
 };
 
+const NETWORK = (process.env.NEXT_PUBLIC_STELLAR_NETWORK ?? "testnet").toLowerCase();
+const txUrl = (hash: string) =>
+  `https://stellar.expert/explorer/${NETWORK === "mainnet" ? "public" : "testnet"}/tx/${hash}`;
+
+function TxLink({ hash }: { hash: string }) {
+  return (
+    <a href={txUrl(hash)} target="_blank" rel="noreferrer" className="font-mono text-brand hover:underline">
+      tx {hash.slice(0, 8)}…{hash.slice(-6)} ↗
+    </a>
+  );
+}
+
 function RebalancePanel({ auth, address }: { auth: ApiAuth; address: string | null }) {
   const [amount, setAmount] = useState("1");
   const [venue, setVenue] = useState<"blend" | "defindex">("blend");
   const [asset, setAsset] = useState<"XLM" | "USDC">("XLM");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [tx, setTx] = useState<string | null>(null);
 
-  const freighter = venue === "blend";
   const selectCls =
     "mt-1 w-full rounded-lg border border-white/15 bg-ink-900 px-2.5 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand";
+  const effectiveAsset: "XLM" | "USDC" = venue === "defindex" ? "XLM" : asset;
 
   const move = async (direction: "in" | "out") => {
     const amountBaseUnits = toBase(amount);
     if (!amountBaseUnits) return setMsg("Enter a positive amount.");
-    if (freighter && !address) return setMsg("Connect a wallet first.");
+    if (!address) return setMsg("Connect a wallet first.");
     if (busy) return;
     setBusy(true);
     setMsg(null);
+    setTx(null);
     try {
-      if (freighter && address) {
-        // Self-custody: build the tx → user signs in Freighter → submit.
-        setMsg("Preparing transaction…");
-        const { xdr } = await api.prepareMove(auth, {
-          direction: direction === "in" ? "supply" : "withdraw",
-          asset,
-          amountBaseUnits,
-          address,
-        });
-        setMsg("Approve in your wallet…");
-        const signed = await signWalletTransaction(xdr, address);
-        setMsg("Submitting…");
-        const r = await api.submitMove(auth, signed);
-        setMsg(`Signed by you · tx ${r.txHash.slice(0, 8)}…`);
-      } else {
-        // DeFindex: executed by the agent wallet (XLM vault).
-        const r = await api.rebalance(auth, {
-          from: direction === "in" ? "liquidity" : "defindex_vault",
-          to: direction === "in" ? "defindex_vault" : "liquidity",
-          asset: "XLM",
-          amountBaseUnits,
-          strategyRef: "defindex",
-        });
-        setMsg(`Settled (agent) · tx ${r.txHash.slice(0, 8)}…`);
-      }
+      // Self-custody everywhere: build the tx → user signs in Freighter → submit.
+      setMsg("Preparing transaction…");
+      const { xdr } = await api.prepareMove(auth, {
+        venue,
+        direction: direction === "in" ? "supply" : "withdraw",
+        asset: effectiveAsset,
+        amountBaseUnits,
+        address,
+      });
+      setMsg("Approve in your wallet…");
+      const signed = await signWalletTransaction(xdr, address);
+      setMsg("Submitting…");
+      const r = await api.submitMove(auth, signed);
+      setTx(r.txHash);
+      setMsg("Signed by you — settled on-chain:");
     } catch (e) {
-      const m = e instanceof Error ? e.message.replace(/^API[^:]*:\s*/, "") : String(e);
+      const m = e instanceof Error ? e.message : String(e);
       setMsg(/declin|reject|cancel/i.test(m) ? "Signature cancelled." : m);
     } finally {
       setBusy(false);
@@ -142,19 +146,17 @@ function RebalancePanel({ auth, address }: { auth: ApiAuth; address: string | nu
   return (
     <div className="rounded-xl border border-white/10 bg-ink-900/40 p-4">
       <p className="text-sm font-medium text-white">Move capital</p>
-      <p className="mt-0.5 text-xs text-slate-500">
-        {freighter ? "You sign with your own wallet — self-custody." : "Executed by the agent wallet."}
-      </p>
+      <p className="mt-0.5 text-xs text-slate-500">You sign with your own wallet — self-custody.</p>
 
       <label className="mt-3 block text-[11px] text-slate-400">
         Venue
         <select value={venue} onChange={(e) => setVenue(e.target.value as typeof venue)} className={selectCls}>
-          <option value="blend">Blend · self-custody (Freighter)</option>
-          <option value="defindex">DeFindex · agent-executed</option>
+          <option value="blend">Blend · lending</option>
+          <option value="defindex">DeFindex · XLM vault</option>
         </select>
       </label>
 
-      {freighter && (
+      {venue === "blend" && (
         <label className="mt-2 block text-[11px] text-slate-400">
           Asset
           <select value={asset} onChange={(e) => setAsset(e.target.value as typeof asset)} className={selectCls}>
@@ -165,7 +167,7 @@ function RebalancePanel({ auth, address }: { auth: ApiAuth; address: string | nu
       )}
 
       <label className="mt-2 block text-[11px] text-slate-400">
-        Amount ({freighter ? asset : "XLM"})
+        Amount ({effectiveAsset})
         <input
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
@@ -182,7 +184,12 @@ function RebalancePanel({ auth, address }: { auth: ApiAuth; address: string | nu
           {busy ? "…" : "Retirar capital"}
         </button>
       </div>
-      {msg && <p className="mt-2 break-words text-[11px] text-slate-400">{msg}</p>}
+      {(msg || tx) && (
+        <p className="mt-2 flex flex-wrap items-center gap-1.5 break-words text-[11px] text-slate-400">
+          <span>{msg}</span>
+          {tx && <TxLink hash={tx} />}
+        </p>
+      )}
     </div>
   );
 }

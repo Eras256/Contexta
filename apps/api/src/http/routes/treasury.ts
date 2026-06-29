@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireCapability } from "../middleware/rbac.js";
-import { requireCtx, HttpError } from "../context.js";
+import { requireCtx } from "../context.js";
 import {
   agentToggleSchema,
   prepareMoveSchema,
@@ -63,14 +63,30 @@ export function treasuryRouter(): Router {
     }
   });
 
-  // ── Self-custody (user-signed) Blend move ────────────────────────────────
+  // ── Self-custody (user-signed) move ──────────────────────────────────────
   // 1) Build an unsigned tx the user signs in their own wallet (Freighter).
   router.post("/prepare", requireCapability("treasury.rebalance"), async (req, res, next) => {
     try {
       requireCtx(req);
       const b = prepareMoveSchema.parse(req.body);
-      if (!req.container.blend.live) throw new HttpError(400, "Blend is not live; cannot prepare a self-custody move.");
-      const xdr = await req.container.blend.buildRequestXdr(b.address, b.direction, b.asset, b.amountBaseUnits);
+      let xdr: string;
+      try {
+        if (b.venue === "defindex") {
+          if (!req.container.defindex.live) throw new Error("DeFindex is not live.");
+          xdr = await req.container.defindex.buildUserXdr(
+            b.address,
+            b.direction === "supply" ? "deposit" : "withdraw",
+            b.amountBaseUnits,
+          );
+        } else {
+          if (!req.container.blend.live) throw new Error("Blend is not live.");
+          xdr = await req.container.blend.buildRequestXdr(b.address, b.direction, b.asset, b.amountBaseUnits);
+        }
+      } catch (opErr) {
+        // Surface the on-chain/upstream reason (the generic handler hides it).
+        res.status(400).json({ error: opErr instanceof Error ? opErr.message : String(opErr) });
+        return;
+      }
       res.json({ xdr });
     } catch (e) {
       next(e);
@@ -83,16 +99,23 @@ export function treasuryRouter(): Router {
       const ctx = requireCtx(req);
       const { signedXdr } = submitMoveSchema.parse(req.body);
       const binding = await req.container.legal.bindForAction(ctx.tenantId, ["treasury-management"]);
-      const r = await req.container.blend.submitSignedXdr(signedXdr);
+      let txHash: string;
+      try {
+        const r = await req.container.blend.submitSignedXdr(signedXdr);
+        txHash = r.txHash;
+      } catch (opErr) {
+        res.status(400).json({ error: opErr instanceof Error ? opErr.message : String(opErr) });
+        return;
+      }
       await req.container.audit.record({
         tenantId: ctx.tenantId,
         actorId: ctx.userId,
         actorType: "user",
         action: "treasury.rebalanced",
-        detail: { txHash: r.txHash, selfCustody: true },
+        detail: { txHash, selfCustody: true },
         legalContextId: binding.contextId,
       });
-      res.json({ txHash: r.txHash, legalContextHash: binding.hash });
+      res.json({ txHash, legalContextHash: binding.hash });
     } catch (e) {
       next(e);
     }

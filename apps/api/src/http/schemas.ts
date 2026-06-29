@@ -20,10 +20,11 @@ export const agentToggleSchema = z.object({
   enabled: z.boolean(),
 });
 
-/** Build an unsigned Blend tx for the user to sign in their own wallet (self-custody). */
+/** Build an unsigned tx for the user to sign in their own wallet (self-custody). */
 export const prepareMoveSchema = z.object({
+  venue: z.enum(["blend", "defindex"]).default("blend"),
   direction: z.enum(["supply", "withdraw"]),
-  asset: z.enum(["XLM", "USDC"]),
+  asset: z.enum(["XLM", "USDC"]).default("XLM"),
   amountBaseUnits: z.string().regex(/^\d+$/u),
   address: z.string().regex(/^G[A-Z2-7]{55}$/u, "Expected a Stellar public key (G...)"),
 });

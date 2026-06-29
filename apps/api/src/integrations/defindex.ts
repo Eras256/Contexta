@@ -190,6 +190,26 @@ export class DefindexClient {
     };
   }
 
+  /**
+   * Build an UNSIGNED DeFindex deposit/withdraw tx whose `caller` is the user's
+   * own wallet — the self-custody path. The frontend signs it with the user's
+   * wallet (Freighter); we submit the signed envelope via Soroban RPC. Moves the
+   * user's own funds, not the platform's.
+   */
+  async buildUserXdr(
+    userAddress: string,
+    direction: "deposit" | "withdraw",
+    amountBaseUnits: string,
+  ): Promise<string> {
+    if (!this.live || !this.config.vaultId) throw new Error("DeFindex vault not live");
+    const body =
+      direction === "deposit"
+        ? { amounts: [Number(amountBaseUnits)], caller: userAddress, invest: true, slippageBps: 50 }
+        : { amounts: [Number(amountBaseUnits)], caller: userAddress };
+    const { xdr } = await this.request<{ xdr: string }>("POST", `/vault/${this.config.vaultId}/${direction}`, body);
+    return xdr;
+  }
+
   /** Get unsigned XDR from DeFindex, sign locally, submit via /send. */
   private async signedTx(path: string, body: unknown): Promise<{ tvlBaseUnits: string; txHash?: string }> {
     if (!this.canWrite) throw new Error("DeFindex writes disabled (missing vault/signer)");

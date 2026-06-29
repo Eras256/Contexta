@@ -220,9 +220,9 @@ export class BlendClient {
     return this.stellarClient.buildOperationXdr(opXdr, userAddress);
   }
 
-  /** Submit a user-signed Blend transaction envelope and confirm. */
+  /** Submit a user-signed Soroban transaction envelope and confirm (60s window). */
   async submitSignedXdr(signedXdr: string): Promise<{ txHash: string }> {
-    const r = await this.stellarClient.submitSignedXdr(signedXdr);
+    const r = await this.stellarClient.submitSignedXdr(signedXdr, 60_000);
     return { txHash: r.txHash };
   }
 }
