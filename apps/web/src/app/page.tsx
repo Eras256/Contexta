@@ -4,6 +4,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
 import { LiveAgentFeed } from "@/components/LiveAgentFeed";
+import { Reveal } from "@/components/Reveal";
 import { useT } from "@/lib/i18n";
 
 // 3D hero: client-only, lazy chunk, with a gradient poster while it loads.
@@ -20,17 +21,23 @@ export default function HomePage() {
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative grid items-center gap-10 pt-2 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
         <div className="relative z-10">
-          <div className="mb-5 flex flex-wrap gap-2">
+          <div className="animate-fade-up mb-5 flex flex-wrap gap-2">
             <span className="pill border-brand/30 bg-brand/10 text-brand">● {t("hero.badge1")}</span>
             <span className="pill border-accent/30 bg-accent/10 text-accent">{t("hero.badge2")}</span>
           </div>
-          <h1 className="text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1
+            className="animate-fade-up text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl"
+            style={{ animationDelay: "80ms" }}
+          >
             {t("hero.title")}
           </h1>
-          <p className="mt-6 max-w-xl text-pretty text-base leading-relaxed text-slate-300 sm:text-lg">
+          <p
+            className="animate-fade-up mt-6 max-w-xl text-pretty text-base leading-relaxed text-slate-300 sm:text-lg"
+            style={{ animationDelay: "160ms" }}
+          >
             {t("hero.subtitle")}
           </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="animate-fade-up mt-8 flex flex-wrap gap-3" style={{ animationDelay: "240ms" }}>
             <Link href="/treasury" className="btn-primary px-5 py-2.5 text-[15px]">
               {t("hero.ctaPrimary")}
             </Link>
@@ -38,14 +45,16 @@ export default function HomePage() {
               {t("hero.ctaSecondary")}
             </a>
           </div>
-          <p className="mt-5 flex items-center gap-2 text-xs text-slate-400">
+          <p className="animate-fade-up mt-5 flex items-center gap-2 text-xs text-slate-400" style={{ animationDelay: "320ms" }}>
             <LockIcon />
             {t("hero.trust")}
           </p>
         </div>
 
         {/* 3D panel */}
-        <div className="relative">
+        <div className="animate-fade-up relative" style={{ animationDelay: "200ms" }}>
+          {/* soft pulsing glow behind the panel */}
+          <div className="animate-glow pointer-events-none absolute left-1/2 top-1/2 -z-10 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/20 blur-[90px]" />
           <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[28px] border border-white/10 bg-ink-900/40 sm:max-w-lg lg:aspect-[4/5]">
             <div className="pointer-events-none absolute inset-0 hero-poster" />
             <Hero3D className="absolute inset-0" />
@@ -60,17 +69,17 @@ export default function HomePage() {
       </section>
 
       {/* ── How it works ─────────────────────────────────────────────────── */}
-      <section id="how">
+      <Reveal id="how">
         <SectionEyebrow eyebrow={t("steps.eyebrow")} title={t("steps.title")} />
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           <StepCard n="1" tone="brand" title={t("steps.s1Title")} body={t("steps.s1Body")} icon={<WalletIcon />} />
           <StepCard n="2" tone="accent" title={t("steps.s2Title")} body={t("steps.s2Body")} icon={<SlidersIcon />} />
           <StepCard n="3" tone="sky" title={t("steps.s3Title")} body={t("steps.s3Body")} icon={<BoltIcon />} />
         </div>
-      </section>
+      </Reveal>
 
       {/* ── Benefits ─────────────────────────────────────────────────────── */}
-      <section>
+      <Reveal>
         <SectionEyebrow eyebrow={t("benefits.eyebrow")} title={t("benefits.title")} />
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <BenefitCard icon={<ShieldCheckIcon />} title={t("benefits.b1Title")} body={t("benefits.b1Body")} />
@@ -78,19 +87,19 @@ export default function HomePage() {
           <BenefitCard icon={<GlobeIcon />} title={t("benefits.b3Title")} body={t("benefits.b3Body")} />
           <BenefitCard icon={<KeyIcon />} title={t("benefits.b4Title")} body={t("benefits.b4Body")} />
         </div>
-      </section>
+      </Reveal>
 
       {/* ── Flow / diagram ───────────────────────────────────────────────── */}
-      <section>
+      <Reveal>
         <SectionEyebrow eyebrow={t("flow.eyebrow")} title={t("flow.title")} />
         <p className="mt-2 max-w-2xl text-sm text-slate-400">{t("flow.subtitle")}</p>
         <div className="mt-6">
           <ArchitectureDiagram />
         </div>
-      </section>
+      </Reveal>
 
       {/* ── Why / trust strip ────────────────────────────────────────────── */}
-      <section className="grid gap-4 sm:grid-cols-3">
+      <Reveal className="grid gap-4 sm:grid-cols-3">
         {[
           { k: t("why.t1"), v: t("why.b1") },
           { k: t("why.t2"), v: t("why.b2") },
@@ -101,10 +110,10 @@ export default function HomePage() {
             <p className="mt-2 text-sm text-slate-300">{x.v}</p>
           </div>
         ))}
-      </section>
+      </Reveal>
 
       {/* ── CTA ──────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand/10 via-ink-900/40 to-accent/10 px-6 py-12 text-center sm:px-12 sm:py-16">
+      <Reveal className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-brand/10 via-ink-900/40 to-accent/10 px-6 py-12 text-center sm:px-12 sm:py-16">
         <div className="pointer-events-none absolute -top-24 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-brand/20 blur-3xl" />
         <h2 className="relative mx-auto max-w-2xl text-balance text-2xl font-semibold tracking-tight text-white sm:text-3xl">
           {t("cta.title")}
@@ -115,7 +124,7 @@ export default function HomePage() {
             {t("cta.button")}
           </Link>
         </div>
-      </section>
+      </Reveal>
     </div>
   );
 }
