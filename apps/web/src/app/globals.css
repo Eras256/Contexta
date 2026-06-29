@@ -15,9 +15,13 @@
   }
   body {
     @apply bg-ink-950 text-slate-200 antialiased;
+    /* Cosmic aurora mesh — layered nebulae that set a premium, Stellar-native
+       atmosphere without ever competing with content. */
     background-image:
-      radial-gradient(60rem 60rem at 80% -10%, rgba(45, 212, 191, 0.08), transparent),
-      radial-gradient(50rem 50rem at 0% 10%, rgba(167, 139, 250, 0.06), transparent);
+      radial-gradient(42rem 42rem at 82% -8%, rgba(45, 212, 191, 0.13), transparent 60%),
+      radial-gradient(38rem 38rem at 10% 4%, rgba(167, 139, 250, 0.11), transparent 60%),
+      radial-gradient(46rem 30rem at 50% 116%, rgba(56, 189, 248, 0.09), transparent 60%),
+      radial-gradient(30rem 30rem at 95% 60%, rgba(245, 181, 74, 0.05), transparent 60%);
     background-attachment: fixed;
   }
   ::selection {

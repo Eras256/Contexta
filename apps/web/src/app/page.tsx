@@ -26,7 +26,7 @@ export default function HomePage() {
             <span className="pill border-accent/30 bg-accent/10 text-accent">{t("hero.badge2")}</span>
           </div>
           <h1
-            className="animate-fade-up text-balance text-4xl font-semibold leading-[1.05] tracking-tight text-white sm:text-5xl lg:text-6xl"
+            className="animate-fade-up text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.02em] text-white sm:text-6xl lg:text-7xl"
             style={{ animationDelay: "80ms" }}
           >
             {t("hero.title")}
@@ -53,12 +53,16 @@ export default function HomePage() {
 
         {/* 3D panel */}
         <div className="animate-fade-up relative" style={{ animationDelay: "200ms" }}>
-          {/* soft pulsing glow behind the panel */}
-          <div className="animate-glow pointer-events-none absolute left-1/2 top-1/2 -z-10 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/20 blur-[90px]" />
-          <div className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[28px] border border-white/10 bg-ink-900/40 sm:max-w-lg lg:aspect-[4/5]">
-            <div className="pointer-events-none absolute inset-0 hero-poster" />
-            <Hero3D className="absolute inset-0" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-950/70 to-transparent" />
+          {/* dual nebula glows behind the panel */}
+          <div className="animate-glow pointer-events-none absolute left-1/2 top-1/2 -z-10 h-80 w-80 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/25 blur-[100px]" />
+          <div className="pointer-events-none absolute -right-6 top-6 -z-10 h-40 w-40 rounded-full bg-accent/20 blur-[80px]" />
+          {/* gradient hairline frame */}
+          <div className="mx-auto w-full max-w-md rounded-[30px] bg-gradient-to-br from-brand/50 via-accent/25 to-sky-400/40 p-px shadow-[0_30px_80px_-30px_rgba(45,212,191,0.35)] sm:max-w-lg">
+            <div className="relative aspect-square w-full overflow-hidden rounded-[29px] bg-ink-950 lg:aspect-[4/5]">
+              <div className="pointer-events-none absolute inset-0 hero-poster" />
+              <Hero3D className="absolute inset-0" />
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-950/80 to-transparent" />
+            </div>
           </div>
         </div>
       </section>
@@ -132,8 +136,11 @@ export default function HomePage() {
 function SectionEyebrow({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
     <div className="max-w-2xl">
-      <div className="label text-brand">{eyebrow}</div>
-      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">{title}</h2>
+      <div className="label flex items-center gap-2 text-brand">
+        <span className="h-px w-6 bg-brand/50" aria-hidden />
+        {eyebrow}
+      </div>
+      <h2 className="mt-3 text-3xl font-semibold tracking-[-0.01em] text-white sm:text-4xl">{title}</h2>
     </div>
   );
 }
