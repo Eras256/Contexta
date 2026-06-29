@@ -112,7 +112,7 @@ const en: Dict = {
   },
   diagram: {
     laneCompany: "YOUR COMPANY",
-    lanePlatform: "CONTEXTIO (THE ASSISTANT)",
+    lanePlatform: "CONTEXTIO",
     laneStellar: "STELLAR NETWORK & PAYOUTS",
     header: "ARCHITECTURE",
     treasuryTitle: "Your money",
@@ -414,7 +414,7 @@ const es: Dict = {
   },
   diagram: {
     laneCompany: "TU EMPRESA",
-    lanePlatform: "CONTEXTIO (EL ASISTENTE)",
+    lanePlatform: "CONTEXTIO",
     laneStellar: "RED STELLAR Y PAGOS",
     header: "ARQUITECTURA",
     treasuryTitle: "Tu dinero",
@@ -716,7 +716,7 @@ const pt: Dict = {
   },
   diagram: {
     laneCompany: "SUA EMPRESA",
-    lanePlatform: "CONTEXTIO (O ASSISTENTE)",
+    lanePlatform: "CONTEXTIO",
     laneStellar: "REDE STELLAR E PAGAMENTOS",
     header: "ARQUITETURA",
     treasuryTitle: "Seu dinheiro",
