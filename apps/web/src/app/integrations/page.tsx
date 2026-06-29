@@ -32,10 +32,19 @@ interface BlendVault {
 const xlm = (stroops: string) =>
   `${(Number(stroops) / 1e7).toLocaleString(undefined, { maximumFractionDigits: 4 })}`;
 
+interface AnchorInfo {
+  anchor: string;
+  withdraw: string[];
+  deposit: string[];
+  protocols: string[];
+  transferServer: string | null;
+}
+
 export default function IntegrationsPage() {
   const t = useT();
   const [vault, setVault] = useState<LiveVault | null>(null);
   const [blend, setBlend] = useState<BlendVault | null>(null);
+  const [anchor, setAnchor] = useState<AnchorInfo | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -48,6 +57,12 @@ export default function IntegrationsPage() {
         .catch(() => {});
     void grab("defindex", (v) => setVault(v as LiveVault));
     void grab("blend", (v) => setBlend(v as BlendVault));
+    fetch(`${API}/api/v1/public/anchor`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (alive && j?.live) setAnchor(j as AnchorInfo);
+      })
+      .catch(() => {});
     return () => {
       alive = false;
     };
@@ -132,6 +147,25 @@ export default function IntegrationsPage() {
       {/* How your team gets paid */}
       <section className="space-y-4">
         <Header title={t("pages.integrations.railsTitle")} body={t("pages.integrations.railsBody")} />
+
+        {/* Real SEP-24 off-ramp anchor */}
+        <Card className="flex flex-col">
+          <div className="flex items-start justify-between gap-2">
+            <span className="font-medium text-white">{t("pages.integrations.anchorName")}</span>
+            <Badge tone={anchor ? "success" : "warn"}>
+              {t(anchor ? "pages.integrations.statusLive" : "pages.integrations.statusReady")}
+            </Badge>
+          </div>
+          <p className="mt-2 text-xs leading-relaxed text-slate-400">{t("pages.integrations.anchorBody")}</p>
+          {anchor && (
+            <div className="mt-3 space-y-1.5 border-t border-white/5 pt-3 text-xs">
+              <Row k="Anchor" v={<span className="font-mono text-slate-300">{anchor.anchor}</span>} />
+              <Row k="Off-ramp" v={<span className="font-mono text-slate-300">{anchor.withdraw.join(" · ")}</span>} />
+              <Row k="Protocols" v={<span className="font-mono text-slate-300">{anchor.protocols.join(" · ")}</span>} />
+            </div>
+          )}
+        </Card>
+
         <div className="grid gap-4 sm:grid-cols-3">
           <IntegrationCard t={t} name={t("pages.integrations.pixName")} body={t("pages.integrations.pixBody")} status="mock" />
           <IntegrationCard t={t} name={t("pages.integrations.transfersName")} body={t("pages.integrations.transfersBody")} status="mock" />

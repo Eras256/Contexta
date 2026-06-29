@@ -82,5 +82,48 @@ export function publicRouter(): Router {
     }
   });
 
+  /**
+   * Public, read-only SEP-24 off-ramp anchor capabilities (SEP-1 toml + SEP-24
+   * /info). Shows the real testnet anchor the platform would use to off-ramp USDC
+   * to local rails (PIX/Bre-B in production). Read-only — moves no funds.
+   */
+  router.get("/anchor", async (_req, res, next) => {
+    try {
+      const base = env().ANCHOR_SEP24_URL.replace(/\/$/, "");
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000);
+      try {
+        const toml = await (await fetch(`${base}/.well-known/stellar.toml`, { signal: ctrl.signal })).text();
+        const grab = (k: string) => toml.match(new RegExp(`${k}\\s*=\\s*"([^"]+)"`))?.[1] ?? null;
+        const transferServer = grab("TRANSFER_SERVER_SEP0024");
+        const webAuth = grab("WEB_AUTH_ENDPOINT");
+        let withdraw: string[] = [];
+        let deposit: string[] = [];
+        if (transferServer) {
+          const info = (await (await fetch(`${transferServer.replace(/\/$/, "")}/info`, { signal: ctrl.signal })).json()) as {
+            withdraw?: Record<string, unknown>;
+            deposit?: Record<string, unknown>;
+          };
+          withdraw = Object.keys(info.withdraw ?? {});
+          deposit = Object.keys(info.deposit ?? {});
+        }
+        res.setHeader("cache-control", "public, max-age=300");
+        res.json({
+          live: Boolean(transferServer),
+          anchor: base.replace(/^https?:\/\//, ""),
+          transferServer,
+          webAuth,
+          protocols: ["SEP-1", "SEP-10", "SEP-24"],
+          withdraw,
+          deposit,
+        });
+      } finally {
+        clearTimeout(timer);
+      }
+    } catch (e) {
+      next(e);
+    }
+  });
+
   return router;
 }

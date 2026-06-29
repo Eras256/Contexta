@@ -76,6 +76,8 @@ export const serverEnvSchema = baseEnvSchema.extend({
   BLEND_BACKSTOP_CONTRACT_ID: z.string().optional().or(z.literal("")),
   BLEND_ORACLE_CONTRACT_ID: z.string().optional().or(z.literal("")),
   BLEND_ASSET_ID: z.string().optional().or(z.literal("")),
+  /** SEP-24 off-ramp anchor base URL (testnet reference anchor by default). */
+  ANCHOR_SEP24_URL: z.string().default("https://testanchor.stellar.org"),
   // Signer for Blend supply/withdraw. Defaults to STELLAR_SERVICE_SECRET, but for
   // USDC lending it must be the account that actually holds the BlendUSDC (the
   // agent wallet), so this overrides the signer for the Blend client only.
