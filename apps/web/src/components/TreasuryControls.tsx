@@ -371,7 +371,7 @@ function CreateVaultPanel({ auth, address }: { auth: ApiAuth; address: string | 
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-white">Vaults</p>
-          <p className="mt-0.5 text-xs text-slate-500">Deploy a yield vault you own — real factory deploy, signed by your wallet.</p>
+          <p className="mt-0.5 text-xs text-slate-500">Deploy your own DeFindex vault (Blend yield strategy) — real factory deploy, signed by your wallet.</p>
         </div>
         <button onClick={() => setOpen((o) => !o)} className="btn-ghost px-3 py-1.5 text-xs">
           {open ? "Cancel" : "New vault"}
@@ -387,7 +387,7 @@ function CreateVaultPanel({ auth, address }: { auth: ApiAuth; address: string | 
             className={selectCls}
           />
           <select value={asset} onChange={(e) => setAsset(e.target.value as "XLM" | "USDC")} className={selectCls}>
-            <option value="XLM">XLM · Blend</option>
+            <option value="XLM">XLM · Blend strategy</option>
             <option value="USDC">USDC (no testnet strategy)</option>
           </select>
           <button onClick={() => void create()} disabled={busy} className="btn-primary justify-center px-3 py-2 text-xs disabled:opacity-40 sm:col-span-2">
