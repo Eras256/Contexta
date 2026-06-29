@@ -35,12 +35,42 @@ export function treasuryRouter(): Router {
     }
   });
 
-  // Activate / deactivate the autonomous agent for this tenant (dashboard toggle).
+  // Activate / deactivate the autonomous agent — gated by a SEP-53 wallet
+  // signature so the delegation is an explicit, auditable consent by the owner.
   router.post("/agent", requireCapability("treasury.configure"), async (req, res, next) => {
     try {
       const ctx = requireCtx(req);
-      const { enabled } = agentToggleSchema.parse(req.body);
-      const saved = await req.container.treasury.setAgentEnabled(ctx.tenantId, enabled, ctx.userId);
+      const b = agentToggleSchema.parse(req.body);
+
+      // 1. The message must carry a valid ed25519 signature from `address`.
+      if (!req.container.walletAuth.verifySignedMessage(b.address, b.message, b.signedMessage)) {
+        res.status(400).json({ error: "Invalid wallet signature." });
+        return;
+      }
+      // 2. The signer must be the signed-in user's own wallet.
+      const user = await req.container.repo.findUserByWallet(b.address);
+      if (!user || user.id !== ctx.userId) {
+        res.status(403).json({ error: "Signature does not match your wallet." });
+        return;
+      }
+      // 3. The consent must match the action and be fresh (≤5 min).
+      const okAction = new RegExp(`Action:\\s*${b.enabled ? "enable" : "disable"}`, "i").test(b.message);
+      const issued = b.message.match(/Issued:\s*(.+)/i)?.[1]?.trim();
+      const fresh = issued ? Date.now() - Date.parse(issued) < 5 * 60_000 : false;
+      if (!okAction || !fresh) {
+        res.status(400).json({ error: "Consent message invalid or expired." });
+        return;
+      }
+
+      // 4. Apply + record the signed consent (auditable authorization artifact).
+      const saved = await req.container.treasury.setAgentEnabled(ctx.tenantId, b.enabled, ctx.userId);
+      await req.container.audit.record({
+        tenantId: ctx.tenantId,
+        actorId: ctx.userId,
+        actorType: "user",
+        action: "treasury.configured",
+        detail: { agentEnabled: saved.agentEnabled, signedConsent: true, address: b.address, signature: b.signedMessage.slice(0, 24) },
+      });
       res.json({ agentEnabled: saved.agentEnabled });
     } catch (e) {
       next(e);

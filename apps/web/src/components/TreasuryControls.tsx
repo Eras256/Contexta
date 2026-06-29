@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui";
 import { api, type ApiAuth, type TreasurySnapshot } from "@/lib/api";
-import { signWalletTransaction } from "@/lib/wallet";
+import { signWalletMessage, signWalletTransaction } from "@/lib/wallet";
 
 /**
  * Manual treasury controls for the dashboard — everything the autonomous agent
@@ -23,15 +23,30 @@ export function TreasuryControls({
 }) {
   const [agentEnabled, setAgentEnabled] = useState(config?.agentEnabled ?? true);
   const [toggling, setToggling] = useState(false);
+  const [toggleMsg, setToggleMsg] = useState<string | null>(null);
 
   const toggleAgent = async () => {
     if (toggling) return;
+    if (!address) return setToggleMsg("Connect a wallet first.");
     setToggling(true);
+    setToggleMsg(null);
     try {
-      const r = await api.toggleAgent(auth, !agentEnabled);
+      const next = !agentEnabled;
+      // SEP-53 consent: you sign the authorization with your own wallet.
+      const message = [
+        "Contextio — Agent authorization",
+        `Action: ${next ? "enable" : "disable"}`,
+        `Address: ${address}`,
+        `Issued: ${new Date().toISOString()}`,
+        "This authorizes Contextio's agent to manage your treasury within your risk rules. It does not move funds.",
+      ].join("\n");
+      setToggleMsg("Approve in your wallet…");
+      const signedMessage = await signWalletMessage(message, address);
+      const r = await api.toggleAgent(auth, next, { address, message, signedMessage });
       setAgentEnabled(r.agentEnabled);
-    } catch {
-      /* leave previous state */
+      setToggleMsg(r.agentEnabled ? "Agent activated — signed by you." : "Agent paused — signed by you.");
+    } catch (e) {
+      setToggleMsg(friendlyError(e instanceof Error ? e.message : String(e)));
     } finally {
       setToggling(false);
     }
@@ -56,6 +71,7 @@ export function TreasuryControls({
           <p className="mt-0.5 text-xs text-slate-500">
             {agentEnabled ? "Active — rebalances & lends 24/7 on its own." : "Paused — only manual actions run."}
           </p>
+          {toggleMsg && <p className="mt-1 text-[11px] text-slate-400">{toggleMsg}</p>}
         </div>
         <button
           onClick={() => void toggleAgent()}

@@ -132,6 +132,16 @@ export class WalletAuthService {
     };
   }
 
+  /**
+   * Verify an ad-hoc SEP-53 signed message (no server challenge) — used for the
+   * agent-authorization consent: the user signs "enable/disable agent" with their
+   * wallet and we verify the ed25519 signature against their public key.
+   */
+  verifySignedMessage(address: string, message: string, signedMessage: string): boolean {
+    if (!/^G[A-Z2-7]{55}$/u.test(address)) return false;
+    return verifySep53(address, message, signedMessage);
+  }
+
   private hmac(message: string): string {
     return createHmac("sha256", this.config.SUPABASE_JWT_SECRET).update(message, "utf8").digest("base64");
   }

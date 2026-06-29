@@ -140,11 +140,15 @@ export const api = {
     body: JSON.stringify(move),
   }),
 
-  /** Activate / deactivate the autonomous agent for this tenant. */
-  toggleAgent: (auth: ApiAuth, enabled: boolean) =>
+  /** Activate / deactivate the autonomous agent — gated by a SEP-53 wallet signature. */
+  toggleAgent: (
+    auth: ApiAuth,
+    enabled: boolean,
+    consent: { address: string; message: string; signedMessage: string },
+  ) =>
     request<{ agentEnabled: boolean }>("/treasury/agent", auth, {
       method: "POST",
-      body: JSON.stringify({ enabled }),
+      body: JSON.stringify({ enabled, ...consent }),
     }),
 
   /** Step 1 of a self-custody move: get an unsigned tx for the user to sign. */

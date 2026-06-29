@@ -15,9 +15,12 @@ export const treasuryConfigSchema = z.object({
   agentEnabled: z.boolean().default(true),
 });
 
-/** Toggle the autonomous agent on/off for the tenant (dashboard switch). */
+/** Toggle the autonomous agent on/off — gated by a SEP-53 wallet signature (consent). */
 export const agentToggleSchema = z.object({
   enabled: z.boolean(),
+  address: z.string().regex(/^G[A-Z2-7]{55}$/u, "Expected a Stellar public key (G...)"),
+  message: z.string().min(1).max(2000),
+  signedMessage: z.string().min(1).max(2000),
 });
 
 /** Build an unsigned tx for the user to sign in their own wallet (self-custody). */
