@@ -70,7 +70,9 @@ export function createContainer(): Container {
       asset: config.BLEND_ASSET_ID || undefined,
       rpcUrl: config.STELLAR_RPC_URL,
       networkPassphrase: config.STELLAR_NETWORK_PASSPHRASE,
-      signerSecret: config.STELLAR_SERVICE_SECRET || undefined,
+      // Sign Blend ops with the account that holds the (Blend)USDC — the agent
+      // wallet — falling back to the platform service key for XLM-only setups.
+      signerSecret: config.BLEND_SIGNER_SECRET || config.STELLAR_SERVICE_SECRET || undefined,
     },
     stellarClient,
     logger,
