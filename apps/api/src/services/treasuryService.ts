@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { type Logger, fromBaseUnits } from "@contextio/shared";
+import type { stellar } from "@contextio/shared";
 import type { TreasuryConfig, TreasuryPosition } from "@contextio/shared";
 import type { Repository } from "../db/repository.js";
 import type { DefindexClient } from "../integrations/defindex.js";
@@ -30,6 +31,13 @@ export interface RebalanceRequest {
   actorType: "user" | "agent";
 }
 
+/** Dashboard pricing: USDC/BlendUSDC = $1; XLM uses a fixed testnet reference rate. */
+const XLM_USD = 0.11;
+function toUsdBase(assetCode: string, amount: number): bigint {
+  const usd = assetCode === "XLM" ? amount * XLM_USD : amount;
+  return BigInt(Math.max(0, Math.round(usd * 1e7)));
+}
+
 /**
  * Treasury domain logic: aggregate balances across liquidity / DeFindex /
  * Blend, and execute rebalances that move value between them. Every rebalance
@@ -44,12 +52,21 @@ export class TreasuryService {
     private readonly legal: LegalContextService,
     private readonly audit: AuditService,
     private readonly logger: Logger,
+    private readonly stellarClient: stellar.StellarClient,
+    /** Treasury wallet whose real on-chain balances power the dashboard. */
+    private readonly treasuryAddress: string | undefined,
   ) {}
 
+  /**
+   * Live treasury snapshot. When a treasury wallet is configured, positions are
+   * read from REAL on-chain state — the wallet's classic balances (liquid) plus
+   * the real Blend and DeFindex positions (yield) — not from seeded DB rows.
+   * Falls back to the DB positions if the wallet isn't set or every source fails.
+   */
   async snapshot(tenantId: string): Promise<TreasurySnapshot> {
     const [config, positions] = await Promise.all([
       this.repo.getTreasuryConfig(tenantId),
-      this.repo.listPositions(tenantId),
+      this.treasuryAddress ? this.onchainPositions(tenantId) : this.repo.listPositions(tenantId),
     ]);
 
     let liquid = 0n;
@@ -92,6 +109,62 @@ export class TreasuryService {
       detail: { maxYieldBps: saved.maxYieldBps, minLiquidity: saved.minLiquidityBaseUnits },
     });
     return saved;
+  }
+
+  /** Build treasury positions from real on-chain state (wallet + Blend + DeFindex). */
+  private async onchainPositions(tenantId: string): Promise<TreasuryPosition[]> {
+    const addr = this.treasuryAddress as string;
+    const positions: TreasuryPosition[] = [];
+    const mk = (
+      asset: string,
+      strategy: TreasuryPosition["strategy"],
+      usdBaseUnits: bigint,
+      apyBps: number | null,
+    ): TreasuryPosition => ({
+      id: `onchain-${strategy}-${asset}`,
+      tenantId,
+      asset: asset as TreasuryPosition["asset"],
+      strategy,
+      strategyRef: strategy === "liquidity" ? null : strategy,
+      amountBaseUnits: usdBaseUnits.toString(),
+      apyBps,
+      updatedAt: new Date().toISOString(),
+    });
+
+    const [bal, blend, dfx] = await Promise.allSettled([
+      this.stellarClient.getBalances(addr),
+      this.blend.getVaultData(),
+      this.defindex.getVaultData(),
+    ]);
+
+    if (bal.status === "fulfilled") {
+      let usdc = 0;
+      let xlm = 0;
+      for (const b of bal.value) {
+        const amt = Number(b.balance) || 0;
+        if (b.assetType === "native") xlm += amt;
+        else if (b.assetCode === "USDC") usdc += amt; // Circle + BlendUSDC share the code
+      }
+      if (usdc > 0) positions.push(mk("USDC", "liquidity", toUsdBase("USDC", usdc), null));
+      if (xlm > 0) positions.push(mk("XLM", "liquidity", toUsdBase("XLM", xlm), null));
+    } else {
+      this.logger.warn({ err: String(bal.reason) }, "Treasury balances read failed");
+    }
+
+    if (blend.status === "fulfilled" && blend.value.ok) {
+      const v = blend.value.value;
+      const amt = Number(v.positionBaseUnits) / 1e7;
+      if (amt > 0) positions.push(mk(v.asset, "blend_pool", toUsdBase(v.asset, amt), v.supplyApyBps));
+    }
+
+    if (dfx.status === "fulfilled" && dfx.value.ok) {
+      const v = dfx.value.value;
+      const amt = Number(v.positionBaseUnits) / 1e7;
+      if (amt > 0) positions.push(mk(v.asset, "defindex_vault", toUsdBase(v.asset, amt), v.apyBps));
+    }
+
+    // If every on-chain source failed, fall back to the DB so the page isn't empty.
+    return positions.length > 0 ? positions : this.repo.listPositions(tenantId);
   }
 
   /**

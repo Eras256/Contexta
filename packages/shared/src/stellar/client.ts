@@ -220,6 +220,23 @@ export class StellarClient {
   }
 
   /**
+   * Read an account's classic balances from Horizon (native XLM + credit assets).
+   * Used to surface the treasury wallet's REAL on-chain holdings on the dashboard.
+   */
+  async getBalances(
+    account: string,
+  ): Promise<{ assetType: string; assetCode: string | null; assetIssuer: string | null; balance: string }[]> {
+    const horizon = new Horizon.Server(this.config.horizonUrl);
+    const acc = await horizon.loadAccount(account);
+    return acc.balances.map((b) => ({
+      assetType: b.asset_type,
+      assetCode: b.asset_type === "native" ? "XLM" : "asset_code" in b ? b.asset_code : null,
+      assetIssuer: "asset_issuer" in b ? b.asset_issuer : null,
+      balance: b.balance,
+    }));
+  }
+
+  /**
    * Read-only invocation via simulation only — no fees, no submission. Use for
    * view methods (balances, positions) where a ledger write isn't required.
    */

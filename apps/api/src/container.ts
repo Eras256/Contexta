@@ -116,7 +116,21 @@ export function createContainer(): Container {
 
   const audit = new AuditService(repo);
   const legal = new LegalContextService(repo, logger);
-  const treasury = new TreasuryService(repo, defindex, blend, soroban, legal, audit, logger);
+  // The treasury wallet whose real on-chain balances power the dashboard.
+  const treasurySigner = config.BLEND_SIGNER_SECRET || config.STELLAR_SERVICE_SECRET || "";
+  const treasuryAddress =
+    config.AGENT_PUBLIC_ADDRESS || (treasurySigner ? stellar.Keypair.fromSecret(treasurySigner).publicKey() : undefined);
+  const treasury = new TreasuryService(
+    repo,
+    defindex,
+    blend,
+    soroban,
+    legal,
+    audit,
+    logger,
+    stellarClient,
+    treasuryAddress || undefined,
+  );
   const payroll = new PayrollService(repo, soroban, legal, audit, logger);
   const agent = new AgentService(repo, treasury, defindex, blend, payroll, oracle, legal, audit, ai, logger);
   const walletAuth = new WalletAuthService(repo, config, logger);
