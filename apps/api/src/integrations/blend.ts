@@ -195,6 +195,36 @@ export class BlendClient {
       : { poolId: this.poolId, asset, suppliedBaseUnits: "0", borrowedBaseUnits: "0", supplyApyBps: 0, borrowApyBps: 0 };
     return { ...base, txHash: res.txHash };
   }
+
+  /**
+   * Build an UNSIGNED Blend `submit` transaction whose source + supplier is the
+   * user's own wallet — the self-custody path. The frontend signs it with the
+   * user's wallet (Freighter); we never touch their key. With the user as the
+   * source account, their envelope signature satisfies the pool's `require_auth`.
+   */
+  async buildRequestXdr(
+    userAddress: string,
+    direction: "supply" | "withdraw",
+    asset: string,
+    amountBaseUnits: string,
+  ): Promise<string> {
+    if (!this.config.poolId) throw new Error("Blend pool not configured");
+    const resolved = this.resolveAssetAddress(asset);
+    const requestType = direction === "supply" ? RequestType.Supply : RequestType.Withdraw;
+    const opXdr = new PoolContractV2(this.config.poolId).submit({
+      from: userAddress,
+      spender: userAddress,
+      to: userAddress,
+      requests: [{ amount: BigInt(amountBaseUnits), request_type: requestType, address: resolved }],
+    });
+    return this.stellarClient.buildOperationXdr(opXdr, userAddress);
+  }
+
+  /** Submit a user-signed Blend transaction envelope and confirm. */
+  async submitSignedXdr(signedXdr: string): Promise<{ txHash: string }> {
+    const r = await this.stellarClient.submitSignedXdr(signedXdr);
+    return { txHash: r.txHash };
+  }
 }
 
 export type { BlendPosition };

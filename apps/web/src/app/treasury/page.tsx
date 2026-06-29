@@ -22,7 +22,7 @@ const PLACE_KEY: Record<string, string> = {
 
 export default function TreasuryPage() {
   const tr = useT();
-  const { accessToken, tenantId, connect, connecting } = useAuth();
+  const { accessToken, tenantId, address, connect, connecting } = useAuth();
   const { data: snap, live, loading } = useLiveData(api.treasury, EMPTY, {
     realtimeTable: "treasury_positions",
   });
@@ -111,7 +111,7 @@ export default function TreasuryPage() {
         </Card>
       </div>
 
-      {tenantId && <TreasuryControls auth={{ accessToken, tenantId }} config={snap.config} />}
+      {tenantId && <TreasuryControls auth={{ accessToken, tenantId }} address={address} config={snap.config} />}
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card>

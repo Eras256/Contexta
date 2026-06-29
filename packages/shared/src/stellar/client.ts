@@ -149,6 +149,46 @@ export class StellarClient {
   }
 
   /**
+   * Build (but do NOT sign) a Soroban operation as a prepared transaction for an
+   * external source account — the user-signed (self-custody) path. The frontend
+   * signs the returned XDR with the user's own wallet (Freighter). We attach the
+   * footprint + auth + resource fees via `prepareTransaction`; with the user as
+   * the source account, their envelope signature satisfies the contract's
+   * source-account auth, so no separate auth-entry signing is needed.
+   */
+  async buildOperationXdr(operationXdr: string, sourcePublicKey: string): Promise<string> {
+    const source = await this.server.getAccount(sourcePublicKey);
+    const op = xdr.Operation.fromXDR(operationXdr, "base64");
+    const built = new TransactionBuilder(source, {
+      fee: (Number(BASE_FEE) * 100).toString(),
+      networkPassphrase: this.config.networkPassphrase,
+    })
+      .addOperation(op)
+      .setTimeout(180)
+      .build();
+    const prepared = await this.server.prepareTransaction(built);
+    return prepared.toXDR();
+  }
+
+  /** Submit an already-signed transaction envelope (base-64 XDR) and confirm. */
+  async submitSignedXdr(signedXdr: string, timeoutMs = 30_000): Promise<InvokeResult> {
+    const tx = TransactionBuilder.fromXDR(signedXdr, this.config.networkPassphrase);
+    const sent = await this.server.sendTransaction(tx);
+    if (sent.status === "ERROR") {
+      throw new Error(`Stellar submission failed: ${JSON.stringify(sent.errorResult)}`);
+    }
+    const confirmed = await this.pollTransaction(sent.hash, timeoutMs);
+    if (confirmed.status !== "SUCCESS") {
+      throw new Error(`Transaction ${sent.hash} did not succeed: ${confirmed.status}`);
+    }
+    return {
+      txHash: sent.hash,
+      returnValue: confirmed.returnValue ? scValToNative(confirmed.returnValue) : null,
+      ledger: confirmed.ledger,
+    };
+  }
+
+  /**
    * Send one or more classic asset payments in a single transaction via Horizon
    * (used for real payroll payouts — e.g. USDC to each employee's wallet).
    * `amount` is a decimal string (e.g. "45.0000000"). Returns the tx hash.

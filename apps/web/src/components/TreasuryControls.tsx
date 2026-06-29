@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui";
 import { api, type ApiAuth, type TreasurySnapshot } from "@/lib/api";
+import { signWalletTransaction } from "@/lib/wallet";
 
 /**
  * Manual treasury controls for the dashboard — everything the autonomous agent
@@ -13,9 +14,11 @@ import { api, type ApiAuth, type TreasurySnapshot } from "@/lib/api";
  */
 export function TreasuryControls({
   auth,
+  address,
   config,
 }: {
   auth: ApiAuth;
+  address: string | null;
   config: TreasurySnapshot["config"];
 }) {
   const [agentEnabled, setAgentEnabled] = useState(config?.agentEnabled ?? true);
@@ -67,7 +70,7 @@ export function TreasuryControls({
       </div>
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
-        <RebalancePanel auth={auth} />
+        <RebalancePanel auth={auth} address={address} />
         <RiskPanel auth={auth} config={config} agentEnabled={agentEnabled} />
       </div>
 
@@ -84,34 +87,53 @@ const toBase = (usd: string) => {
   return BigInt(Math.round(n * 1e7)).toString();
 };
 
-function RebalancePanel({ auth }: { auth: ApiAuth }) {
+function RebalancePanel({ auth, address }: { auth: ApiAuth; address: string | null }) {
   const [amount, setAmount] = useState("1");
-  const [venue, setVenue] = useState<"blend_pool" | "defindex_vault">("blend_pool");
+  const [venue, setVenue] = useState<"blend" | "defindex">("blend");
+  const [asset, setAsset] = useState<"XLM" | "USDC">("XLM");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
 
-  const asset = venue === "blend_pool" ? "USDC" : "XLM";
-  const strategyRef = venue === "blend_pool" ? "blend" : "defindex";
+  const freighter = venue === "blend";
+  const selectCls =
+    "mt-1 w-full rounded-lg border border-white/15 bg-ink-900 px-2.5 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand";
 
   const move = async (direction: "in" | "out") => {
     const amountBaseUnits = toBase(amount);
-    if (!amountBaseUnits || busy) {
-      if (!amountBaseUnits) setMsg("Enter a positive amount.");
-      return;
-    }
+    if (!amountBaseUnits) return setMsg("Enter a positive amount.");
+    if (freighter && !address) return setMsg("Connect a wallet first.");
+    if (busy) return;
     setBusy(true);
     setMsg(null);
     try {
-      const r = await api.rebalance(auth, {
-        from: direction === "in" ? "liquidity" : venue,
-        to: direction === "in" ? venue : "liquidity",
-        asset,
-        amountBaseUnits,
-        strategyRef,
-      });
-      setMsg(`Settled on-chain · tx ${r.txHash.slice(0, 8)}…`);
+      if (freighter && address) {
+        // Self-custody: build the tx → user signs in Freighter → submit.
+        setMsg("Preparing transaction…");
+        const { xdr } = await api.prepareMove(auth, {
+          direction: direction === "in" ? "supply" : "withdraw",
+          asset,
+          amountBaseUnits,
+          address,
+        });
+        setMsg("Approve in your wallet…");
+        const signed = await signWalletTransaction(xdr, address);
+        setMsg("Submitting…");
+        const r = await api.submitMove(auth, signed);
+        setMsg(`Signed by you · tx ${r.txHash.slice(0, 8)}…`);
+      } else {
+        // DeFindex: executed by the agent wallet (XLM vault).
+        const r = await api.rebalance(auth, {
+          from: direction === "in" ? "liquidity" : "defindex_vault",
+          to: direction === "in" ? "defindex_vault" : "liquidity",
+          asset: "XLM",
+          amountBaseUnits,
+          strategyRef: "defindex",
+        });
+        setMsg(`Settled (agent) · tx ${r.txHash.slice(0, 8)}…`);
+      }
     } catch (e) {
-      setMsg(e instanceof Error ? e.message.replace(/^API[^:]*:\s*/, "") : String(e));
+      const m = e instanceof Error ? e.message.replace(/^API[^:]*:\s*/, "") : String(e);
+      setMsg(/declin|reject|cancel/i.test(m) ? "Signature cancelled." : m);
     } finally {
       setBusy(false);
     }
@@ -120,22 +142,30 @@ function RebalancePanel({ auth }: { auth: ApiAuth }) {
   return (
     <div className="rounded-xl border border-white/10 bg-ink-900/40 p-4">
       <p className="text-sm font-medium text-white">Move capital</p>
-      <p className="mt-0.5 text-xs text-slate-500">Liquidity ⇄ yield venue. Real on-chain rebalance.</p>
+      <p className="mt-0.5 text-xs text-slate-500">
+        {freighter ? "You sign with your own wallet — self-custody." : "Executed by the agent wallet."}
+      </p>
 
       <label className="mt-3 block text-[11px] text-slate-400">
         Venue
-        <select
-          value={venue}
-          onChange={(e) => setVenue(e.target.value as typeof venue)}
-          className="mt-1 w-full rounded-lg border border-white/15 bg-ink-900 px-2.5 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand"
-        >
-          <option value="blend_pool">Blend · USDC lending</option>
-          <option value="defindex_vault">DeFindex · XLM vault</option>
+        <select value={venue} onChange={(e) => setVenue(e.target.value as typeof venue)} className={selectCls}>
+          <option value="blend">Blend · self-custody (Freighter)</option>
+          <option value="defindex">DeFindex · agent-executed</option>
         </select>
       </label>
 
+      {freighter && (
+        <label className="mt-2 block text-[11px] text-slate-400">
+          Asset
+          <select value={asset} onChange={(e) => setAsset(e.target.value as typeof asset)} className={selectCls}>
+            <option value="XLM">XLM — works with your testnet balance</option>
+            <option value="USDC">USDC — needs trustline + balance</option>
+          </select>
+        </label>
+      )}
+
       <label className="mt-2 block text-[11px] text-slate-400">
-        Amount ({asset})
+        Amount ({freighter ? asset : "XLM"})
         <input
           value={amount}
           onChange={(e) => setAmount(e.target.value)}

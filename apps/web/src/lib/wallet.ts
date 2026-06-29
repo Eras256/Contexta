@@ -40,6 +40,13 @@ export async function signWalletMessage(message: string, address: string): Promi
   return signedMessage;
 }
 
+/** Sign a Stellar transaction envelope (base64 XDR) with the connected wallet. */
+export async function signWalletTransaction(xdr: string, address: string): Promise<string> {
+  const k = await getKit();
+  const { signedTxXdr } = await k.signTransaction(xdr, { address });
+  return signedTxXdr;
+}
+
 export async function disconnectWallet(): Promise<void> {
   try {
     const k = await getKit();

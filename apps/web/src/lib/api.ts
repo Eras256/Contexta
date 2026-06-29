@@ -136,6 +136,19 @@ export const api = {
       body: JSON.stringify({ enabled }),
     }),
 
+  /** Step 1 of a self-custody move: get an unsigned Blend tx for the user to sign. */
+  prepareMove: (
+    auth: ApiAuth,
+    body: { direction: "supply" | "withdraw"; asset: "XLM" | "USDC"; amountBaseUnits: string; address: string },
+  ) => request<{ xdr: string }>("/treasury/prepare", auth, { method: "POST", body: JSON.stringify(body) }),
+
+  /** Step 2: submit the user-signed envelope. */
+  submitMove: (auth: ApiAuth, signedXdr: string) =>
+    request<{ txHash: string; legalContextHash: string }>("/treasury/submit", auth, {
+      method: "POST",
+      body: JSON.stringify({ signedXdr }),
+    }),
+
   /** Create / register a yield vault (DeFindex factory; returns the live vault). */
   createVault: (auth: ApiAuth, vault: { name: string; asset: string; strategy: string }) =>
     request<{ vaultId?: string; name?: string }>("/integrations/defindex/vaults", auth, {
