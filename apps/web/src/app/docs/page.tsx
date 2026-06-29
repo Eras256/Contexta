@@ -33,9 +33,7 @@ export default function DocsPage() {
           <h3 className="text-lg font-semibold text-white">{t("pages.docs.archTitle")}</h3>
           <p className="mt-1 max-w-2xl text-sm text-slate-400">{t("pages.docs.archBody")}</p>
         </div>
-        <Card className="overflow-x-auto">
-          <ArchitectureDiagram />
-        </Card>
+        <ArchitectureDiagram />
       </section>
 
       {/* Highlights */}
