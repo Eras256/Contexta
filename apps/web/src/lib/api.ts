@@ -182,9 +182,15 @@ export interface AiStatus {
 }
 
 export async function fetchAiStatus(): Promise<AiStatus> {
-  const res = await fetch(`${API_URL}/api/v1/public/ai`, { cache: "no-store" });
-  if (!res.ok) return { live: false, provider: "none", model: null };
-  return (await res.json()) as AiStatus;
+  const off: AiStatus = { live: false, provider: "none", model: null };
+  try {
+    const res = await fetch(`${API_URL}/api/v1/public/ai`, { cache: "no-store" });
+    if (!res.ok) return off;
+    return (await res.json()) as AiStatus;
+  } catch {
+    // API unreachable (down / CORS / offline) — degrade gracefully, never crash.
+    return off;
+  }
 }
 
 export const apiBaseUrl = API_URL;
