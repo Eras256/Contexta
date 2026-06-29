@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AuthControls } from "@/components/AuthControls";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { AiSelector } from "@/components/AiSelector";
 import { useT } from "@/lib/i18n";
 
 const SECTIONS = [
@@ -53,6 +54,7 @@ export function Navbar() {
           <Link href="/treasury" className="btn-ghost hidden sm:inline-flex">
             {t("nav.workspace")}
           </Link>
+          <AiSelector />
           <LanguageSelector />
           <AuthControls />
         </div>

@@ -9,11 +9,23 @@ import type { LegalContextService } from "./legalContextService.js";
 import type { AuditService } from "./auditService.js";
 import type { DefindexClient } from "../integrations/defindex.js";
 import type { BlendClient } from "../integrations/blend.js";
+import type { AiAdvisor } from "../integrations/ai.js";
 
 export interface RebalancePlan {
   action: AgentDecision["action"];
   rationale: string;
   payload: Record<string, unknown>;
+}
+
+/**
+ * Per-call planning options — the dashboard AI selector can run the agent with
+ * any provider's own key (BYOK) for one request; the autonomous worker passes
+ * none of these and uses the server-configured provider (OpenAI on Fly).
+ */
+export interface PlanOptions {
+  aiProvider?: string;
+  aiModel?: string;
+  aiApiKey?: string;
 }
 
 /** Planning horizon: obligations due within this many days drive liquidity need. */
@@ -25,10 +37,11 @@ const DEFAULT_YIELD_VAULT = "vault_cetes_rwa_001";
 const HEARTBEAT_BPS = 100;
 
 /**
- * The agent. This is the orchestration layer — deterministic, auditable, and
- * intentionally free of any embedded LLM. An external AI system can be plugged
- * in at `plan()` to refine the proposal, but the platform never lets it bypass
- * the risk constraints or the legal-context binding enforced on execution.
+ * The agent. This is the orchestration layer — deterministic and auditable for
+ * the actual on-chain decision. A pluggable LLM (the {@link AiAdvisor}) is wired
+ * in at `plan()` to write the human-readable rationale, but the platform never
+ * lets it change the action/amount, bypass the risk constraints, or skip the
+ * legal-context binding enforced on execution. The LLM explains; it never bypasses.
  */
 export class AgentService {
   constructor(
@@ -40,6 +53,7 @@ export class AgentService {
     private readonly oracle: Oracle,
     private readonly legal: LegalContextService,
     private readonly audit: AuditService,
+    private readonly ai: AiAdvisor,
     private readonly logger: Logger,
   ) {}
 
@@ -180,11 +194,13 @@ export class AgentService {
   }
 
   /**
-   * Pure-ish planner: given the current snapshot, obligations and FX volatility,
-   * decide whether to move excess liquidity into yield or pull yield back to
-   * cover upcoming payroll. Returns a single best action (or noop).
+   * Planner: given the current snapshot, obligations and FX volatility, decide
+   * whether to move excess liquidity into yield or pull yield back to cover
+   * upcoming payroll. The action and amount are computed deterministically; when
+   * an LLM provider is configured the rationale is then written by the AI
+   * reasoning layer (the action/amount are never changed by it).
    */
-  async plan(tenantId: string, country: Country): Promise<RebalancePlan> {
+  async plan(tenantId: string, country: Country, opts?: PlanOptions): Promise<RebalancePlan> {
     const [snapshot, obligations, fx] = await Promise.all([
       this.treasury.snapshot(tenantId),
       this.payroll.upcomingObligations(tenantId),
@@ -215,12 +231,14 @@ export class AgentService {
     const maxYield = applyBps(total, snapshot.config.maxYieldBps);
     const currentYield = BigInt(snapshot.totals.yieldBaseUnits);
 
+    let result: RebalancePlan | null = null;
+
     if (liquid > requiredLiquidity) {
       const excess = liquid - requiredLiquidity;
       const yieldRoom = maxYield > currentYield ? maxYield - currentYield : 0n;
       const moveAmount = bigMin(excess, yieldRoom);
       if (moveAmount > 0n) {
-        return {
+        result = {
           action: "deposit_vault",
           rationale:
             `Liquid ${fromBaseUnits(liquid)} exceeds required ${fromBaseUnits(requiredLiquidity)} ` +
@@ -233,7 +251,7 @@ export class AgentService {
     } else if (liquid < requiredLiquidity && currentYield > 0n) {
       const shortfall = requiredLiquidity - liquid;
       const moveAmount = bigMin(shortfall, currentYield);
-      return {
+      result = {
         action: "withdraw_vault",
         rationale:
           `Liquid ${fromBaseUnits(liquid)} below required ${fromBaseUnits(requiredLiquidity)} ` +
@@ -242,32 +260,72 @@ export class AgentService {
       };
     }
 
-    // Band rebalance heartbeat: keep funds actively cycling inside the safe band
-    // (above the liquidity floor, below the yield cap) so the agent is always
-    // working and settling a real on-chain transaction every cycle.
-    const heartbeat = bigMax(applyBps(total, HEARTBEAT_BPS), 1n);
-    const yieldHeadroom = maxYield > currentYield ? maxYield - currentYield : 0n;
-    const liquidHeadroom = liquid > requiredLiquidity ? liquid - requiredLiquidity : 0n;
-    if (yieldHeadroom >= heartbeat && liquidHeadroom >= heartbeat) {
-      return {
-        action: "deposit_vault",
-        rationale: `Band rebalance: moving ${fromBaseUnits(heartbeat)} into yield, keeping allocation inside the target band.`,
-        payload: this.movePayload("liquidity", "defindex_vault", heartbeat, fx),
-      };
+    if (!result) {
+      // Band rebalance heartbeat: keep funds actively cycling inside the safe band
+      // (above the liquidity floor, below the yield cap) so the agent is always
+      // working and settling a real on-chain transaction every cycle.
+      const heartbeat = bigMax(applyBps(total, HEARTBEAT_BPS), 1n);
+      const yieldHeadroom = maxYield > currentYield ? maxYield - currentYield : 0n;
+      const liquidHeadroom = liquid > requiredLiquidity ? liquid - requiredLiquidity : 0n;
+      if (yieldHeadroom >= heartbeat && liquidHeadroom >= heartbeat) {
+        result = {
+          action: "deposit_vault",
+          rationale: `Band rebalance: moving ${fromBaseUnits(heartbeat)} into yield, keeping allocation inside the target band.`,
+          payload: this.movePayload("liquidity", "defindex_vault", heartbeat, fx),
+        };
+      } else if (currentYield >= heartbeat) {
+        result = {
+          action: "withdraw_vault",
+          rationale: `Band rebalance: returning ${fromBaseUnits(heartbeat)} to the liquid reserve, keeping allocation inside the target band.`,
+          payload: this.movePayload("defindex_vault", "liquidity", heartbeat, fx),
+        };
+      }
     }
-    if (currentYield >= heartbeat) {
-      return {
-        action: "withdraw_vault",
-        rationale: `Band rebalance: returning ${fromBaseUnits(heartbeat)} to the liquid reserve, keeping allocation inside the target band.`,
-        payload: this.movePayload("defindex_vault", "liquidity", heartbeat, fx),
+
+    if (!result) {
+      result = {
+        action: "noop",
+        rationale: "Treasury within the target band and at its limits; holding this cycle.",
+        payload: { liquid: fromBaseUnits(liquid), requiredLiquidity: fromBaseUnits(requiredLiquidity) },
       };
     }
 
-    return {
-      action: "noop",
-      rationale: "Treasury within the target band and at its limits; holding this cycle.",
-      payload: { liquid: fromBaseUnits(liquid), requiredLiquidity: fromBaseUnits(requiredLiquidity) },
-    };
+    // Reasoning layer: when an LLM is available — the server-configured provider
+    // (the autonomous Fly agent) OR a per-request BYOK key from the dashboard
+    // selector — let it write the rationale for a real action. It never changes
+    // the action or amount; any failure leaves the deterministic rationale intact.
+    const byok = Boolean(opts?.aiApiKey && opts?.aiProvider);
+    if (result.action !== "noop" && this.ai && (this.ai.live || byok)) {
+      const p = result.payload as { amountBaseUnits?: string; asset?: string };
+      const advice = await this.ai.advise(
+        {
+          action: result.action,
+          amount: fromBaseUnits(BigInt(p.amountBaseUnits ?? "0")),
+          asset: p.asset ?? "USDC",
+          liquid: fromBaseUnits(liquid),
+          requiredLiquidity: fromBaseUnits(requiredLiquidity),
+          currentYield: fromBaseUnits(currentYield),
+          obligationSum: fromBaseUnits(obligationSum),
+          fxPair: fx.pair,
+          fxVolatility: fx.volatility,
+          country,
+        },
+        { provider: opts?.aiProvider, model: opts?.aiModel, apiKey: opts?.aiApiKey },
+      );
+      if (advice) {
+        result = {
+          ...result,
+          rationale: advice.rationale,
+          payload: {
+            ...result.payload,
+            ai: { provider: opts?.aiProvider || this.ai.provider, model: opts?.aiModel || this.ai.model },
+            ...(advice.risk ? { aiRisk: advice.risk } : {}),
+          },
+        };
+      }
+    }
+
+    return result;
   }
 
   private movePayload(
@@ -288,8 +346,8 @@ export class AgentService {
   }
 
   /** Persist a plan as a proposed decision (status: proposed). */
-  async propose(tenantId: string, country: Country): Promise<AgentDecision> {
-    const plan = await this.plan(tenantId, country);
+  async propose(tenantId: string, country: Country, opts?: PlanOptions): Promise<AgentDecision> {
+    const plan = await this.plan(tenantId, country, opts);
     const current = await this.legal.getForTenant(tenantId);
     const decision: AgentDecision = {
       id: randomUUID(),

@@ -89,12 +89,30 @@ export const api = {
   employees: (auth: ApiAuth) => request<PayrollEmployee[]>("/payroll/employees", auth),
   decisions: (auth: ApiAuth) => request<Decision[]>("/agent/decisions", auth),
   legal: (auth: ApiAuth) => request<LegalState>("/legal", auth),
-  propose: (auth: ApiAuth, execute: boolean) =>
+  propose: (auth: ApiAuth, execute: boolean, ai?: { provider?: string; model?: string; apiKey?: string }) =>
     request<Decision>("/agent/propose", auth, {
       method: "POST",
-      body: JSON.stringify({ execute }),
+      body: JSON.stringify({
+        execute,
+        ...(ai?.provider ? { aiProvider: ai.provider } : {}),
+        ...(ai?.model ? { aiModel: ai.model } : {}),
+        ...(ai?.apiKey ? { aiApiKey: ai.apiKey } : {}),
+      }),
     }),
 };
+
+/** Live status of the LLM powering the agent's reasoning (public, no auth). */
+export interface AiStatus {
+  live: boolean;
+  provider: string;
+  model: string | null;
+}
+
+export async function fetchAiStatus(): Promise<AiStatus> {
+  const res = await fetch(`${API_URL}/api/v1/public/ai`, { cache: "no-store" });
+  if (!res.ok) return { live: false, provider: "none", model: null };
+  return (await res.json()) as AiStatus;
+}
 
 export const apiBaseUrl = API_URL;
 

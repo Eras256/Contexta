@@ -25,7 +25,11 @@ export function agentRouter(): Router {
       const ctx = requireCtx(req);
       const body = proposeSchema.parse(req.body);
       const tenant = await req.container.repo.getTenant(ctx.tenantId);
-      const decision = await req.container.agent.propose(ctx.tenantId, tenant.country);
+      const decision = await req.container.agent.propose(ctx.tenantId, tenant.country, {
+        aiProvider: body.aiProvider,
+        aiModel: body.aiModel,
+        aiApiKey: body.aiApiKey,
+      });
 
       if (body.execute && decision.action !== "noop") {
         const executed = await req.container.agent.execute(

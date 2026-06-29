@@ -66,6 +66,7 @@ function buildAgent(opts: {
     oracle,
     {} as never,
     {} as never,
+    {} as never, // ai advisor — not live in plan tests (deterministic fallback)
     logger,
   );
 }

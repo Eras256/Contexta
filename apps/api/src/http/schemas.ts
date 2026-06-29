@@ -62,6 +62,13 @@ export const publishLegalSchema = z.object({
 
 export const proposeSchema = z.object({
   execute: z.boolean().default(false),
+  // Optional per-request override of the LLM that writes the rationale (the
+  // dashboard AI selector). `aiProvider` is a known provider id (the server maps
+  // it to an OpenAI-compatible base URL); with `aiApiKey` this is a BYOK run.
+  // Without a key, only `aiModel` applies (uses the server-configured provider).
+  aiProvider: z.enum(["openai", "openrouter", "groq", "deepseek", "xai", "together"]).optional(),
+  aiModel: z.string().min(1).max(96).optional(),
+  aiApiKey: z.string().min(1).max(400).optional(),
 });
 
 export const vaultCreateSchema = z.object({

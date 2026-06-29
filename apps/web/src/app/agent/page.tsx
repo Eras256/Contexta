@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { Badge, Card, KeyValue, SectionHeader } from "@/components/ui";
 import { shortHash, localDateTime } from "@/lib/format";
 import { api, apiBaseUrl, type Decision, type LegalState } from "@/lib/api";
+import { getAiConfig } from "@/lib/aiModel";
 import { useLiveData } from "@/lib/useLiveData";
 import { useT } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
@@ -16,9 +18,11 @@ interface LegalDoc {
 
 export default function AgentPage() {
   const t = useT();
-  const { accessToken, connect, connecting } = useAuth();
+  const { accessToken, tenantId, connect, connecting } = useAuth();
   const decisions = useLiveData<Decision[]>(api.decisions, [], { realtimeTable: "agent_decisions" });
   const legal = useLiveData<LegalState>(api.legal, { published: false });
+  const [running, setRunning] = useState(false);
+  const [runMsg, setRunMsg] = useState<string | null>(null);
 
   // Localized helpers with graceful fallback to the raw value.
   const tf = (key: string, fallback: string) => {
@@ -28,6 +32,28 @@ export default function AgentPage() {
   const actionLabel = (a: string) => tf(`pages.agent.actions.${a}`, a);
   const statusLabel = (s: string) => tf(`pages.agent.status.${s}`, s);
   const countryLabel = (c: string) => tf(`pages.agent.countries.${c}`, c);
+
+  // Run one real agent cycle now, powered by the AI model chosen in the navbar.
+  // The rationale is written by that LLM; the decision settles on-chain and
+  // streams back into the feed via Realtime.
+  const runAgent = async () => {
+    if (!accessToken || !tenantId || running) return;
+    setRunning(true);
+    setRunMsg(null);
+    try {
+      const ai = getAiConfig() ?? undefined;
+      const d = await api.propose({ accessToken, tenantId }, true, ai);
+      setRunMsg(
+        d.action === "noop"
+          ? tf("pages.agent.runNoop", "Agent evaluated — treasury within band, no move needed.")
+          : tf("pages.agent.runOk", "Agent ran — decision settled on-chain."),
+      );
+    } catch (e) {
+      setRunMsg(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRunning(false);
+    }
+  };
 
   if (!accessToken) {
     return (
@@ -135,8 +161,16 @@ export default function AgentPage() {
 
       {/* Agent decisions (real, with on-chain receipts) */}
       <Card>
-        <h3 className="mb-1 text-sm font-semibold text-white">{t("pages.agent.activityTitle")}</h3>
+        <div className="mb-1 flex flex-wrap items-start justify-between gap-2">
+          <h3 className="text-sm font-semibold text-white">{t("pages.agent.activityTitle")}</h3>
+          <button className="btn-ghost text-xs" onClick={() => void runAgent()} disabled={running}>
+            {running ? tf("pages.agent.running", "Running…") : tf("pages.agent.runNow", "Run agent")}
+          </button>
+        </div>
         <p className="mb-4 text-xs text-slate-400">{t("pages.agent.activityBody")}</p>
+        {runMsg && (
+          <p className="mb-4 rounded-lg border border-white/10 bg-ink-900/60 px-3 py-2 text-xs text-slate-300">{runMsg}</p>
+        )}
         <div className="space-y-3">
           {decisions.data.map((d) => (
             <div key={d.id} className="rounded-lg border border-white/10 bg-ink-900/60 p-4">

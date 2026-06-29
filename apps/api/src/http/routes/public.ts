@@ -66,6 +66,21 @@ export function publicRouter(): Router {
     }
   });
 
+  /**
+   * Public, read-only status of the LLM that powers the agent's reasoning. Lets
+   * the UI show (and the navbar selector reflect) which AI is live. Exposes no
+   * secrets — only provider + model when configured.
+   */
+  router.get("/ai", (req, res) => {
+    const ai = req.container.ai;
+    res.setHeader("cache-control", "public, max-age=30");
+    res.json({
+      live: ai.live,
+      provider: ai.live ? ai.provider : "none",
+      model: ai.live ? ai.model : null,
+    });
+  });
+
   /** Public, read-only snapshot of the live Blend pool reserve the platform lends into. */
   router.get("/blend", async (req, res, next) => {
     try {

@@ -87,6 +87,15 @@ export const serverEnvSchema = baseEnvSchema.extend({
   FX_API_URL: z.string().url().optional().or(z.literal("")),
   FX_API_KEY: z.string().optional().or(z.literal("")),
 
+  // AI advisor — the LLM that writes the agent's reasoning. Provider-neutral via
+  // an OpenAI-compatible Chat Completions endpoint (OpenAI, OpenRouter, a local
+  // model, …). `none` keeps the agent fully deterministic (the default). The LLM
+  // only explains decisions; it never changes the action or bypasses risk limits.
+  AI_PROVIDER: z.enum(["none", "openai"]).default("none"),
+  AI_MODEL: z.string().default("gpt-4o-mini"),
+  OPENAI_API_KEY: z.string().optional().or(z.literal("")),
+  OPENAI_BASE_URL: z.string().url().default("https://api.openai.com/v1"),
+
   // Wallet auth (Sign In With Stellar). Session JWTs are signed with the
   // Supabase JWT secret (HS256) so they also authorize Supabase Realtime/RLS.
   // A freshly-connected wallet auto-joins this tenant with AUTH_DEMO_ROLE (demo

@@ -12,7 +12,13 @@ export function AuthControls() {
   const t = useT();
 
   if (loading) {
-    return <span className="text-xs text-slate-500">…</span>;
+    // Show the connect button immediately (disabled) instead of a bare ellipsis,
+    // so the wallet CTA is always visible while the session restores.
+    return (
+      <button className="btn-primary" disabled>
+        {t("auth.connect")}
+      </button>
+    );
   }
 
   if (address) {

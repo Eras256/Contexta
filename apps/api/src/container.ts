@@ -4,6 +4,7 @@ import { env } from "./env.js";
 import { Repository } from "./db/repository.js";
 import { DefindexClient } from "./integrations/defindex.js";
 import { BlendClient } from "./integrations/blend.js";
+import { AiAdvisor } from "./integrations/ai.js";
 import { SorobanGateway } from "./integrations/soroban.js";
 import { createOracle, type Oracle } from "./integrations/oracle.js";
 import { AuditService } from "./services/auditService.js";
@@ -26,6 +27,7 @@ export interface Container {
   blend: BlendClient;
   soroban: SorobanGateway;
   oracle: Oracle;
+  ai: AiAdvisor;
   audit: AuditService;
   legal: LegalContextService;
   treasury: TreasuryService;
@@ -91,12 +93,21 @@ export function createContainer(): Container {
     logger,
   );
   const oracle = createOracle(config, logger);
+  const ai = new AiAdvisor(
+    {
+      provider: config.AI_PROVIDER,
+      model: config.AI_MODEL,
+      apiKey: config.OPENAI_API_KEY || undefined,
+      baseUrl: config.OPENAI_BASE_URL,
+    },
+    logger,
+  );
 
   const audit = new AuditService(repo);
   const legal = new LegalContextService(repo, logger);
   const treasury = new TreasuryService(repo, defindex, blend, soroban, legal, audit, logger);
   const payroll = new PayrollService(repo, soroban, legal, audit, logger);
-  const agent = new AgentService(repo, treasury, defindex, blend, payroll, oracle, legal, audit, logger);
+  const agent = new AgentService(repo, treasury, defindex, blend, payroll, oracle, legal, audit, ai, logger);
   const walletAuth = new WalletAuthService(repo, config, logger);
 
   return {
@@ -107,6 +118,7 @@ export function createContainer(): Container {
     blend,
     soroban,
     oracle,
+    ai,
     audit,
     legal,
     treasury,
