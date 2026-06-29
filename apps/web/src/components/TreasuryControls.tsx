@@ -99,6 +99,17 @@ function TxLink({ hash }: { hash: string }) {
   );
 }
 
+/** Turn raw on-chain / API error strings into one readable line. */
+function friendlyError(m: string): string {
+  const s = m.toLowerCase();
+  if (/declin|reject|cancel/.test(s)) return "Signature cancelled in your wallet.";
+  if (/txbadseq|bad.?seq/.test(s)) return "Network busy — a previous tx is still settling. Wait a few seconds and retry.";
+  if (/insufficientbalance|insufficient balance/.test(s)) return "Amount exceeds your position here. Try a smaller amount (e.g. withdraw a bit less than you supplied).";
+  if (/trustline/.test(s)) return "Your wallet needs a trustline for this asset first.";
+  if (/underfunded|txinsufficient/.test(s)) return "Your wallet doesn't have enough balance for this amount plus fees.";
+  return m.length > 180 ? `${m.slice(0, 180)}…` : m;
+}
+
 function RebalancePanel({ auth, address }: { auth: ApiAuth; address: string | null }) {
   const [amount, setAmount] = useState("1");
   const [venue, setVenue] = useState<"blend" | "defindex">("blend");
@@ -119,9 +130,9 @@ function RebalancePanel({ auth, address }: { auth: ApiAuth; address: string | nu
     setBusy(true);
     setMsg(null);
     setTx(null);
-    try {
-      // Self-custody everywhere: build the tx → user signs in Freighter → submit.
-      setMsg("Preparing transaction…");
+
+    // One self-custody attempt: build → user signs in Freighter → submit.
+    const attempt = async (): Promise<string> => {
       const { xdr } = await api.prepareMove(auth, {
         venue,
         direction: direction === "in" ? "supply" : "withdraw",
@@ -133,11 +144,28 @@ function RebalancePanel({ auth, address }: { auth: ApiAuth; address: string | nu
       const signed = await signWalletTransaction(xdr, address);
       setMsg("Submitting…");
       const r = await api.submitMove(auth, signed);
-      setTx(r.txHash);
+      return r.txHash;
+    };
+
+    try {
+      setMsg("Preparing transaction…");
+      let txHash: string;
+      try {
+        txHash = await attempt();
+      } catch (e) {
+        const m = e instanceof Error ? e.message : String(e);
+        // Sequence race with a still-settling tx → re-prepare with a fresh seq (one retry).
+        if (/txbadseq|bad.?seq/i.test(m)) {
+          setMsg("A previous tx is still settling — retrying with a fresh sequence…");
+          txHash = await attempt();
+        } else {
+          throw e;
+        }
+      }
+      setTx(txHash);
       setMsg("Signed by you — settled on-chain:");
     } catch (e) {
-      const m = e instanceof Error ? e.message : String(e);
-      setMsg(/declin|reject|cancel/i.test(m) ? "Signature cancelled." : m);
+      setMsg(friendlyError(e instanceof Error ? e.message : String(e)));
     } finally {
       setBusy(false);
     }
