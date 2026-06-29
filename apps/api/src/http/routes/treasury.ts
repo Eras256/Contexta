@@ -9,6 +9,20 @@ import {
   treasuryConfigSchema,
 } from "../schemas.js";
 
+/**
+ * Recursively convert BigInt → string so a Soroban contract's native return
+ * value (e.g. an i128 position decoded as BigInt) survives `res.json()`.
+ * `JSON.stringify` throws on BigInt, which otherwise surfaces as a 500.
+ */
+function jsonSafe(v: unknown): unknown {
+  if (typeof v === "bigint") return v.toString();
+  if (Array.isArray(v)) return v.map(jsonSafe);
+  if (v && typeof v === "object") {
+    return Object.fromEntries(Object.entries(v as Record<string, unknown>).map(([k, val]) => [k, jsonSafe(val)]));
+  }
+  return v;
+}
+
 export function treasuryRouter(): Router {
   const router = Router();
 
@@ -140,7 +154,7 @@ export function treasuryRouter(): Router {
           detail: { txHash: r.txHash, selfCustody: true },
           legalContextId: binding.contextId,
         });
-        res.json({ txHash: r.txHash, legalContextHash: binding.hash, returnValue: r.returnValue });
+        res.json({ txHash: r.txHash, legalContextHash: binding.hash, returnValue: jsonSafe(r.returnValue) });
       } catch (opErr) {
         res.status(400).json({ error: opErr instanceof Error ? opErr.message : String(opErr) });
       }
