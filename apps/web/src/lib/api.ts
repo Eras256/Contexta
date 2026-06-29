@@ -170,11 +170,11 @@ export const api = {
       body: JSON.stringify({ signedXdr }),
     }),
 
-  /** Create / register a yield vault (DeFindex factory; returns the live vault). */
-  createVault: (auth: ApiAuth, vault: { name: string; asset: string; strategy: string }) =>
-    request<{ vaultId?: string; name?: string }>("/integrations/defindex/vaults", auth, {
+  /** Step 1: build an unsigned factory create-vault tx for the user to sign (self-custody deploy). */
+  prepareCreateVault: (auth: ApiAuth, body: { asset: "XLM" | "USDC"; name: string; address: string }) =>
+    request<{ xdr: string }>("/integrations/defindex/vaults/prepare", auth, {
       method: "POST",
-      body: JSON.stringify(vault),
+      body: JSON.stringify(body),
     }),
 };
 

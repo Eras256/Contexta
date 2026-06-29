@@ -210,6 +210,38 @@ export class DefindexClient {
     return xdr;
   }
 
+  /**
+   * Build an UNSIGNED factory `create_defindex_vault` tx whose caller + roles are
+   * the user's own wallet — a REAL, self-custody vault deployment. The frontend
+   * signs it in Freighter and submits; the new vault is managed by the user.
+   * Restricted to the XLM·Blend strategy (the deployed testnet combo).
+   */
+  async buildCreateVaultXdr(userAddress: string, asset: string, name: string): Promise<string> {
+    if (!this.live) throw new Error("DeFindex not live");
+    if (asset !== "XLM") {
+      throw new Error("Only XLM·Blend vaults are deployable on testnet (no USDC strategy deployed).");
+    }
+    // Known-good testnet combo: the XLM Stellar Asset Contract + the XLM·Blend strategy.
+    const XLM_SAC = "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC";
+    const XLM_BLEND_STRATEGY = "CDVLOSPJPQOTB6ZCWO5VSGTOLGMKTXSFWYTUP572GTPNOWX4F76X3HPM";
+    const r = await this.request<{ xdr?: string; error?: string }>("POST", "/factory/create-vault", {
+      caller: userAddress,
+      roles: {
+        manager: userAddress,
+        emergencyManager: userAddress,
+        rebalanceManager: userAddress,
+        feeReceiver: userAddress,
+      },
+      vaultFeeBps: 0,
+      assets: [{ address: XLM_SAC, strategies: [{ address: XLM_BLEND_STRATEGY, name: "Blend XLM", paused: false }] }],
+      name: name.slice(0, 32) || "Corporate Vault",
+      symbol: "CXVLT",
+      upgradable: true,
+    });
+    if (!r.xdr) throw new Error(`Factory create-vault failed: ${r.error ?? "no xdr returned"}`);
+    return r.xdr;
+  }
+
   /** Get unsigned XDR from DeFindex, sign locally, submit via /send. */
   private async signedTx(path: string, body: unknown): Promise<{ tvlBaseUnits: string; txHash?: string }> {
     if (!this.canWrite) throw new Error("DeFindex writes disabled (missing vault/signer)");

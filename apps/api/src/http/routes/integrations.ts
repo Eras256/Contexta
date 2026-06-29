@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireCapability } from "../middleware/rbac.js";
 import { requireCtx } from "../context.js";
-import { blendOpSchema, vaultCreateSchema } from "../schemas.js";
+import { blendOpSchema, createVaultPrepareSchema, vaultCreateSchema } from "../schemas.js";
 
 export function integrationsRouter(): Router {
   const router = Router();
@@ -23,6 +23,24 @@ export function integrationsRouter(): Router {
       const r = await req.container.defindex.createVault(body);
       if (!r.ok) throw r.error;
       res.status(201).json(r.value);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Self-custody vault deploy: build an unsigned factory create-vault tx for the
+  // user to sign in Freighter; submit via /treasury/submit. Returns the on-chain
+  // error if the combo isn't deployable on testnet.
+  router.post("/defindex/vaults/prepare", requireCapability("integrations.manage"), async (req, res, next) => {
+    try {
+      requireCtx(req);
+      const b = createVaultPrepareSchema.parse(req.body);
+      try {
+        const xdr = await req.container.defindex.buildCreateVaultXdr(b.address, b.asset, b.name);
+        res.json({ xdr });
+      } catch (opErr) {
+        res.status(400).json({ error: opErr instanceof Error ? opErr.message : String(opErr) });
+      }
     } catch (e) {
       next(e);
     }

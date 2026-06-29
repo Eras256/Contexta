@@ -99,7 +99,7 @@ export function TreasuryControls({
       </div>
 
       <div className="mt-4">
-        <CreateVaultPanel auth={auth} />
+        <CreateVaultPanel auth={auth} address={address} />
       </div>
     </Card>
   );
@@ -333,23 +333,34 @@ function RiskPanel({
   );
 }
 
-function CreateVaultPanel({ auth }: { auth: ApiAuth }) {
+function CreateVaultPanel({ auth, address }: { auth: ApiAuth; address: string | null }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("Corporate Vault");
-  const [asset, setAsset] = useState("USDC");
-  const [strategy, setStrategy] = useState("blend");
+  const [asset, setAsset] = useState<"XLM" | "USDC">("XLM");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [tx, setTx] = useState<string | null>(null);
+  const selectCls =
+    "rounded-lg border border-white/15 bg-ink-900 px-2.5 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand";
 
   const create = async () => {
     if (busy) return;
+    if (!address) return setMsg("Connect a wallet first.");
     setBusy(true);
     setMsg(null);
+    setTx(null);
     try {
-      const v = await api.createVault(auth, { name, asset, strategy });
-      setMsg(v.vaultId ? `Vault ready · ${v.vaultId.slice(0, 8)}…` : "Vault registered.");
+      // Real factory deploy: build → sign in Freighter → submit. You own the vault.
+      setMsg("Preparing deploy…");
+      const { xdr } = await api.prepareCreateVault(auth, { asset, name, address });
+      setMsg("Approve in your wallet…");
+      const signed = await signWalletTransaction(xdr, address);
+      setMsg("Deploying vault on-chain…");
+      const r = await api.submitMove(auth, signed);
+      setTx(r.txHash);
+      setMsg("Vault deployed — signed by you:");
     } catch (e) {
-      setMsg(e instanceof Error ? e.message.replace(/^API[^:]*:\s*/, "") : String(e));
+      setMsg(friendlyError(e instanceof Error ? e.message : String(e)));
     } finally {
       setBusy(false);
     }
@@ -360,29 +371,36 @@ function CreateVaultPanel({ auth }: { auth: ApiAuth }) {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-white">Vaults</p>
-          <p className="mt-0.5 text-xs text-slate-500">Register a yield vault the agent can allocate into.</p>
+          <p className="mt-0.5 text-xs text-slate-500">Deploy a yield vault you own — real factory deploy, signed by your wallet.</p>
         </div>
         <button onClick={() => setOpen((o) => !o)} className="btn-ghost px-3 py-1.5 text-xs">
           {open ? "Cancel" : "New vault"}
         </button>
       </div>
       {open && (
-        <div className="mt-3 grid gap-2 sm:grid-cols-3">
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" className="rounded-lg border border-white/15 bg-ink-900 px-2.5 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand" />
-          <select value={asset} onChange={(e) => setAsset(e.target.value)} className="rounded-lg border border-white/15 bg-ink-900 px-2.5 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand">
-            <option>USDC</option>
-            <option>XLM</option>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name"
+            maxLength={32}
+            className={selectCls}
+          />
+          <select value={asset} onChange={(e) => setAsset(e.target.value as "XLM" | "USDC")} className={selectCls}>
+            <option value="XLM">XLM · Blend</option>
+            <option value="USDC">USDC (no testnet strategy)</option>
           </select>
-          <select value={strategy} onChange={(e) => setStrategy(e.target.value)} className="rounded-lg border border-white/15 bg-ink-900 px-2.5 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-brand">
-            <option value="blend">Blend</option>
-            <option value="defindex">DeFindex</option>
-          </select>
-          <button onClick={() => void create()} disabled={busy} className="btn-primary justify-center px-3 py-2 text-xs disabled:opacity-40 sm:col-span-3">
-            {busy ? "Creating…" : "Create vault"}
+          <button onClick={() => void create()} disabled={busy} className="btn-primary justify-center px-3 py-2 text-xs disabled:opacity-40 sm:col-span-2">
+            {busy ? "…" : "Create vault"}
           </button>
         </div>
       )}
-      {msg && <p className="mt-2 break-words text-[11px] text-slate-400">{msg}</p>}
+      {(msg || tx) && (
+        <p className="mt-2 flex flex-wrap items-center gap-1.5 break-words text-[11px] text-slate-400">
+          <span>{msg}</span>
+          {tx && <TxLink hash={tx} />}
+        </p>
+      )}
     </div>
   );
 }

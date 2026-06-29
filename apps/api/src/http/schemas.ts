@@ -100,6 +100,13 @@ export const vaultCreateSchema = z.object({
   strategy: z.string().min(1),
 });
 
+/** Build an unsigned factory create-vault tx for the user to sign (self-custody deploy). */
+export const createVaultPrepareSchema = z.object({
+  asset: z.enum(["XLM", "USDC"]),
+  name: z.string().min(1).max(32),
+  address: z.string().regex(/^G[A-Z2-7]{55}$/u, "Expected a Stellar public key (G...)"),
+});
+
 export const blendOpSchema = z.object({
   asset: z.string().min(1),
   amountBaseUnits: z.string().regex(/^\d+$/u),
