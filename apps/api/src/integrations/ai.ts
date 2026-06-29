@@ -48,7 +48,11 @@ export interface AiOverride {
   provider?: string;
   model?: string;
   apiKey?: string;
+  /** UI language code (en|es|pt) — the rationale is written in this language. */
+  language?: string;
 }
+
+const LANGUAGE_NAMES: Record<string, string> = { es: "Spanish", pt: "Portuguese", en: "English" };
 
 export interface AiAdvice {
   rationale: string;
@@ -132,6 +136,13 @@ export class AiAdvisor {
     // they still return JSON because the system prompt mandates it.
     const useJsonMode = (AI_PROVIDERS as Record<string, { jsonMode?: boolean }>)[provider]?.jsonMode !== false;
 
+    // Write the rationale in the caller's UI language (defaults to English).
+    const langName = override?.language ? LANGUAGE_NAMES[override.language] : undefined;
+    const systemPrompt =
+      langName && override?.language !== "en"
+        ? `${SYSTEM_PROMPT} Write the "rationale" and "risk" values in ${langName}.`
+        : SYSTEM_PROMPT;
+
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS);
     try {
@@ -151,7 +162,7 @@ export class AiAdvisor {
           max_tokens: 220,
           ...(useJsonMode ? { response_format: { type: "json_object" } } : {}),
           messages: [
-            { role: "system", content: SYSTEM_PROMPT },
+            { role: "system", content: systemPrompt },
             { role: "user", content: JSON.stringify(ctx) },
           ],
         }),

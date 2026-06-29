@@ -101,7 +101,12 @@ export const api = {
   employees: (auth: ApiAuth) => request<PayrollEmployee[]>("/payroll/employees", auth),
   decisions: (auth: ApiAuth) => request<Decision[]>("/agent/decisions", auth),
   legal: (auth: ApiAuth) => request<LegalState>("/legal", auth),
-  propose: (auth: ApiAuth, execute: boolean, ai?: { provider?: string; model?: string; apiKey?: string }) =>
+  propose: (
+    auth: ApiAuth,
+    execute: boolean,
+    ai?: { provider?: string; model?: string; apiKey?: string },
+    locale?: string,
+  ) =>
     request<Decision>("/agent/propose", auth, {
       method: "POST",
       body: JSON.stringify({
@@ -109,6 +114,7 @@ export const api = {
         ...(ai?.provider ? { aiProvider: ai.provider } : {}),
         ...(ai?.model ? { aiModel: ai.model } : {}),
         ...(ai?.apiKey ? { aiApiKey: ai.apiKey } : {}),
+        ...(locale ? { locale } : {}),
       }),
     }),
 

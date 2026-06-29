@@ -92,6 +92,9 @@ export const proposeSchema = z.object({
   aiProvider: z.enum(["openai", "anthropic", "openrouter", "groq", "deepseek", "xai", "together"]).optional(),
   aiModel: z.string().min(1).max(96).optional(),
   aiApiKey: z.string().min(1).max(400).optional(),
+  // UI language for the LLM-written rationale (the autonomous worker omits it
+  // and keeps the server default, English).
+  locale: z.enum(["en", "es", "pt"]).optional(),
 });
 
 export const vaultCreateSchema = z.object({

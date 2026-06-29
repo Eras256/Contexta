@@ -44,6 +44,7 @@ export function agentRouter(): Router {
         aiProvider: body.aiProvider,
         aiModel: body.aiModel,
         aiApiKey: body.aiApiKey,
+        locale: body.locale,
       });
 
       if (body.execute && decision.action !== "noop") {

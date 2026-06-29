@@ -26,6 +26,8 @@ export interface PlanOptions {
   aiProvider?: string;
   aiModel?: string;
   aiApiKey?: string;
+  /** UI language (en|es|pt) for the LLM rationale; omitted → English. */
+  locale?: string;
 }
 
 /** Planning horizon: obligations due within this many days drive liquidity need. */
@@ -310,7 +312,7 @@ export class AgentService {
           fxVolatility: fx.volatility,
           country,
         },
-        { provider: opts?.aiProvider, model: opts?.aiModel, apiKey: opts?.aiApiKey },
+        { provider: opts?.aiProvider, model: opts?.aiModel, apiKey: opts?.aiApiKey, language: opts?.locale },
       );
       if (advice) {
         result = {

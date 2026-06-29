@@ -6,7 +6,7 @@ import { shortHash, localDateTime } from "@/lib/format";
 import { api, apiBaseUrl, type Decision, type LegalState } from "@/lib/api";
 import { getAiConfig } from "@/lib/aiModel";
 import { useLiveData } from "@/lib/useLiveData";
-import { useT } from "@/lib/i18n";
+import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 
 interface LegalDoc {
@@ -17,7 +17,7 @@ interface LegalDoc {
 }
 
 export default function AgentPage() {
-  const t = useT();
+  const { t, locale } = useI18n();
   const { accessToken, tenantId, connect, connecting } = useAuth();
   const decisions = useLiveData<Decision[]>(api.decisions, [], { realtimeTable: "agent_decisions" });
   const legal = useLiveData<LegalState>(api.legal, { published: false });
@@ -42,7 +42,7 @@ export default function AgentPage() {
     setRunMsg(null);
     try {
       const ai = getAiConfig() ?? undefined;
-      const d = await api.propose({ accessToken, tenantId }, true, ai);
+      const d = await api.propose({ accessToken, tenantId }, true, ai, locale);
       setRunMsg(
         d.action === "noop"
           ? tf("pages.agent.runNoop", "Agent evaluated — treasury within band, no move needed.")
@@ -148,7 +148,7 @@ export default function AgentPage() {
             {consents.map((c) => (
               <div key={c.id} className="rounded-lg border border-white/10 bg-ink-900/60 p-3">
                 <Badge>{c.id}</Badge>
-                <p className="mt-2 text-xs text-slate-400">{c.description}</p>
+                <p className="mt-2 text-xs text-slate-400">{tf(`consents.${c.id}`, c.description)}</p>
               </div>
             ))}
             {consents.length === 0 && (

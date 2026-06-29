@@ -94,11 +94,16 @@ export function SectionHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
       <div>
-        {eyebrow ? <div className="label mb-1 text-brand">{eyebrow}</div> : null}
-        <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{title}</h1>
-        {description ? <p className="mt-2 max-w-2xl text-sm text-slate-400">{description}</p> : null}
+        {eyebrow ? (
+          <div className="label mb-2 flex items-center gap-2 text-brand">
+            <span className="h-px w-6 bg-brand/50" aria-hidden />
+            {eyebrow}
+          </div>
+        ) : null}
+        <h1 className="text-3xl font-semibold tracking-[-0.01em] text-white sm:text-4xl">{title}</h1>
+        {description ? <p className="mt-2.5 max-w-2xl text-sm text-slate-400">{description}</p> : null}
       </div>
       {action}
     </div>

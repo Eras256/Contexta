@@ -83,6 +83,49 @@
   .animate-glow {
     animation: glow-pulse 7s ease-in-out infinite;
   }
+
+  /* Animated aurora field — drifting nebulae fixed behind all content. */
+  .aurora-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -10;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .aurora-bg::before,
+  .aurora-bg::after {
+    content: "";
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(110px);
+    will-change: transform;
+  }
+  .aurora-bg::before {
+    top: -14rem;
+    right: -10rem;
+    height: 52rem;
+    width: 52rem;
+    background: radial-gradient(closest-side, rgba(45, 212, 191, 0.22), transparent);
+    animation: aurora-drift-1 26s ease-in-out infinite alternate;
+  }
+  .aurora-bg::after {
+    bottom: -16rem;
+    left: -10rem;
+    height: 46rem;
+    width: 46rem;
+    background: radial-gradient(closest-side, rgba(167, 139, 250, 0.18), transparent);
+    animation: aurora-drift-2 32s ease-in-out infinite alternate;
+  }
+  @keyframes aurora-drift-1 {
+    to { transform: translate(-7rem, 5rem) scale(1.12); }
+  }
+  @keyframes aurora-drift-2 {
+    to { transform: translate(6rem, -5rem) scale(1.1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .aurora-bg::before,
+    .aurora-bg::after { animation: none; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .animate-fade-up,
     .animate-glow { animation: none; }

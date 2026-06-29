@@ -28,6 +28,10 @@ const en: Dict = {
     selfCustody: "Self-custody means only your wallet can move your money. Contextio never holds it.",
     rebalance: "Rebalancing means moving money between 'ready cash' and 'earning', following your rules.",
   },
+  consents: {
+    "treasury-management": "Authorize the assistant to move idle treasury between ready cash and yield, within your rules.",
+    "payroll-execution": "Authorize scheduled payroll settlement to your listed employees and contractors.",
+  },
   nav: {
     home: "Home",
     treasury: "Treasury",
@@ -344,6 +348,10 @@ const es: Dict = {
     selfCustody: "Autocustodia: solo tu wallet puede mover tu dinero. Contextio nunca lo guarda.",
     rebalance: "Rebalancear es mover dinero entre 'disponible' y 'rindiendo', siguiendo tus reglas.",
   },
+  consents: {
+    "treasury-management": "Autoriza al asistente a mover la tesorería ociosa entre dinero disponible y rendimiento, dentro de tus reglas.",
+    "payroll-execution": "Autoriza el pago de nómina programado a tus empleados y contratistas registrados.",
+  },
   nav: {
     home: "Inicio",
     treasury: "Tesorería",
@@ -659,6 +667,10 @@ const pt: Dict = {
     defindex: "DeFindex é um cofre automático na Stellar que coloca seus fundos em uma estratégia de rendimento para você.",
     selfCustody: "Autocustódia: só a sua carteira move o seu dinheiro. A Contextio nunca o guarda.",
     rebalance: "Rebalancear é mover dinheiro entre 'disponível' e 'rendendo', seguindo as suas regras.",
+  },
+  consents: {
+    "treasury-management": "Autoriza o assistente a mover a tesouraria ociosa entre dinheiro disponível e rendimento, dentro das suas regras.",
+    "payroll-execution": "Autoriza o pagamento de folha programado aos seus funcionários e prestadores cadastrados.",
   },
   nav: {
     home: "Início",

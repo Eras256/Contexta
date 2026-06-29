@@ -27,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body className="min-h-screen">
+        <div className="aurora-bg" aria-hidden />
         <I18nProvider>
           <AuthProvider>
             <div className="flex min-h-screen flex-col">
