@@ -220,10 +220,12 @@ export class BlendClient {
     return this.stellarClient.buildOperationXdr(opXdr, userAddress);
   }
 
-  /** Submit a user-signed Soroban transaction envelope and confirm (60s window). */
-  async submitSignedXdr(signedXdr: string): Promise<{ txHash: string }> {
+  /** Submit a user-signed Soroban transaction envelope and confirm (60s window).
+   *  `returnValue` carries the contract's native return — e.g. the new vault
+   *  address for a factory create-vault. */
+  async submitSignedXdr(signedXdr: string): Promise<{ txHash: string; returnValue: unknown }> {
     const r = await this.stellarClient.submitSignedXdr(signedXdr, 60_000);
-    return { txHash: r.txHash };
+    return { txHash: r.txHash, returnValue: r.returnValue };
   }
 }
 

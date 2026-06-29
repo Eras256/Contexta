@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui";
 import { api, type ApiAuth, type TreasurySnapshot } from "@/lib/api";
 import { signWalletMessage, signWalletTransaction } from "@/lib/wallet";
+import { getVaults, addVault, removeVault, type DeployedVault } from "@/lib/vaults";
 
 /**
  * Manual treasury controls for the dashboard — everything the autonomous agent
@@ -32,6 +33,10 @@ export function TreasuryControls({
   useEffect(() => {
     if (cfgEnabled !== undefined) setAgentEnabled(cfgEnabled);
   }, [cfgEnabled]);
+
+  // Locally-tracked list of the user's deployed vaults (real on-chain).
+  const [vaults, setVaults] = useState<DeployedVault[]>([]);
+  useEffect(() => setVaults(getVaults()), []);
 
   const toggleAgent = async () => {
     if (toggling) return;
@@ -99,8 +104,10 @@ export function TreasuryControls({
       </div>
 
       <div className="mt-4">
-        <CreateVaultPanel auth={auth} address={address} />
+        <CreateVaultPanel auth={auth} address={address} onCreated={(v) => setVaults(addVault(v))} />
       </div>
+
+      <DeployedVaults vaults={vaults} onRemove={(h) => setVaults(removeVault(h))} />
     </Card>
   );
 }
@@ -132,6 +139,52 @@ function friendlyError(m: string): string {
   if (/trustline/.test(s)) return "Your wallet needs a trustline for this asset first.";
   if (/underfunded|txinsufficient/.test(s)) return "Your wallet doesn't have enough balance for this amount plus fees.";
   return m.length > 180 ? `${m.slice(0, 180)}…` : m;
+}
+
+const contractUrl = (a: string) =>
+  `https://stellar.expert/explorer/${NETWORK === "mainnet" ? "public" : "testnet"}/contract/${a}`;
+
+/** The vaults the user has deployed (real on-chain), tracked client-side. */
+function DeployedVaults({ vaults, onRemove }: { vaults: DeployedVault[]; onRemove: (txHash: string) => void }) {
+  if (vaults.length === 0) return null;
+  return (
+    <div className="mt-5">
+      <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <span className="text-brand">◆</span> Deployed vaults ({vaults.length})
+      </p>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {vaults.map((v) => (
+          <div key={v.txHash} className="rounded-xl border border-brand/25 bg-ink-900/50 p-3">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-white">{v.name}</p>
+                <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-brand">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand shadow-[0_0_6px_#22d3a5]" />
+                  DeFindex · {v.asset} · Blend
+                </p>
+              </div>
+              <button
+                onClick={() => onRemove(v.txHash)}
+                className="shrink-0 rounded px-1 text-slate-500 hover:text-white"
+                aria-label="Remove from list"
+                title="Remove from this list (the on-chain vault stays)"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/5 pt-2 text-[11px]">
+              {v.address && (
+                <a href={contractUrl(v.address)} target="_blank" rel="noreferrer" className="font-mono text-accent hover:underline">
+                  vault {v.address.slice(0, 6)}…{v.address.slice(-4)} ↗
+                </a>
+              )}
+              <TxLink hash={v.txHash} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function RebalancePanel({ auth, address }: { auth: ApiAuth; address: string | null }) {
@@ -333,7 +386,15 @@ function RiskPanel({
   );
 }
 
-function CreateVaultPanel({ auth, address }: { auth: ApiAuth; address: string | null }) {
+function CreateVaultPanel({
+  auth,
+  address,
+  onCreated,
+}: {
+  auth: ApiAuth;
+  address: string | null;
+  onCreated: (v: DeployedVault) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("Corporate Vault");
   const [asset, setAsset] = useState<"XLM" | "USDC">("XLM");
@@ -357,7 +418,9 @@ function CreateVaultPanel({ auth, address }: { auth: ApiAuth; address: string | 
       const signed = await signWalletTransaction(xdr, address);
       setMsg("Deploying vault on-chain…");
       const r = await api.submitMove(auth, signed);
+      const vaultAddr = typeof r.returnValue === "string" ? r.returnValue : undefined;
       setTx(r.txHash);
+      onCreated({ name, asset, address: vaultAddr, txHash: r.txHash, createdAt: new Date().toISOString() });
       setMsg("Vault deployed — signed by you:");
     } catch (e) {
       setMsg(friendlyError(e instanceof Error ? e.message : String(e)));

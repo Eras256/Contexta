@@ -163,9 +163,10 @@ export const api = {
     },
   ) => request<{ xdr: string }>("/treasury/prepare", auth, { method: "POST", body: JSON.stringify(body) }),
 
-  /** Step 2: submit the user-signed envelope. */
+  /** Step 2: submit the user-signed envelope. `returnValue` carries the contract's
+   *  native return (e.g. the new vault address for a factory create-vault). */
   submitMove: (auth: ApiAuth, signedXdr: string) =>
-    request<{ txHash: string; legalContextHash: string }>("/treasury/submit", auth, {
+    request<{ txHash: string; legalContextHash: string; returnValue?: unknown }>("/treasury/submit", auth, {
       method: "POST",
       body: JSON.stringify({ signedXdr }),
     }),

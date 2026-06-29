@@ -130,9 +130,11 @@ export function treasuryRouter(): Router {
       const { signedXdr } = submitMoveSchema.parse(req.body);
       const binding = await req.container.legal.bindForAction(ctx.tenantId, ["treasury-management"]);
       let txHash: string;
+      let returnValue: unknown = null;
       try {
         const r = await req.container.blend.submitSignedXdr(signedXdr);
         txHash = r.txHash;
+        returnValue = r.returnValue;
       } catch (opErr) {
         res.status(400).json({ error: opErr instanceof Error ? opErr.message : String(opErr) });
         return;
@@ -145,7 +147,7 @@ export function treasuryRouter(): Router {
         detail: { txHash, selfCustody: true },
         legalContextId: binding.contextId,
       });
-      res.json({ txHash, legalContextHash: binding.hash });
+      res.json({ txHash, legalContextHash: binding.hash, returnValue });
     } catch (e) {
       next(e);
     }
