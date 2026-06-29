@@ -43,11 +43,21 @@ export default function AgentPage() {
     try {
       const ai = getAiConfig() ?? undefined;
       const d = await api.propose({ accessToken, tenantId }, true, ai, locale);
-      setRunMsg(
-        d.action === "noop"
-          ? tf("pages.agent.runNoop", "Agent evaluated — treasury within band, no move needed.")
-          : tf("pages.agent.runOk", "Agent ran — decision settled on-chain."),
-      );
+      if (d.executionError) {
+        const e = d.executionError.toLowerCase();
+        const reason = /not enough/.test(e)
+          ? tf("pages.agent.runInsufficient", "there isn't enough in that bucket to settle right now")
+          : /timed out|timeout/.test(e)
+            ? tf("pages.agent.runTimeout", "the network is slow — it may still settle and appear in the feed shortly")
+            : d.executionError;
+        setRunMsg(`${tf("pages.agent.runProposed", "Agent proposed a move, but it couldn't settle this cycle:")} ${reason}`);
+      } else {
+        setRunMsg(
+          d.action === "noop"
+            ? tf("pages.agent.runNoop", "Agent evaluated — treasury within band, no move needed.")
+            : tf("pages.agent.runOk", "Agent ran — decision settled on-chain."),
+        );
+      }
     } catch (e) {
       setRunMsg(e instanceof Error ? e.message : String(e));
     } finally {

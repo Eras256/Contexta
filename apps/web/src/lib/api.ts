@@ -61,6 +61,8 @@ export interface Decision {
   legalContextHash: string | null;
   stellarTxHash: string | null;
   createdAt: string;
+  /** Present when a proposal was made but couldn't settle this cycle. */
+  executionError?: string;
 }
 
 export interface LegalState {

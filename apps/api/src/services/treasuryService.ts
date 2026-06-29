@@ -200,6 +200,11 @@ export class TreasuryService {
       "treasury-management",
     ]);
 
+    // Guard BEFORE any on-chain side-effect: never settle a move the source
+    // bucket can't cover, or DB bookkeeping and chain drift (and the caller
+    // would see a 500 after a tx already fired). Surfaces as a clean message.
+    await this.assertCanDebit(req.tenantId, req.from, req.asset, req.strategyRef, BigInt(req.amountBaseUnits));
+
     // 1. Integration side-effects. The agent's treasury band is denominated in
     // the tenant's accounting asset (USD), so we only drive the demo DeFindex
     // mock from here. Real DeFindex deposits (XLM-denominated, on its own vault)
@@ -257,6 +262,26 @@ export class TreasuryService {
       "Treasury rebalanced",
     );
     return { txHash: onchain.value.txHash, legalContextHash: binding.hash };
+  }
+
+  /** Assert the source bucket holds at least `amount` before a debit. */
+  private async assertCanDebit(
+    tenantId: string,
+    strategy: TreasuryPosition["strategy"],
+    asset: string,
+    strategyRef: string,
+    amount: bigint,
+  ): Promise<void> {
+    const positions = await this.repo.listPositions(tenantId);
+    const match = positions.find(
+      (p) => p.strategy === strategy && p.asset === asset && (p.strategyRef ?? "") === (strategy === "liquidity" ? "" : strategyRef),
+    );
+    const current = match ? BigInt(match.amountBaseUnits) : 0n;
+    if (current - amount < 0n) {
+      throw new Error(
+        `Not enough ${asset} in ${strategy} to move: have ${fromBaseUnits(current)}, need ${fromBaseUnits(amount)}`,
+      );
+    }
   }
 
   private async applyPositionDelta(

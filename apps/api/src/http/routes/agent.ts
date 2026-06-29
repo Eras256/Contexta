@@ -48,13 +48,27 @@ export function agentRouter(): Router {
       });
 
       if (body.execute && decision.action !== "noop") {
-        const executed = await req.container.agent.execute(
-          ctx.tenantId,
-          decision,
-          ctx.userId,
-          ctx.isAgent ? "agent" : "user",
-        );
-        res.json(executed);
+        try {
+          const executed = await req.container.agent.execute(
+            ctx.tenantId,
+            decision,
+            ctx.userId,
+            ctx.isAgent ? "agent" : "user",
+          );
+          res.json(executed);
+        } catch (execErr) {
+          // The proposal is already recorded; execution couldn't settle this
+          // cycle (e.g. insufficient bucket, slow tx). Surface it as a clean
+          // result instead of a 500 — the move can settle later via Realtime.
+          req.container.logger.warn(
+            { err: execErr instanceof Error ? execErr.message : String(execErr) },
+            "Agent execute failed after proposal",
+          );
+          res.json({
+            ...decision,
+            executionError: execErr instanceof Error ? execErr.message : String(execErr),
+          });
+        }
         return;
       }
       res.json(decision);
