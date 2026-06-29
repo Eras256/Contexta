@@ -71,6 +71,13 @@ export class BlendClient {
     return this.config.asset ?? XLM_SAC;
   }
 
+  private resolveAssetAddress(asset: string): string {
+    if (!asset) return this.assetId;
+    if (asset === "XLM") return XLM_SAC;
+    if (asset === "USDC") return this.config.asset ?? "CAQCFVLOBK5GIULPNZRGATJJMIZL5BSP7X5YJVMGCPTUEPFM4AVSRCJU";
+    return asset;
+  }
+
   private get net(): { rpc: string; passphrase: string } {
     return {
       rpc: this.config.rpcUrl ?? "https://soroban-testnet.stellar.org",
@@ -84,10 +91,11 @@ export class BlendClient {
       return tryAsync(() => mock.getPosition(this.poolId, asset));
     }
     return tryAsync(async () => {
-      const d = await this.loadVault(asset || this.assetId);
+      const resolvedAsset = this.resolveAssetAddress(asset);
+      const d = await this.loadVault(resolvedAsset);
       return {
         poolId: this.poolId,
-        asset: asset || this.assetId,
+        asset: resolvedAsset,
         suppliedBaseUnits: d.positionBaseUnits,
         borrowedBaseUnits: "0",
         supplyApyBps: d.supplyApyBps,
@@ -120,7 +128,8 @@ export class BlendClient {
       const mock = this.mock;
       return tryAsync(() => mock.supply(this.poolId, asset, amountBaseUnits));
     }
-    const res = await tryAsync(() => this.submitRequest(RequestType.Supply, asset || this.assetId, amountBaseUnits));
+    const resolvedAsset = this.resolveAssetAddress(asset);
+    const res = await tryAsync(() => this.submitRequest(RequestType.Supply, resolvedAsset, amountBaseUnits));
     if (!res.ok && /MissingValue|TTL|trustline|balance/i.test(res.error.message)) {
       this.logger.warn({ pool: this.poolId, error: res.error.message }, "Blend supply recoverable error");
       return err(new Error(`Blend supply deferred: ${res.error.message}`));
@@ -133,7 +142,8 @@ export class BlendClient {
       const mock = this.mock;
       return tryAsync(() => mock.withdraw(this.poolId, asset, amountBaseUnits));
     }
-    return tryAsync(() => this.submitRequest(RequestType.Withdraw, asset || this.assetId, amountBaseUnits));
+    const resolvedAsset = this.resolveAssetAddress(asset);
+    return tryAsync(() => this.submitRequest(RequestType.Withdraw, resolvedAsset, amountBaseUnits));
   }
 
   // ── live helpers ──────────────────────────────────────────────────────────

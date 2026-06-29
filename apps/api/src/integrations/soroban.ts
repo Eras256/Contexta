@@ -73,9 +73,12 @@ export class SorobanGateway {
           StellarClient.toScVal(direction, { type: "symbol" }),
           StellarClient.toScVal(params.asset, { type: "symbol" }),
           StellarClient.toScVal(BigInt(params.amountBaseUnits), { type: "i128" }),
-          // The contract's `strategy` param is a Soroban Symbol (≤32 chars, [a-zA-Z0-9_]),
-          // not a String — passing a String here traps the VM (UnreachableCodeReached).
-          StellarClient.toScVal(params.strategyRef, { type: "symbol" }),
+          StellarClient.toScVal(
+            params.strategyRef.length > 32
+              ? (params.strategyRef.includes("CCEB") ? "blend" : "defindex")
+              : params.strategyRef,
+            { type: "symbol" }
+          ),
           StellarClient.toScVal(params.binding.hash, { type: "string" }),
         ],
       });

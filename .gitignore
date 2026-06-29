@@ -59,3 +59,4 @@ Memory.md
 # Vercel
 .vercel
 .env*
+apps/api/scratch/

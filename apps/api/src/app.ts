@@ -35,8 +35,22 @@ export function createApp(container: Container = createContainer()): Express {
     next();
   });
 
-  // Structured request logging.
-  app.use(pinoHttp({ logger: container.logger }));
+  // Structured request logging — concise: method, url, status, latency only
+  // (no full header dumps), and skip health probes to keep dev logs readable.
+  app.use(
+    pinoHttp({
+      logger: container.logger,
+      autoLogging: {
+        ignore: (req) => req.url === "/healthz" || req.url === "/readyz" || req.url === "/",
+      },
+      serializers: {
+        req: (req) => ({ method: req.method, url: req.url }),
+        res: (res) => ({ statusCode: res.statusCode }),
+      },
+      customSuccessMessage: (req, res) => `${req.method} ${req.url} ${res.statusCode}`,
+      customErrorMessage: (req, res, err) => `${req.method} ${req.url} ${res.statusCode} ${err.message}`,
+    }),
+  );
 
   // Security headers (helmet + our explicit additions).
   app.use(helmet());

@@ -208,18 +208,33 @@ export class DefindexClient {
   private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
     const sep = path.includes("?") ? "&" : "?";
     const network = this.config.network ?? "testnet";
-    const res = await fetch(`${this.config.apiUrl}${path}${sep}network=${network}`, {
-      method,
-      headers: {
-        "content-type": "application/json",
-        ...(this.config.apiKey ? { authorization: `Bearer ${this.config.apiKey}` } : {}),
-      },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    if (!res.ok) {
-      throw new Error(`DeFindex ${method} ${path} -> ${res.status}: ${await res.text()}`);
+    // Hard timeout so a slow/hanging DeFindex upstream (we've seen 504s after
+    // 5 min) fails fast and the agent can defer + retry on the next tick instead
+    // of blocking the worker job.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 45_000);
+    try {
+      const res = await fetch(`${this.config.apiUrl}${path}${sep}network=${network}`, {
+        method,
+        headers: {
+          "content-type": "application/json",
+          ...(this.config.apiKey ? { authorization: `Bearer ${this.config.apiKey}` } : {}),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+        signal: controller.signal,
+      });
+      if (!res.ok) {
+        throw new Error(`DeFindex ${method} ${path} -> ${res.status}: ${await res.text()}`);
+      }
+      return (await res.json()) as T;
+    } catch (e) {
+      if (e instanceof Error && e.name === "AbortError") {
+        throw new Error(`DeFindex ${method} ${path} -> timeout after 45s`);
+      }
+      throw e;
+    } finally {
+      clearTimeout(timer);
     }
-    return (await res.json()) as T;
   }
 }
 
