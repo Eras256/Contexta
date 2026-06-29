@@ -177,6 +177,13 @@ export const api = {
       method: "POST",
       body: JSON.stringify(body),
     }),
+
+  /** Build an unsigned tx to renounce control of a vault (manager → null), user-signed. */
+  prepareRenounceVault: (auth: ApiAuth, body: { vaultAddress: string; address: string }) =>
+    request<{ xdr: string }>("/integrations/defindex/vaults/renounce/prepare", auth, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
 };
 
 /** Live status of the LLM powering the agent's reasoning (public, no auth). */

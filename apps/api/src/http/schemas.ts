@@ -107,6 +107,12 @@ export const createVaultPrepareSchema = z.object({
   address: z.string().regex(/^G[A-Z2-7]{55}$/u, "Expected a Stellar public key (G...)"),
 });
 
+/** Build an unsigned tx that renounces control of a vault (manager → null). */
+export const renounceVaultSchema = z.object({
+  vaultAddress: z.string().regex(/^C[A-Z2-7]{55}$/u, "Expected a Soroban contract address (C...)"),
+  address: z.string().regex(/^G[A-Z2-7]{55}$/u, "Expected a Stellar public key (G...)"),
+});
+
 export const blendOpSchema = z.object({
   asset: z.string().min(1),
   amountBaseUnits: z.string().regex(/^\d+$/u),

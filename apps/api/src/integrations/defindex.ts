@@ -242,6 +242,22 @@ export class DefindexClient {
     return r.xdr;
   }
 
+  /**
+   * Build an UNSIGNED tx that renounces on-chain control of a vault by setting
+   * its `manager` role to the null Stellar address — a real, irreversible
+   * relinquishment the current manager (the user) signs in their wallet.
+   */
+  async buildRenounceVaultXdr(vaultAddress: string, caller: string): Promise<string> {
+    if (!this.live) throw new Error("DeFindex not live");
+    const NULL_ADDRESS = "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF";
+    const r = await this.request<{ xdr?: string; error?: string }>("POST", `/vault/${vaultAddress}/set/manager`, {
+      new_address: NULL_ADDRESS,
+      caller,
+    });
+    if (!r.xdr) throw new Error(`Renounce failed: ${r.error ?? "no xdr returned"}`);
+    return r.xdr;
+  }
+
   /** Get unsigned XDR from DeFindex, sign locally, submit via /send. */
   private async signedTx(path: string, body: unknown): Promise<{ tvlBaseUnits: string; txHash?: string }> {
     if (!this.canWrite) throw new Error("DeFindex writes disabled (missing vault/signer)");

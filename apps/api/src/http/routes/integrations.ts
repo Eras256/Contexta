@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireCapability } from "../middleware/rbac.js";
 import { requireCtx } from "../context.js";
-import { blendOpSchema, createVaultPrepareSchema, vaultCreateSchema } from "../schemas.js";
+import { blendOpSchema, createVaultPrepareSchema, renounceVaultSchema, vaultCreateSchema } from "../schemas.js";
 
 export function integrationsRouter(): Router {
   const router = Router();
@@ -37,6 +37,22 @@ export function integrationsRouter(): Router {
       const b = createVaultPrepareSchema.parse(req.body);
       try {
         const xdr = await req.container.defindex.buildCreateVaultXdr(b.address, b.asset, b.name);
+        res.json({ xdr });
+      } catch (opErr) {
+        res.status(400).json({ error: opErr instanceof Error ? opErr.message : String(opErr) });
+      }
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Renounce on-chain control of a vault (manager → null), user-signed.
+  router.post("/defindex/vaults/renounce/prepare", requireCapability("integrations.manage"), async (req, res, next) => {
+    try {
+      requireCtx(req);
+      const b = renounceVaultSchema.parse(req.body);
+      try {
+        const xdr = await req.container.defindex.buildRenounceVaultXdr(b.vaultAddress, b.address);
         res.json({ xdr });
       } catch (opErr) {
         res.status(400).json({ error: opErr instanceof Error ? opErr.message : String(opErr) });
