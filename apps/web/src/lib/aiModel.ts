@@ -30,6 +30,15 @@ export const AI_PROVIDERS: ProviderDef[] = [
     note: "Powers the deployed agent",
   },
   {
+    id: "anthropic",
+    label: "Anthropic · Claude",
+    models: ["claude-sonnet-4-6", "claude-opus-4-8", "claude-haiku-4-5"],
+    keyHint: "sk-ant-...",
+    byok: true,
+    note: "Claude — native Anthropic",
+    keysUrl: "https://console.anthropic.com/settings/keys",
+  },
+  {
     id: "openrouter",
     label: "OpenRouter",
     models: [

@@ -66,7 +66,7 @@ export const proposeSchema = z.object({
   // dashboard AI selector). `aiProvider` is a known provider id (the server maps
   // it to an OpenAI-compatible base URL); with `aiApiKey` this is a BYOK run.
   // Without a key, only `aiModel` applies (uses the server-configured provider).
-  aiProvider: z.enum(["openai", "openrouter", "groq", "deepseek", "xai", "together"]).optional(),
+  aiProvider: z.enum(["openai", "anthropic", "openrouter", "groq", "deepseek", "xai", "together"]).optional(),
   aiModel: z.string().min(1).max(96).optional(),
   aiApiKey: z.string().min(1).max(400).optional(),
 });

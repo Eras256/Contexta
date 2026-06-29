@@ -11,6 +11,9 @@ import type { Logger } from "@contextio/shared";
  */
 export const AI_PROVIDERS = {
   openai: { label: "OpenAI", baseUrl: "https://api.openai.com/v1" },
+  // Anthropic's OpenAI-compatible endpoint (Bearer auth, /chat/completions).
+  // It doesn't support JSON response_format, so we rely on the prompt for JSON.
+  anthropic: { label: "Anthropic (Claude)", baseUrl: "https://api.anthropic.com/v1", jsonMode: false },
   openrouter: { label: "OpenRouter", baseUrl: "https://openrouter.ai/api/v1" },
   groq: { label: "Groq", baseUrl: "https://api.groq.com/openai/v1" },
   deepseek: { label: "DeepSeek", baseUrl: "https://api.deepseek.com/v1" },
@@ -125,6 +128,10 @@ export class AiAdvisor {
 
     if (!apiKey) return null;
 
+    // A few providers (Anthropic's compat endpoint) reject JSON response_format;
+    // they still return JSON because the system prompt mandates it.
+    const useJsonMode = (AI_PROVIDERS as Record<string, { jsonMode?: boolean }>)[provider]?.jsonMode !== false;
+
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS);
     try {
@@ -142,7 +149,7 @@ export class AiAdvisor {
           model,
           temperature: 0.4,
           max_tokens: 220,
-          response_format: { type: "json_object" },
+          ...(useJsonMode ? { response_format: { type: "json_object" } } : {}),
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             { role: "user", content: JSON.stringify(ctx) },
