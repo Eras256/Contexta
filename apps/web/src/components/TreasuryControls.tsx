@@ -37,37 +37,14 @@ export function TreasuryControls({
   // Locally-tracked list of the user's deployed vaults (real on-chain).
   const [vaults, setVaults] = useState<DeployedVault[]>([]);
   useEffect(() => setVaults(getVaults()), []);
-  const [vaultMsg, setVaultMsg] = useState<string | null>(null);
-  const [closingTx, setClosingTx] = useState<string | null>(null);
 
-  // Closing a vault renounces on-chain control (manager → null), signed by you.
-  // A vault with no recorded address (or no wallet) is just removed from the list.
-  const onCloseVault = async (v: DeployedVault) => {
-    if (!v.address || !address) {
-      setVaults(removeVault(v.txHash));
-      return;
-    }
-    if (closingTx) return;
-    if (
-      !window.confirm(
-        "Renounce on-chain control of this vault (set its manager to a null address)? You'll sign in your wallet. This is irreversible.",
-      )
-    )
-      return;
-    setClosingTx(v.txHash);
-    setVaultMsg("Approve in your wallet…");
-    try {
-      const { xdr } = await api.prepareRenounceVault(auth, { vaultAddress: v.address, address });
-      const signed = await signWalletTransaction(xdr, address);
-      setVaultMsg("Submitting…");
-      const r = await api.submitMove(auth, signed);
-      setVaults(removeVault(v.txHash));
-      setVaultMsg(`Control renounced — signed by you · tx ${r.txHash.slice(0, 8)}…`);
-    } catch (e) {
-      setVaultMsg(friendlyError(e instanceof Error ? e.message : String(e)));
-    } finally {
-      setClosingTx(null);
-    }
+  // Remove a vault from this list. The on-chain vault is a Soroban contract — it
+  // can't be deleted, and it has no power over your wallet (self-custody), so
+  // there's nothing to revoke. DeFindex also rejects a null manager address, so
+  // a true on-chain "renounce" isn't available; we just drop it from the list.
+  const onRemoveVault = (v: DeployedVault) => {
+    if (!window.confirm("Remove this vault from your list? The on-chain vault stays; it has no control over your wallet.")) return;
+    setVaults(removeVault(v.txHash));
   };
 
   const toggleAgent = async () => {
@@ -139,7 +116,7 @@ export function TreasuryControls({
         <CreateVaultPanel auth={auth} address={address} onCreated={(v) => setVaults(addVault(v))} />
       </div>
 
-      <DeployedVaults vaults={vaults} onClose={onCloseVault} closingTx={closingTx} msg={vaultMsg} />
+      <DeployedVaults vaults={vaults} onRemove={onRemoveVault} />
     </Card>
   );
 }
@@ -179,14 +156,10 @@ const contractUrl = (a: string) =>
 /** The vaults the user has deployed (real on-chain), tracked client-side. */
 function DeployedVaults({
   vaults,
-  onClose,
-  closingTx,
-  msg,
+  onRemove,
 }: {
   vaults: DeployedVault[];
-  onClose: (v: DeployedVault) => void;
-  closingTx: string | null;
-  msg: string | null;
+  onRemove: (v: DeployedVault) => void;
 }) {
   if (vaults.length === 0) return null;
   return (
@@ -206,17 +179,12 @@ function DeployedVaults({
                 </p>
               </div>
               <button
-                onClick={() => onClose(v)}
-                disabled={closingTx === v.txHash}
-                className="shrink-0 rounded px-1 text-slate-500 hover:text-white disabled:opacity-50"
-                aria-label={v.address ? "Renounce control & remove" : "Remove from list"}
-                title={
-                  v.address
-                    ? "Renounce on-chain control (sign in your wallet) & remove"
-                    : "Remove from this list"
-                }
+                onClick={() => onRemove(v)}
+                className="shrink-0 rounded px-1 text-slate-500 hover:text-white"
+                aria-label="Remove from list"
+                title="Remove from this list (the on-chain vault stays — it has no control over your wallet)"
               >
-                {closingTx === v.txHash ? "…" : "✕"}
+                ✕
               </button>
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/5 pt-2 text-[11px]">
@@ -230,7 +198,6 @@ function DeployedVaults({
           </div>
         ))}
       </div>
-      {msg && <p className="mt-2 break-words text-[11px] text-slate-400">{msg}</p>}
     </div>
   );
 }

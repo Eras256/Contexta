@@ -128,26 +128,22 @@ export function treasuryRouter(): Router {
     try {
       const ctx = requireCtx(req);
       const { signedXdr } = submitMoveSchema.parse(req.body);
-      const binding = await req.container.legal.bindForAction(ctx.tenantId, ["treasury-management"]);
-      let txHash: string;
-      let returnValue: unknown = null;
+      // Wrap bind + submit + audit so the real reason surfaces (not a 500).
       try {
+        const binding = await req.container.legal.bindForAction(ctx.tenantId, ["treasury-management"]);
         const r = await req.container.blend.submitSignedXdr(signedXdr);
-        txHash = r.txHash;
-        returnValue = r.returnValue;
+        await req.container.audit.record({
+          tenantId: ctx.tenantId,
+          actorId: ctx.userId,
+          actorType: "user",
+          action: "treasury.rebalanced",
+          detail: { txHash: r.txHash, selfCustody: true },
+          legalContextId: binding.contextId,
+        });
+        res.json({ txHash: r.txHash, legalContextHash: binding.hash, returnValue: r.returnValue });
       } catch (opErr) {
         res.status(400).json({ error: opErr instanceof Error ? opErr.message : String(opErr) });
-        return;
       }
-      await req.container.audit.record({
-        tenantId: ctx.tenantId,
-        actorId: ctx.userId,
-        actorType: "user",
-        action: "treasury.rebalanced",
-        detail: { txHash, selfCustody: true },
-        legalContextId: binding.contextId,
-      });
-      res.json({ txHash, legalContextHash: binding.hash, returnValue });
     } catch (e) {
       next(e);
     }
