@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui";
 import { api, type ApiAuth, type TreasurySnapshot } from "@/lib/api";
 import { signWalletMessage, signWalletTransaction } from "@/lib/wallet";
@@ -24,6 +24,14 @@ export function TreasuryControls({
   const [agentEnabled, setAgentEnabled] = useState(config?.agentEnabled ?? true);
   const [toggling, setToggling] = useState(false);
   const [toggleMsg, setToggleMsg] = useState<string | null>(null);
+
+  // useState seeds from `config` on first render — but the snapshot is still
+  // null then, so re-sync once the server value arrives (otherwise the toggle
+  // shows the default "on" forever, even when the DB says off).
+  const cfgEnabled = config?.agentEnabled;
+  useEffect(() => {
+    if (cfgEnabled !== undefined) setAgentEnabled(cfgEnabled);
+  }, [cfgEnabled]);
 
   const toggleAgent = async () => {
     if (toggling) return;
@@ -252,6 +260,18 @@ function RiskPanel({
   const [sensitivity, setSensitivity] = useState(config?.volatilitySensitivity ?? 50);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+
+  // Re-seed the sliders once the real config loads (same null-on-first-render
+  // issue as the toggle) so they reflect saved values, not the defaults.
+  const cfgMin = config?.minLiquidityBaseUnits;
+  const cfgMax = config?.maxYieldBps;
+  const cfgSens = config?.volatilitySensitivity;
+  useEffect(() => {
+    if (cfgMin === undefined || cfgMax === undefined || cfgSens === undefined) return;
+    setMinLiq((Number(cfgMin) / 1e7).toString());
+    setMaxYieldPct(cfgMax / 100);
+    setSensitivity(cfgSens);
+  }, [cfgMin, cfgMax, cfgSens]);
 
   const save = async () => {
     if (busy) return;
