@@ -1,6 +1,6 @@
 "use client";
 
-import { AllocationBar, Badge, Card, DataBadge, SectionHeader, Stat } from "@/components/ui";
+import { AllocationBar, Badge, Card, DataBadge, Info, SectionHeader, Skeleton, Stat } from "@/components/ui";
 import { bps, shortHash, usdBase, localDateTime } from "@/lib/format";
 import { api, type Decision, type TreasurySnapshot } from "@/lib/api";
 import { TreasuryControls } from "@/components/TreasuryControls";
@@ -62,11 +62,11 @@ export default function TreasuryPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="relative overflow-hidden border-brand/25 bg-gradient-to-br from-brand/[0.08] via-transparent to-transparent transition hover:border-brand/40">
           <div className="animate-glow pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-brand/20 blur-2xl" />
-          <Stat accent label={tr("pages.treasury.statTotal")} value={usdBase(t.totalBaseUnits)} sub={tr("pages.treasury.statTotalSub")} />
+          <Stat accent label={tr("pages.treasury.statTotal")} value={loading ? <Skeleton className="mt-1 h-9 w-32" /> : usdBase(t.totalBaseUnits)} sub={tr("pages.treasury.statTotalSub")} />
         </Card>
-        <Card className="transition hover:border-white/20"><Stat label={tr("pages.treasury.statReady")} value={usdBase(t.liquidBaseUnits)} sub={tr("pages.treasury.statReadySub")} /></Card>
-        <Card className="transition hover:border-white/20"><Stat label={tr("pages.treasury.statEarning")} value={usdBase(t.yieldBaseUnits)} sub={`${bps(weightedApy)} APY`} /></Card>
-        <Card className="transition hover:border-white/20"><Stat label={tr("pages.treasury.statShare")} value={bps(t.yieldShareBps)} sub={tr("pages.treasury.statShareSub")} /></Card>
+        <Card className="transition hover:border-white/20"><Stat label={<>{tr("pages.treasury.statReady")} <Info text={tr("glossary.liquidity")} /></>} value={loading ? <Skeleton className="mt-1 h-7 w-24" /> : usdBase(t.liquidBaseUnits)} sub={tr("pages.treasury.statReadySub")} /></Card>
+        <Card className="transition hover:border-white/20"><Stat label={<>{tr("pages.treasury.statEarning")} <Info text={tr("glossary.yield")} /></>} value={loading ? <Skeleton className="mt-1 h-7 w-24" /> : usdBase(t.yieldBaseUnits)} sub={loading ? "" : `${bps(weightedApy)} APY`} /></Card>
+        <Card className="transition hover:border-white/20"><Stat label={tr("pages.treasury.statShare")} value={loading ? <Skeleton className="mt-1 h-7 w-16" /> : bps(t.yieldShareBps)} sub={tr("pages.treasury.statShareSub")} /></Card>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -88,7 +88,11 @@ export default function TreasuryPage() {
                 <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
                   <th className="pb-2">{tr("pages.treasury.colAsset")}</th>
                   <th className="pb-2">{tr("pages.treasury.colWhere")}</th>
-                  <th className="pb-2 text-right">{tr("pages.treasury.colYield")}</th>
+                  <th className="pb-2 text-right">
+                    <span className="inline-flex items-center justify-end gap-1">
+                      {tr("pages.treasury.colYield")} <Info text={tr("glossary.apy")} />
+                    </span>
+                  </th>
                   <th className="pb-2 text-right">{tr("pages.treasury.colAmount")}</th>
                 </tr>
               </thead>
@@ -101,10 +105,20 @@ export default function TreasuryPage() {
                     <td className="py-2 text-right font-medium text-white">{usdBase(p.amountBaseUnits)}</td>
                   </tr>
                 ))}
-                {snap.positions.length === 0 && (
+                {snap.positions.length === 0 &&
+                  loading &&
+                  [0, 1, 2].map((i) => (
+                    <tr key={`sk-${i}`} className="table-row">
+                      <td className="py-2.5"><Skeleton className="h-4 w-10" /></td>
+                      <td className="py-2.5"><Skeleton className="h-4 w-24" /></td>
+                      <td className="py-2.5"><div className="flex justify-end"><Skeleton className="h-4 w-12" /></div></td>
+                      <td className="py-2.5"><div className="flex justify-end"><Skeleton className="h-4 w-16" /></div></td>
+                    </tr>
+                  ))}
+                {snap.positions.length === 0 && !loading && (
                   <tr>
                     <td colSpan={4} className="py-6 text-center text-slate-500">
-                      {loading ? tr("pages.treasury.loading") : tr("pages.treasury.posEmpty")}
+                      {tr("pages.treasury.posEmpty")}
                     </td>
                   </tr>
                 )}
@@ -157,7 +171,19 @@ export default function TreasuryPage() {
                 ) : null}
               </div>
             ))}
-            {recent.length === 0 && (
+            {recent.length === 0 &&
+              activity.loading &&
+              [0, 1, 2].map((i) => (
+                <div key={`ask-${i}`} className="rounded-lg border border-white/10 bg-ink-900/60 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-3 w-28" />
+                  </div>
+                  <Skeleton className="mt-2 h-4 w-full" />
+                  <Skeleton className="mt-1.5 h-3 w-32" />
+                </div>
+              ))}
+            {recent.length === 0 && !activity.loading && (
               <p className="py-4 text-center text-sm text-slate-500">{tr("pages.treasury.activityEmpty")}</p>
             )}
           </div>

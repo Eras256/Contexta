@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui";
+import { Card, Info } from "@/components/ui";
 import { api, type ApiAuth, type TreasurySnapshot } from "@/lib/api";
 import { signWalletMessage, signWalletTransaction } from "@/lib/wallet";
 import { getVaults, addVault, removeVault, type DeployedVault } from "@/lib/vaults";
+import { useT } from "@/lib/i18n";
 
 /**
  * Manual treasury controls for the dashboard — everything the autonomous agent
@@ -203,6 +204,7 @@ function DeployedVaults({
 }
 
 function RebalancePanel({ auth, address }: { auth: ApiAuth; address: string | null }) {
+  const t = useT();
   const [amount, setAmount] = useState("1");
   const [venue, setVenue] = useState<"blend" | "defindex">("blend");
   const [asset, setAsset] = useState<"XLM" | "USDC">("XLM");
@@ -266,10 +268,16 @@ function RebalancePanel({ auth, address }: { auth: ApiAuth; address: string | nu
   return (
     <div className="rounded-xl border border-white/10 bg-ink-900/40 p-4">
       <p className="text-sm font-medium text-white">Move capital</p>
-      <p className="mt-0.5 text-xs text-slate-500">You sign with your own wallet — self-custody.</p>
+      <p className="mt-0.5 flex items-center gap-1.5 text-xs text-slate-500">
+        You sign with your own wallet — self-custody.
+        <Info text={t("glossary.selfCustody")} />
+      </p>
 
       <label className="mt-3 block text-[11px] text-slate-400">
-        Venue
+        <span className="flex items-center gap-1.5">
+          Venue
+          <Info text={venue === "defindex" ? t("glossary.defindex") : t("glossary.blend")} />
+        </span>
         <select value={venue} onChange={(e) => setVenue(e.target.value as typeof venue)} className={selectCls}>
           <option value="blend">Blend · lending</option>
           <option value="defindex">DeFindex · XLM vault</option>

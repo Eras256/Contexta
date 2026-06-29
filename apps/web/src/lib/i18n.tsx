@@ -18,6 +18,16 @@ export const LOCALES: { code: Locale; short: string; label: string }[] = [
 type Dict = Record<string, unknown>;
 
 const en: Dict = {
+  glossary: {
+    usdc: "A digital dollar (USDC). 1 USDC ≈ 1 US dollar — it doesn't swing like Bitcoin.",
+    yield: "Yield is what your idle money earns over time, like interest in a savings account.",
+    apy: "APY = the yearly rate your money earns, including compounding. Higher APY means faster growth.",
+    liquidity: "Cash kept ready and available — what you can spend or pay out right now.",
+    blend: "Blend is a lending market on Stellar. Your USDC is lent out and earns interest.",
+    defindex: "DeFindex is an automated vault on Stellar that puts your funds into a yield strategy for you.",
+    selfCustody: "Self-custody means only your wallet can move your money. Contextio never holds it.",
+    rebalance: "Rebalancing means moving money between 'ready cash' and 'earning', following your rules.",
+  },
   nav: {
     home: "Home",
     treasury: "Treasury",
@@ -324,6 +334,16 @@ const en: Dict = {
 };
 
 const es: Dict = {
+  glossary: {
+    usdc: "Un dólar digital (USDC). 1 USDC ≈ 1 dólar — no sube y baja como el Bitcoin.",
+    yield: "El rendimiento es lo que gana tu dinero parado con el tiempo, como los intereses de una cuenta de ahorro.",
+    apy: "APY = la tasa anual que gana tu dinero, con interés compuesto. Más APY significa crecer más rápido.",
+    liquidity: "Dinero disponible y listo — lo que puedes gastar o pagar ahora mismo.",
+    blend: "Blend es un mercado de préstamos en Stellar. Tu USDC se presta y gana intereses.",
+    defindex: "DeFindex es una bóveda automática en Stellar que pone tus fondos en una estrategia de rendimiento por ti.",
+    selfCustody: "Autocustodia: solo tu wallet puede mover tu dinero. Contextio nunca lo guarda.",
+    rebalance: "Rebalancear es mover dinero entre 'disponible' y 'rindiendo', siguiendo tus reglas.",
+  },
   nav: {
     home: "Inicio",
     treasury: "Tesorería",
@@ -630,6 +650,16 @@ const es: Dict = {
 };
 
 const pt: Dict = {
+  glossary: {
+    usdc: "Um dólar digital (USDC). 1 USDC ≈ 1 dólar — não oscila como o Bitcoin.",
+    yield: "Rendimento é o que seu dinheiro parado ganha com o tempo, como os juros de uma poupança.",
+    apy: "APY = a taxa anual que seu dinheiro rende, com juros compostos. Mais APY significa crescer mais rápido.",
+    liquidity: "Dinheiro disponível e pronto — o que você pode gastar ou pagar agora.",
+    blend: "Blend é um mercado de empréstimos na Stellar. Seu USDC é emprestado e rende juros.",
+    defindex: "DeFindex é um cofre automático na Stellar que coloca seus fundos em uma estratégia de rendimento para você.",
+    selfCustody: "Autocustódia: só a sua carteira move o seu dinheiro. A Contextio nunca o guarda.",
+    rebalance: "Rebalancear é mover dinheiro entre 'disponível' e 'rendendo', seguindo as suas regras.",
+  },
   nav: {
     home: "Início",
     treasury: "Tesouraria",

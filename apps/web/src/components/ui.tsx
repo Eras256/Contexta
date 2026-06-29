@@ -18,7 +18,7 @@ export function Stat({
   sub,
   accent = false,
 }: {
-  label: string;
+  label: ReactNode;
   value: ReactNode;
   sub?: ReactNode;
   /** Emphasize as the primary KPI (larger value). */
@@ -26,13 +26,43 @@ export function Stat({
 }) {
   return (
     <div>
-      <div className="label">{label}</div>
+      <div className="label flex items-center gap-1.5">{label}</div>
       <div className={`mt-1 font-semibold tracking-tight text-white ${accent ? "text-3xl" : "stat-value"}`}>
         {value}
       </div>
       {sub ? <div className="mt-1 text-xs text-slate-400">{sub}</div> : null}
     </div>
   );
+}
+
+/**
+ * Inline help: a small "i" that reveals a plain-language explanation on hover
+ * or keyboard focus. Built for people who've never touched web3 — every piece
+ * of jargon on a screen should be one hover away from a human explanation.
+ */
+export function Info({ text, label }: { text: string; label?: string }) {
+  return (
+    <span className="group/info relative inline-flex align-middle">
+      <button
+        type="button"
+        aria-label={label ?? "More information"}
+        className="grid h-4 w-4 place-items-center rounded-full border border-white/20 text-[10px] font-semibold leading-none text-slate-400 transition hover:border-brand/60 hover:text-brand focus:outline-none focus-visible:ring-1 focus-visible:ring-brand"
+      >
+        i
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-56 max-w-[70vw] -translate-x-1/2 rounded-lg border border-white/10 bg-ink-850 px-3 py-2 text-left text-xs font-normal normal-case leading-relaxed tracking-normal text-slate-300 opacity-0 shadow-card backdrop-blur transition-opacity duration-150 group-hover/info:opacity-100 group-focus-within/info:opacity-100"
+      >
+        {text}
+      </span>
+    </span>
+  );
+}
+
+/** Shimmering placeholder shown while real data loads (no jarring zero-flash). */
+export function Skeleton({ className = "" }: { className?: string }) {
+  return <div className={`animate-pulse rounded-md bg-white/[0.07] ${className}`} aria-hidden />;
 }
 
 export function Badge({
