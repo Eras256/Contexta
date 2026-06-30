@@ -32,7 +32,7 @@ export function Navbar() {
         {/* Brand + network */}
         <div className="flex items-center gap-2.5">
           <Link href="/" className="flex items-center gap-2.5">
-            <img src="/logo-icon.svg" className="h-8 w-8" alt="Contextio" />
+            <img src="/logo-icon.png" className="h-8 w-8" alt="Contextio" />
             <span className="text-base font-semibold tracking-tight text-white">Contextio</span>
           </Link>
           <span className="hidden items-center gap-1.5 rounded-full border border-brand/25 bg-brand/[0.06] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand sm:inline-flex">
