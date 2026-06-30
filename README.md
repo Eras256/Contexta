@@ -243,6 +243,9 @@ This is **not** slideware. The integrations are load-bearing and settle on Stell
   positions read live on-chain.
 - **Real DeFindex vaults** — XLM yield vaults; users deploy their own via the
   DeFindex factory, **signed in Freighter** (self-custody).
+- **Real on-chain price oracle (Reflector)** — the treasury values XLM in USD from
+  Reflector's **SEP-40** oracle on Stellar (read via Soroban simulation), not a
+  hardcoded rate. Live proof: `GET /api/v1/public/oracle`.
 - **Real USDC payroll** — salaries settled to employee wallets in BR/AR/CO in a
   Horizon batch tx (testnet demo-scaled 1:100). Verified example:
   [`4bd1b927…bc12cf78`](https://stellar.expert/explorer/testnet/tx/4bd1b927df7ab404dcd56abe649dcd47f56aa174b8116c747ec4f1aabc12cf78).

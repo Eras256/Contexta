@@ -47,6 +47,7 @@ export default function IntegrationsPage() {
   const [anchor, setAnchor] = useState<AnchorInfo | null>(null);
   const [offramp, setOfframp] = useState<{ loading: boolean; error: string | null }>({ loading: false, error: null });
   const [health, setHealth] = useState<{ api: boolean; supabase: boolean; stellar: boolean; agent: boolean } | null>(null);
+  const [oracle, setOracle] = useState<{ live: boolean; source: string; network: string; xlm: number | null } | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -80,6 +81,12 @@ export default function IntegrationsPage() {
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => {
         if (alive && j?.live) setAnchor(j as AnchorInfo);
+      })
+      .catch(() => {});
+    fetch(`${API}/api/v1/public/oracle`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        if (alive && j) setOracle({ live: j.live, source: j.source, network: j.network, xlm: j.prices?.XLM ?? null });
       })
       .catch(() => {});
     return () => {
@@ -169,6 +176,32 @@ export default function IntegrationsPage() {
                 <a
                   className="mt-2 inline-flex font-mono text-accent hover:underline"
                   href={explorer(blend.poolId, blend.network)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t("pages.integrations.dfxView")} ↗
+                </a>
+              </div>
+            ) : (
+              <div className="mt-3 border-t border-white/5 pt-3 text-xs text-slate-500">{t("auth.connecting")}</div>
+            )}
+          </Card>
+
+          {/* Reflector on-chain price oracle */}
+          <Card className="flex flex-col">
+            <div className="flex items-start justify-between gap-2">
+              <span className="font-medium text-white">{t("pages.integrations.reflectorName")}</span>
+              <Badge tone={oracle?.live ? "success" : "warn"}>
+                {t(oracle?.live ? "pages.integrations.statusLive" : "pages.integrations.statusReady")}
+              </Badge>
+            </div>
+            <p className="mt-2 text-xs leading-relaxed text-slate-400">{t("pages.integrations.reflectorBody")}</p>
+            {oracle?.live ? (
+              <div className="mt-3 space-y-1.5 border-t border-white/5 pt-3 text-xs">
+                <Row k="XLM / USD" v={<span className="font-mono font-semibold text-brand">${oracle.xlm?.toFixed(4)}</span>} />
+                <a
+                  className="mt-2 inline-flex font-mono text-accent hover:underline"
+                  href={explorer(oracle.source, oracle.network)}
                   target="_blank"
                   rel="noreferrer"
                 >

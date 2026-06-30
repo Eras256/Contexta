@@ -305,6 +305,8 @@ const en: Dict = {
       brebBody: "Colombia's instant payment rail for local payouts.",
       infraTitle: "Under the hood",
       infraBody: "The plumbing that keeps everything running — same stack for the live demo.",
+      reflectorName: "Reflector · price oracle",
+      reflectorBody: "Real on-chain XLM/USD (SEP-40) — powers the treasury's USD valuation.",
       note: "DeFindex and Blend are both live on-chain — real positions on Stellar testnet with verifiable transactions. Only the local payout rails (PIX · Transferencias 3.0 · Bre-B) remain illustrative via SEP-24/31 anchors. Treasury settlement is fully on-chain.",
     },
     security: {
@@ -645,6 +647,8 @@ const es: Dict = {
       brebBody: "El riel de pago instantáneo de Colombia para pagos locales.",
       infraTitle: "Por dentro",
       infraBody: "La infraestructura que mantiene todo funcionando — el mismo stack de la demo en vivo.",
+      reflectorName: "Reflector · oráculo de precios",
+      reflectorBody: "XLM/USD real on-chain (SEP-40) — alimenta la valuación en USD de la tesorería.",
       note: "DeFindex y Blend están ambos en vivo on-chain — posiciones reales en la testnet de Stellar con transacciones verificables. Solo los rieles de pago locales (PIX · Transferencias 3.0 · Bre-B) siguen siendo ilustrativos vía anchors SEP-24/31. La liquidación de tesorería es 100% on-chain.",
     },
     security: {
@@ -985,6 +989,8 @@ const pt: Dict = {
       brebBody: "O trilho de pagamento instantâneo da Colômbia para pagamentos locais.",
       infraTitle: "Por dentro",
       infraBody: "A infraestrutura que mantém tudo rodando — o mesmo stack da demo ao vivo.",
+      reflectorName: "Reflector · oráculo de preços",
+      reflectorBody: "XLM/USD real on-chain (SEP-40) — alimenta a valuação em USD da tesouraria.",
       note: "DeFindex e Blend estão ambos ao vivo on-chain — posições reais na testnet da Stellar com transações verificáveis. Apenas os trilhos de pagamento locais (PIX · Transferencias 3.0 · Bre-B) seguem ilustrativos via anchors SEP-24/31. A liquidação da tesouraria é 100% on-chain.",
     },
     security: {
