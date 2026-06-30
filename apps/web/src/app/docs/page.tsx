@@ -2,6 +2,7 @@
 
 import { Card, SectionHeader } from "@/components/ui";
 import { ArchitectureDiagram } from "@/components/ArchitectureDiagram";
+import { OnchainProof } from "@/components/OnchainProof";
 import { apiBaseUrl } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 
@@ -68,6 +69,9 @@ export default function DocsPage() {
           </a>
         </Card>
       </div>
+
+      {/* Verifiable on-chain artifacts */}
+      <OnchainProof />
 
       {/* SDK */}
       <Card className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">

@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, SectionHeader } from "@/components/ui";
+import { OnchainProof } from "@/components/OnchainProof";
 import { useT } from "@/lib/i18n";
 
 export default function SecurityPage() {
@@ -56,6 +57,9 @@ export default function SecurityPage() {
           ))}
         </div>
       </section>
+
+      {/* Verifiable on-chain proof of the guarantees above */}
+      <OnchainProof />
 
       <div className="rounded-2xl border border-brand/20 bg-brand/5 p-5">
         <h4 className="text-sm font-semibold text-white">{t("pages.security.noteTitle")}</h4>

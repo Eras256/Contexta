@@ -18,6 +18,16 @@ export const LOCALES: { code: Locale; short: string; label: string }[] = [
 type Dict = Record<string, unknown>;
 
 const en: Dict = {
+  onchain: {
+    title: "Verify it yourself — on-chain",
+    body: "Don't trust, verify. These are the real, live contracts and agent wallet on Stellar.",
+    network: "Network",
+    treasury: "Treasury contract",
+    payroll: "Payroll contract",
+    agent: "Agent wallet",
+    terms: "Legal terms (LCP)",
+    view: "View",
+  },
   glossary: {
     usdc: "A digital dollar (USDC). 1 USDC ≈ 1 US dollar — it doesn't swing like Bitcoin.",
     yield: "Yield is what your idle money earns over time, like interest in a savings account.",
@@ -344,6 +354,16 @@ const en: Dict = {
 };
 
 const es: Dict = {
+  onchain: {
+    title: "Verifícalo tú mismo — on-chain",
+    body: "No confíes, verifica. Estos son los contratos reales y la wallet del agente en Stellar.",
+    network: "Red",
+    treasury: "Contrato de tesorería",
+    payroll: "Contrato de nómina",
+    agent: "Wallet del agente",
+    terms: "Términos legales (LCP)",
+    view: "Ver",
+  },
   glossary: {
     usdc: "Un dólar digital (USDC). 1 USDC ≈ 1 dólar — no sube y baja como el Bitcoin.",
     yield: "El rendimiento es lo que gana tu dinero parado con el tiempo, como los intereses de una cuenta de ahorro.",
@@ -670,6 +690,16 @@ const es: Dict = {
 };
 
 const pt: Dict = {
+  onchain: {
+    title: "Verifique você mesmo — on-chain",
+    body: "Não confie, verifique. Estes são os contratos reais e a carteira do agente na Stellar.",
+    network: "Rede",
+    treasury: "Contrato de tesouraria",
+    payroll: "Contrato de folha",
+    agent: "Carteira do agente",
+    terms: "Termos legais (LCP)",
+    view: "Ver",
+  },
   glossary: {
     usdc: "Um dólar digital (USDC). 1 USDC ≈ 1 dólar — não oscila como o Bitcoin.",
     yield: "Rendimento é o que seu dinheiro parado ganha com o tempo, como os juros de uma poupança.",
