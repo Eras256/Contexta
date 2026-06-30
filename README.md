@@ -265,6 +265,12 @@ are shown as "via licensed anchor" — they need a licensed anchor in production
 can't run on testnet. **Mainnet** deployment is the next milestone (a scoring
 advantage we're pursuing).
 
+**What's next:** unify the per-integration testnet service accounts into a single
+**company treasury wallet / smart account** (today liquidity, Blend, and DeFindex
+positions live across separate operational keys); mainnet with licensed anchors
+for real PIX/Bre-B; multi-entity treasury; and LCP as an open standard for
+accountable on-chain agents.
+
 ## Team
 
 A Stellar-native LATAM team, co-creators of **[Nirium](https://nirium.xyz)**:
