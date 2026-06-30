@@ -47,9 +47,10 @@ export function AiSelector() {
 
   const serverLive = status?.live ?? false;
   const activeProvider = cfg?.provider ?? "openai";
-  const activeModel = cfg?.model ?? status?.model ?? "gpt-4o-mini";
   const activeDef = providerDef(activeProvider);
-  const chip = cfg ? (activeDef?.label ?? activeProvider) : serverLive ? activeModel : "AI";
+  // Generic label — this is "connect any AI", not OpenAI-specific. Show the
+  // chosen provider's name only when the user has picked one (BYOK).
+  const chip = cfg ? (activeDef?.label ?? "AI") : "AI";
 
   return (
     <>
@@ -134,13 +135,14 @@ function AiModal({
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
       onMouseDown={onClose}
     >
       <div
-        className="my-8 w-full max-w-lg rounded-2xl border border-white/10 bg-ink-950 p-5 shadow-2xl"
+        className="flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-white/10 bg-ink-950 shadow-2xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
+        <div className="min-h-0 flex-1 overflow-y-auto p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="flex items-center gap-2 text-base font-semibold text-white">
@@ -230,7 +232,9 @@ function AiModal({
           </div>
         )}
 
-        <div className="mt-5 flex items-center justify-between gap-3">
+        </div>
+
+        <div className="flex items-center justify-between gap-3 border-t border-white/10 p-4">
           {cfg ? (
             <button onClick={onReset} className="text-xs text-slate-400 hover:text-white">
               Reset to server default
