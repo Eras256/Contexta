@@ -19,7 +19,17 @@ export interface LiveOptions {
    * the dashboard updates live without polling.
    */
   realtimeTable?: string;
+  /** Stable cache key; defaults to the fetcher's function name. */
+  cacheKey?: string;
 }
+
+/**
+ * Module-level stale-while-revalidate cache. Keeps the last successful payload
+ * per (endpoint, tenant) so navigating back to a section shows real data
+ * instantly (no skeleton flash) while a fresh fetch revalidates in the
+ * background. Cleared on a full page reload.
+ */
+const liveCache = new Map<string, unknown>();
 
 /**
  * Fetch live API data when the user is authenticated; otherwise fall back to the
@@ -32,11 +42,13 @@ export function useLiveData<T>(
   opts: LiveOptions = {},
 ): LiveResult<T> {
   const { accessToken, tenantId, loading: authLoading } = useAuth();
-  const [state, setState] = useState<LiveResult<T>>({
-    data: demo,
-    live: false,
-    loading: true,
-    error: null,
+  const key = `${opts.cacheKey ?? fetcher.name ?? "fn"}:${tenantId ?? ""}`;
+
+  const [state, setState] = useState<LiveResult<T>>(() => {
+    const cached = liveCache.get(key) as T | undefined;
+    return cached !== undefined
+      ? { data: cached, live: true, loading: false, error: null }
+      : { data: demo, live: false, loading: true, error: null };
   });
 
   const load = useCallback(async () => {
@@ -44,15 +56,22 @@ export function useLiveData<T>(
       setState({ data: demo, live: false, loading: false, error: null });
       return;
     }
-    setState((s) => ({ ...s, loading: true }));
+    // Show a skeleton only on a cold load; if we have cached data, revalidate silently.
+    setState((s) => ({ ...s, loading: !liveCache.has(key) }));
     try {
       const d = await fetcher({ accessToken, tenantId });
+      liveCache.set(key, d);
       setState({ data: d, live: true, loading: false, error: null });
     } catch (e: unknown) {
-      setState({ data: demo, live: false, loading: false, error: e instanceof Error ? e.message : String(e) });
+      setState((s) => ({
+        ...s,
+        live: liveCache.has(key),
+        loading: false,
+        error: e instanceof Error ? e.message : String(e),
+      }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken, tenantId]);
+  }, [accessToken, tenantId, key]);
 
   useEffect(() => {
     if (!authLoading) void load();
