@@ -4,34 +4,29 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { useT } from "@/lib/i18n";
 
-const NETWORK = (process.env.NEXT_PUBLIC_STELLAR_NETWORK ?? "testnet").toLowerCase();
-const NETWORK_LABEL = NETWORK === "mainnet" ? "Mainnet" : "Testnet";
-
 /**
  * Navbar wallet control. Connects any Stellar wallet (Freighter, xBull, Albedo,
  * Lobstr, …) via Stellar Wallets Kit and signs a SEP-53 challenge to sign in.
  */
 export function AuthControls() {
-  const { loading, connecting, address, role, error, connect, signOut } = useAuth();
+  const { loading, connecting, address, error, connect, signOut } = useAuth();
   const t = useT();
 
   if (loading) {
-    // Show the connect button immediately (disabled) instead of a bare ellipsis,
-    // so the wallet CTA is always visible while the session restores.
     return (
-      <button className="btn-primary" disabled>
+      <button className="btn-ghost" disabled>
         {t("auth.connect")}
       </button>
     );
   }
 
   if (address) {
-    return <ConnectedChip address={address} role={role} signOut={signOut} t={t} />;
+    return <ConnectedChip address={address} signOut={signOut} t={t} />;
   }
 
   return (
     <div className="flex flex-col items-end">
-      <button className="btn-primary" onClick={() => void connect()} disabled={connecting}>
+      <button className="btn-ghost" onClick={() => void connect()} disabled={connecting}>
         {connecting ? t("auth.connecting") : t("auth.connect")}
       </button>
       {error && <span className="mt-1 max-w-[16rem] text-right text-xs text-red-400">{error}</span>}
@@ -41,12 +36,10 @@ export function AuthControls() {
 
 function ConnectedChip({
   address,
-  role,
   signOut,
   t,
 }: {
   address: string;
-  role: string | null;
   signOut: () => void | Promise<void>;
   t: (k: string) => string;
 }) {
@@ -62,30 +55,26 @@ function ConnectedChip({
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="hidden items-center rounded-full border border-brand/25 bg-brand/[0.06] py-1 pl-2.5 pr-1 sm:flex">
-        <span className="mr-1 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-brand">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand" />
-          </span>
-          {NETWORK_LABEL}
-        </span>
-        <button
-          onClick={() => void copy()}
-          title={copied ? "Copied" : "Copy address"}
-          aria-label={copied ? "Address copied" : "Copy wallet address"}
-          className="flex items-center gap-1.5 rounded-full px-1.5 py-0.5 font-mono text-xs text-white transition hover:bg-white/10"
-        >
-          {address.slice(0, 4)}…{address.slice(-4)}
-          {copied ? <CheckIcon /> : <CopyIcon />}
-        </button>
-        {role && <span className="ml-0.5 pr-1.5 text-[10px] capitalize text-slate-500">{role}</span>}
-      </span>
-      <button className="btn-ghost" onClick={() => void signOut()}>
-        {t("auth.disconnect")}
+    <span className="flex items-center rounded-full border border-white/15 bg-white/5 py-1 pl-2.5 pr-1">
+      <span className="mr-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand shadow-[0_0_6px_#22d3a5]" aria-hidden />
+      <button
+        onClick={() => void copy()}
+        title={copied ? "Copied" : "Copy address"}
+        aria-label={copied ? "Address copied" : "Copy wallet address"}
+        className="flex items-center gap-1.5 rounded-full px-1 py-0.5 font-mono text-xs text-white transition hover:bg-white/10"
+      >
+        {address.slice(0, 4)}…{address.slice(-4)}
+        {copied ? <CheckIcon /> : <CopyIcon />}
       </button>
-    </div>
+      <button
+        onClick={() => void signOut()}
+        title={t("auth.disconnect")}
+        aria-label={t("auth.disconnect")}
+        className="ml-0.5 rounded-full p-1.5 text-slate-400 transition hover:bg-white/10 hover:text-white"
+      >
+        <LogoutIcon />
+      </button>
+    </span>
   );
 }
 
@@ -102,6 +91,15 @@ function CheckIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-brand">
       <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
+function LogoutIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <path d="M16 17l5-5-5-5M21 12H9" />
     </svg>
   );
 }
