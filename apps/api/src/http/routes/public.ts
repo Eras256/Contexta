@@ -81,6 +81,25 @@ export function publicRouter(): Router {
     });
   });
 
+  /** Live XLM/USD price from the Reflector on-chain oracle (SEP-40) — powers the
+   *  treasury's USD valuation. Read-only, public. */
+  router.get("/oracle", async (req, res, next) => {
+    try {
+      const r = req.container.reflector;
+      const xlmUsd = await r.getUsdPrice("XLM");
+      res.setHeader("cache-control", "public, max-age=12");
+      res.json({
+        live: xlmUsd != null,
+        provider: "reflector",
+        network: env().STELLAR_NETWORK,
+        source: r.source,
+        prices: { XLM: xlmUsd },
+      });
+    } catch (e) {
+      next(e);
+    }
+  });
+
   /** Public, read-only snapshot of the live Blend pool reserve the platform lends into. */
   router.get("/blend", async (req, res, next) => {
     try {

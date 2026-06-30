@@ -87,6 +87,11 @@ export const serverEnvSchema = baseEnvSchema.extend({
   FX_API_URL: z.string().url().optional().or(z.literal("")),
   FX_API_KEY: z.string().optional().or(z.literal("")),
 
+  // Reflector — Stellar's on-chain price oracle (SEP-40). When set, real XLM/USD
+  // (and other) prices are read on-chain instead of a hardcoded rate. Defaults to
+  // the public Reflector "external CEX/DEX" oracle for the current network.
+  REFLECTOR_PRICE_CONTRACT_ID: z.string().optional().or(z.literal("")),
+
   // AI advisor — the LLM that writes the agent's reasoning. Provider-neutral via
   // an OpenAI-compatible Chat Completions endpoint (OpenAI, OpenRouter, a local
   // model, …). `none` keeps the agent fully deterministic (the default). The LLM

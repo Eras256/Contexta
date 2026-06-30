@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { type Logger, fromBaseUnits } from "@contextio/shared";
 import type { stellar } from "@contextio/shared";
+import type { ReflectorClient } from "../integrations/reflector.js";
 import type { TreasuryConfig, TreasuryPosition } from "@contextio/shared";
 import type { Repository } from "../db/repository.js";
 import type { DefindexClient } from "../integrations/defindex.js";
@@ -31,10 +32,11 @@ export interface RebalanceRequest {
   actorType: "user" | "agent";
 }
 
-/** Dashboard pricing: USDC/BlendUSDC = $1; XLM uses a fixed testnet reference rate. */
+/** Dashboard pricing: USDC/BlendUSDC = $1; XLM priced via the Reflector on-chain
+ *  oracle when available, falling back to this testnet reference rate. */
 const XLM_USD = 0.11;
-function toUsdBase(assetCode: string, amount: number): bigint {
-  const usd = assetCode === "XLM" ? amount * XLM_USD : amount;
+function toUsdBase(assetCode: string, amount: number, xlmUsd: number = XLM_USD): bigint {
+  const usd = assetCode === "XLM" ? amount * xlmUsd : amount;
   return BigInt(Math.max(0, Math.round(usd * 1e7)));
 }
 
@@ -55,6 +57,8 @@ export class TreasuryService {
     private readonly stellarClient: stellar.StellarClient,
     /** Treasury wallet whose real on-chain balances power the dashboard. */
     private readonly treasuryAddress: string | undefined,
+    /** Optional Reflector on-chain price oracle for real XLM/USD valuation. */
+    private readonly reflector?: ReflectorClient,
   ) {}
 
   /** Short-TTL cache of the on-chain read so rapid dashboard loads don't re-hit
@@ -124,6 +128,8 @@ export class TreasuryService {
     }
     const addr = this.treasuryAddress as string;
     const positions: TreasuryPosition[] = [];
+    // Real XLM/USD from the Reflector on-chain oracle; falls back to the reference rate.
+    const xlmUsd = (this.reflector ? await this.reflector.getUsdPrice("XLM") : null) ?? XLM_USD;
     const mk = (
       asset: string,
       strategy: TreasuryPosition["strategy"],
@@ -154,8 +160,8 @@ export class TreasuryService {
         if (b.assetType === "native") xlm += amt;
         else if (b.assetCode === "USDC") usdc += amt; // Circle + BlendUSDC share the code
       }
-      if (usdc > 0) positions.push(mk("USDC", "liquidity", toUsdBase("USDC", usdc), null));
-      if (xlm > 0) positions.push(mk("XLM", "liquidity", toUsdBase("XLM", xlm), null));
+      if (usdc > 0) positions.push(mk("USDC", "liquidity", toUsdBase("USDC", usdc, xlmUsd), null));
+      if (xlm > 0) positions.push(mk("XLM", "liquidity", toUsdBase("XLM", xlm, xlmUsd), null));
     } else {
       this.logger.warn({ err: String(bal.reason) }, "Treasury balances read failed");
     }
@@ -163,13 +169,13 @@ export class TreasuryService {
     if (blend.status === "fulfilled" && blend.value.ok) {
       const v = blend.value.value;
       const amt = Number(v.positionBaseUnits) / 1e7;
-      if (amt > 0) positions.push(mk(v.asset, "blend_pool", toUsdBase(v.asset, amt), v.supplyApyBps));
+      if (amt > 0) positions.push(mk(v.asset, "blend_pool", toUsdBase(v.asset, amt, xlmUsd), v.supplyApyBps));
     }
 
     if (dfx.status === "fulfilled" && dfx.value.ok) {
       const v = dfx.value.value;
       const amt = Number(v.positionBaseUnits) / 1e7;
-      if (amt > 0) positions.push(mk(v.asset, "defindex_vault", toUsdBase(v.asset, amt), v.apyBps));
+      if (amt > 0) positions.push(mk(v.asset, "defindex_vault", toUsdBase(v.asset, amt, xlmUsd), v.apyBps));
     }
 
     // If every on-chain source failed, fall back to the DB so the page isn't empty.

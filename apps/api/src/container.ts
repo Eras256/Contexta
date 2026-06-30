@@ -8,6 +8,7 @@ import { AiAdvisor } from "./integrations/ai.js";
 import { AnchorClient } from "./integrations/anchor.js";
 import { SorobanGateway } from "./integrations/soroban.js";
 import { createOracle, type Oracle } from "./integrations/oracle.js";
+import { ReflectorClient } from "./integrations/reflector.js";
 import { AuditService } from "./services/auditService.js";
 import { LegalContextService } from "./services/legalContextService.js";
 import { TreasuryService } from "./services/treasuryService.js";
@@ -28,6 +29,7 @@ export interface Container {
   blend: BlendClient;
   soroban: SorobanGateway;
   oracle: Oracle;
+  reflector: ReflectorClient;
   ai: AiAdvisor;
   anchor: AnchorClient;
   audit: AuditService;
@@ -95,6 +97,11 @@ export function createContainer(): Container {
     logger,
   );
   const oracle = createOracle(config, logger);
+  const reflector = new ReflectorClient(
+    stellarClient,
+    { network: config.STELLAR_NETWORK, priceOracleId: config.REFLECTOR_PRICE_CONTRACT_ID || undefined },
+    logger,
+  );
   const ai = new AiAdvisor(
     {
       provider: config.AI_PROVIDER,
@@ -130,6 +137,7 @@ export function createContainer(): Container {
     logger,
     stellarClient,
     treasuryAddress || undefined,
+    reflector,
   );
   const payroll = new PayrollService(repo, soroban, legal, audit, logger);
   const agent = new AgentService(repo, treasury, defindex, blend, payroll, oracle, legal, audit, ai, logger);
@@ -143,6 +151,7 @@ export function createContainer(): Container {
     blend,
     soroban,
     oracle,
+    reflector,
     ai,
     anchor,
     audit,
