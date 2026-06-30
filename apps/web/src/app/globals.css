@@ -83,6 +83,13 @@
   .animate-glow {
     animation: glow-pulse 7s ease-in-out infinite;
   }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-5px); }
+  }
+  .animate-float {
+    animation: float 5s ease-in-out infinite;
+  }
 
   /* Animated aurora field — drifting nebulae fixed behind all content. */
   .aurora-bg {

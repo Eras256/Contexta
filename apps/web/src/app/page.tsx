@@ -21,9 +21,14 @@ export default function HomePage() {
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section className="relative grid items-center gap-10 pt-2 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
         <div className="relative z-10">
-          <div className="animate-fade-up mb-5 flex flex-wrap gap-2">
-            <span className="pill border-brand/30 bg-brand/10 text-brand">● {t("hero.badge1")}</span>
-            <span className="pill border-accent/30 bg-accent/10 text-accent">{t("hero.badge2")}</span>
+          <div className="animate-fade-up mb-6 flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-brand/30 bg-brand/5 p-1.5 shadow-[0_0_12px_rgba(34,211,165,0.06)] animate-float">
+              <img src="/logo-icon.png" alt="Contextio Logo" className="h-full w-full object-contain" />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="pill border-brand/30 bg-brand/10 text-brand">● {t("hero.badge1")}</span>
+              <span className="pill border-accent/30 bg-accent/10 text-accent">{t("hero.badge2")}</span>
+            </div>
           </div>
           <h1
             className="animate-fade-up text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.02em] text-white sm:text-6xl lg:text-7xl"
@@ -61,6 +66,19 @@ export default function HomePage() {
             <div className="relative aspect-square w-full overflow-hidden rounded-[29px] bg-ink-950 lg:aspect-[4/5]">
               <div className="pointer-events-none absolute inset-0 hero-poster" />
               <Hero3D className="absolute inset-0" />
+              {/* Floating active node badge with new logo */}
+              <div className="absolute left-6 top-6 z-10 flex items-center gap-2.5 rounded-2xl border border-white/10 bg-ink-950/45 px-3.5 py-2.5 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-md transition-all duration-300 hover:border-brand/40">
+                <div className="relative h-7 w-7 flex-shrink-0 animate-pulse">
+                  <img src="/logo-icon.png" alt="Contextio Node" className="h-full w-full object-contain" />
+                </div>
+                <div className="text-left">
+                  <div className="text-[11px] font-semibold text-white/90">Contextio Engine</div>
+                  <div className="text-[9px] font-semibold text-brand tracking-wider uppercase flex items-center gap-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand animate-ping" />
+                    Active Node
+                  </div>
+                </div>
+              </div>
               <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ink-950/80 to-transparent" />
             </div>
           </div>
