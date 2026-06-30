@@ -53,6 +53,19 @@ export interface PayrollEmployee {
   active: boolean;
 }
 
+export interface PayrollRun {
+  id: string;
+  scheduleId: string;
+  status: "simulated" | "executing" | "completed" | "failed";
+  totalAmount: string;
+  asset: string;
+  legalContextHash: string | null;
+  stellarTxHash: string | null;
+  executedAt: string | null;
+  createdAt: string;
+  lines?: { fullName?: string; destination: string; amount: string }[];
+}
+
 export interface Decision {
   id: string;
   action: string;
@@ -101,6 +114,10 @@ export const api = {
   treasury: (auth: ApiAuth) => request<TreasurySnapshot>("/treasury", auth),
   obligations: (auth: ApiAuth) => request<Obligation[]>("/payroll/obligations", auth),
   employees: (auth: ApiAuth) => request<PayrollEmployee[]>("/payroll/employees", auth),
+  runs: (auth: ApiAuth) => request<PayrollRun[]>("/payroll/runs", auth),
+  /** Execute a real payroll run for a schedule (settles USDC on-chain). */
+  runPayroll: (auth: ApiAuth, scheduleId: string) =>
+    request<PayrollRun>("/payroll/runs", auth, { method: "POST", body: JSON.stringify({ scheduleId }) }),
   decisions: (auth: ApiAuth) => request<Decision[]>("/agent/decisions", auth),
   legal: (auth: ApiAuth) => request<LegalState>("/legal", auth),
   propose: (

@@ -1,8 +1,12 @@
 "use client";
 
-import { Badge, Card, DataBadge, SectionHeader, Stat } from "@/components/ui";
-import { COUNTRY_LABEL, RAIL_LABEL, fromBaseUnits, usd, usdBase } from "@/lib/format";
+import { Badge, Card, DataBadge, SectionHeader, Skeleton, Stat } from "@/components/ui";
+import { COUNTRY_LABEL, RAIL_LABEL, fromBaseUnits, localDateTime, shortHash, usd, usdBase } from "@/lib/format";
 import { api, type PayrollEmployee, type TreasurySnapshot } from "@/lib/api";
+
+const NETWORK = (process.env.NEXT_PUBLIC_STELLAR_NETWORK ?? "testnet").toLowerCase();
+const txUrl = (h: string) =>
+  `https://stellar.expert/explorer/${NETWORK === "mainnet" ? "public" : "testnet"}/tx/${h}`;
 import { useLiveData } from "@/lib/useLiveData";
 import { useT } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
@@ -19,6 +23,7 @@ export default function PayrollPage() {
   const employeesQ = useLiveData<PayrollEmployee[]>(api.employees, []);
   const obligationsQ = useLiveData(api.obligations, []);
   const treasuryQ = useLiveData(api.treasury, EMPTY_TREASURY);
+  const runsQ = useLiveData(api.runs, []);
 
   if (!accessToken) {
     return (
@@ -38,7 +43,10 @@ export default function PayrollPage() {
   const monthlyTotal = employees.reduce((acc, e) => acc + Number(e.salaryAmount || 0), 0);
   const next = obligationsQ.data[0];
   const required = next ? fromBaseUnits(next.requiredBaseUnits) : 0;
-  const buffer = required * 0.085;
+  // FX cushion sized to the owner's own risk setting (volatility sensitivity 0–100),
+  // not a fixed magic number — ties the forecast to real config.
+  const sensitivity = treasuryQ.data.config?.volatilitySensitivity ?? 50;
+  const buffer = required * (sensitivity / 100) * 0.15;
   const needed = required + buffer;
   const ready = fromBaseUnits(treasuryQ.data.totals.liquidBaseUnits);
   const enough = ready >= needed;
@@ -101,6 +109,59 @@ export default function PayrollPage() {
               )}
             </tbody>
           </table>
+        </div>
+      </Card>
+
+      {/* Recent payroll runs (real, on-chain) */}
+      <Card>
+        <h3 className="mb-1 text-sm font-semibold text-white">{tr("pages.payroll.runsTitle")}</h3>
+        <p className="mb-4 text-xs text-slate-400">{tr("pages.payroll.runsBody")}</p>
+        <div className="space-y-3">
+          {runsQ.loading &&
+            runsQ.data.length === 0 &&
+            [0, 1].map((i) => (
+              <div key={`rsk-${i}`} className="rounded-lg border border-white/10 bg-ink-900/60 p-4">
+                <div className="flex items-center justify-between gap-2">
+                  <Skeleton className="h-5 w-24" />
+                  <Skeleton className="h-3 w-28" />
+                </div>
+                <Skeleton className="mt-2 h-4 w-40" />
+              </div>
+            ))}
+          {runsQ.data.map((run) => (
+            <div key={run.id} className="rounded-lg border border-white/10 bg-ink-900/60 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Badge tone={run.status === "completed" ? "success" : run.status === "failed" ? "warn" : "default"}>
+                    {tr(`pages.payroll.runStatus.${run.status}`)}
+                  </Badge>
+                  <span className="text-sm font-medium text-white">
+                    {usd(Number(run.totalAmount || 0))} {run.asset}
+                  </span>
+                  {run.lines && (
+                    <span className="text-xs text-slate-500">
+                      · {run.lines.length} {tr("pages.payroll.runsPaid")}
+                    </span>
+                  )}
+                </div>
+                <span className="font-mono text-xs text-slate-500">
+                  {localDateTime(run.executedAt ?? run.createdAt)}
+                </span>
+              </div>
+              <div className="mt-2 text-xs">
+                {run.stellarTxHash && !run.stellarTxHash.startsWith("sim:") ? (
+                  <a href={txUrl(run.stellarTxHash)} target="_blank" rel="noreferrer" className="font-mono text-brand hover:underline">
+                    tx {shortHash(run.stellarTxHash, 8, 6)} ↗
+                  </a>
+                ) : (
+                  <span className="font-mono text-slate-500">{run.stellarTxHash ?? "—"}</span>
+                )}
+              </div>
+            </div>
+          ))}
+          {!runsQ.loading && runsQ.data.length === 0 && (
+            <p className="py-4 text-center text-sm text-slate-500">{tr("pages.payroll.runsEmpty")}</p>
+          )}
         </div>
       </Card>
 
