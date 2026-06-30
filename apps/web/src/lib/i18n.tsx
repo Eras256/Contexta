@@ -130,7 +130,7 @@ const en: Dict = {
   },
   footer: {
     tagline:
-      "Contextio — smart treasury & payroll for Latin America, on Stellar. Non-custodial · Testnet demo · Not financial advice.",
+      "Contextio — non-custodial technology platform (not a fintech or financial services provider) for smart treasury & payroll in Latin America on Stellar. Testnet demo · Not financial advice.",
     security: "Security",
     docs: "Docs",
   },
@@ -171,6 +171,11 @@ const en: Dict = {
     typeMediation: "Mediation",
     typeCourt: "Court",
     typeOmbudsman: "Ombudsman",
+    termsOfService: "Terms of Service",
+    privacyPolicy: "Privacy Policy",
+    lastUpdated: "Last updated",
+    tableOfContents: "Table of Contents",
+    backToTop: "Back to top",
   },
   diagram: {
     laneCompany: "YOUR COMPANY",
@@ -510,7 +515,7 @@ const es: Dict = {
   },
   footer: {
     tagline:
-      "Contextio — tesorería y nómina inteligentes para Latinoamérica, sobre Stellar. Sin custodia · Demo en testnet · No es asesoría financiera.",
+      "Contextio — plataforma tecnológica sin custodia (no es una fintech ni un proveedor de servicios financieros) para tesorería y nómina inteligentes en Latinoamérica sobre Stellar. Demo en testnet · No es asesoría financiera.",
     security: "Seguridad",
     docs: "Docs",
   },
@@ -551,6 +556,11 @@ const es: Dict = {
     typeMediation: "Mediación",
     typeCourt: "Tribunal",
     typeOmbudsman: "Defensor del Pueblo",
+    termsOfService: "Términos de Servicio",
+    privacyPolicy: "Política de Privacidad",
+    lastUpdated: "Última actualización",
+    tableOfContents: "Tabla de Contenidos",
+    backToTop: "Volver al inicio",
   },
   diagram: {
     laneCompany: "TU EMPRESA",
@@ -890,7 +900,7 @@ const pt: Dict = {
   },
   footer: {
     tagline:
-      "Contextio — tesouraria e folha inteligentes para a América Latina, na Stellar. Sem custódia · Demo na testnet · Não é consultoria financeira.",
+      "Contextio — plataforma tecnológica sem custódia (não é uma fintech ou provedora de serviços financeiros) para tesouraria e folha inteligentes na América Latina sob a Stellar. Demo na testnet · Não é consultoria financeira.",
     security: "Segurança",
     docs: "Docs",
   },
@@ -931,6 +941,11 @@ const pt: Dict = {
     typeMediation: "Mediação",
     typeCourt: "Tribunal",
     typeOmbudsman: "Ouvidoria",
+    termsOfService: "Termos de Serviço",
+    privacyPolicy: "Política de Privacidade",
+    lastUpdated: "Última atualização",
+    tableOfContents: "Sumário",
+    backToTop: "Voltar ao topo",
   },
   diagram: {
     laneCompany: "SUA EMPRESA",

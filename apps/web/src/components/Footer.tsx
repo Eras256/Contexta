@@ -16,6 +16,12 @@ export function Footer() {
             <a className="text-slate-500 hover:text-slate-300 transition-colors" href="/.well-known/legal-context.json">
               legal-context.json
             </a>
+            <a className="text-slate-500 hover:text-slate-300 transition-colors" href="/legal/terms">
+              {t("legal.termsOfService")}
+            </a>
+            <a className="text-slate-500 hover:text-slate-300 transition-colors" href="/legal/privacy">
+              {t("legal.privacyPolicy")}
+            </a>
             <a className="text-slate-500 hover:text-slate-300 transition-colors" href="/security">
               {t("footer.security")}
             </a>
