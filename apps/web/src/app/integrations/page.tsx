@@ -46,9 +46,27 @@ export default function IntegrationsPage() {
   const [blend, setBlend] = useState<BlendVault | null>(null);
   const [anchor, setAnchor] = useState<AnchorInfo | null>(null);
   const [offramp, setOfframp] = useState<{ loading: boolean; error: string | null }>({ loading: false, error: null });
+  const [health, setHealth] = useState<{ api: boolean; supabase: boolean; stellar: boolean; agent: boolean } | null>(null);
 
   useEffect(() => {
     let alive = true;
+    // Real infra health: /readyz reports Supabase + Stellar RPC; recent agent
+    // activity (a decision in the last ~20 min) proves the 24/7 agent is alive.
+    void Promise.all([
+      fetch(`${API}/readyz`, { cache: "no-store" }).then((r) => r.json()).catch(() => null),
+      fetch(`${API}/api/v1/public/activity`, { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+    ]).then(([ready, activity]) => {
+      if (!alive) return;
+      const checks = (ready?.checks ?? {}) as Record<string, { ok?: boolean }>;
+      const last = activity?.decisions?.[0]?.createdAt as string | undefined;
+      const agentLive = last ? Date.now() - new Date(last).getTime() < 20 * 60_000 : false;
+      setHealth({
+        api: Boolean(ready),
+        supabase: Boolean(checks.supabase?.ok),
+        stellar: Boolean(checks.stellar?.ok),
+        agent: agentLive,
+      });
+    });
     const grab = (path: string, set: (v: unknown) => void) =>
       fetch(`${API}/api/v1/public/${path}`, { cache: "no-store" })
         .then((r) => (r.ok ? r.json() : null))
@@ -205,10 +223,10 @@ export default function IntegrationsPage() {
       <section className="space-y-4">
         <Header title={t("pages.integrations.infraTitle")} body={t("pages.integrations.infraBody")} />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <HealthTile name="Stellar · Soroban" detail="testnet" status="live" t={t} />
-          <HealthTile name="Supabase" detail="Postgres · Auth · Realtime" status="live" t={t} />
-          <HealthTile name="Fly.io · API" detail="gru · contextio-api" status="live" t={t} />
-          <HealthTile name="Fly.io · Agent" detail="gru · contextio-agent" status="live" t={t} />
+          <HealthTile name="Stellar · Soroban" detail="testnet" live={health ? health.stellar : null} t={t} />
+          <HealthTile name="Supabase" detail="Postgres · Auth · Realtime" live={health ? health.supabase : null} t={t} />
+          <HealthTile name="Fly.io · API" detail="gru · contextio-api" live={health ? health.api : null} t={t} />
+          <HealthTile name="Fly.io · Agent" detail="gru · contextio-agent" live={health ? health.agent : null} t={t} />
         </div>
       </section>
 
@@ -280,25 +298,30 @@ function IntegrationCard({
 function HealthTile({
   name,
   detail,
-  status,
+  live,
   t,
 }: {
   name: string;
   detail: string;
-  status: Status;
+  /** true = up, false = down, null = still checking. */
+  live: boolean | null;
   t: (k: string) => string;
 }) {
+  const label =
+    live === null ? t("auth.connecting") : live ? t("pages.integrations.statusLive") : t("pages.integrations.statusDown");
   return (
     <div className="rounded-lg border border-white/10 bg-ink-900/60 p-4">
       <div className="flex items-center justify-between">
         <span className="font-medium text-white">{name}</span>
         <span className="relative flex h-2.5 w-2.5">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand/70" />
-          <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-brand" />
+          {live !== false && (
+            <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${live ? "bg-brand/70" : "bg-slate-400/50"}`} />
+          )}
+          <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${live === false ? "bg-slate-600" : live === null ? "bg-slate-400" : "bg-brand"}`} />
         </span>
       </div>
       <p className="mt-1 text-xs text-slate-400">{detail}</p>
-      <p className="mt-2 text-xs font-medium text-brand">{t(STATUS_KEY[status])}</p>
+      <p className={`mt-2 text-xs font-medium ${live === false ? "text-slate-500" : "text-brand"}`}>{label}</p>
     </div>
   );
 }
