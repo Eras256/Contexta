@@ -8,9 +8,11 @@
 > verifiable **Legal Context Protocol (LCP)** document. Users sign in with their
 > **Stellar wallet** (Sign In With Stellar, SEP-53) — no passwords.
 
-Built for a hackathon demo, architected for the **SCF Integration Track** and
-production. Bootstrapped with the Stellar skill bundle for Soroban correctness;
-all code in this monorepo is original.
+Built for the **Stellar PULSO Hackathon** (and architected for the SCF
+Integration Track + production). **Everything settles for real on Stellar
+testnet** — treasury moves, Blend lending, DeFindex vaults, and USDC payroll are
+verifiable on-chain (see [What's real today](#whats-real-today--verifiable-on-chain)).
+All code in this monorepo is original.
 
 ## Live
 
@@ -21,6 +23,8 @@ all code in this monorepo is original.
 | Client SDK (npm) | **`contextio-sdk`** — `npm i contextio-sdk` |
 | Soroban contracts (testnet) | treasury `CASGAQQVHDF4Q2XTK3QWYHRABYX7JUIO6HCLEOZZR7V3TIMVHMXPTA7I` · payroll `CDXML4PU5RVXQ7DSM7UO5OURKFUJMPGI57PRZCQ3NZTKFGPOIDIOIRCT` |
 | DeFindex vault (testnet · real yield) | `CDR4WRWLHN2KNAEWT4ZFOL42WDQAHF3N7TLYB7QA5IORUS7XP4UJGTHS` |
+| Autonomous agent (Fly.io · GRU) | app **`contextio-agent`** — rebalances + lends 24/7 |
+| Demo video | _add YouTube link_ |
 
 Connect Freighter (on **Testnet**) at the web app → sign the message → explore live treasury, agent, and payroll data.
 
@@ -228,21 +232,55 @@ these in [.github/workflows/ci.yml](.github/workflows/ci.yml).
 See [docs/SCF-INTEGRATION.md](docs/SCF-INTEGRATION.md) and
 [apps/api/README.md](apps/api/README.md) for the API surface.
 
-## Status & remaining work
+## What's real today — verifiable on-chain
 
-Done: wallet sign-in, live web↔API wiring, Supabase Realtime, Soroban contracts
-deployed on testnet, published client SDK, API on Fly + web on Vercel.
+This is **not** slideware. The integrations are load-bearing and settle on Stellar
+**testnet** right now:
 
-Clearly-bounded scaffolding (marked in code) rather than full implementations:
+- **Autonomous agent, live 24/7** (`contextio-agent` on Fly) — rebalances treasury
+  and lends idle cash on its own, within owner-signed rules.
+- **Real Blend lending** — idle USDC supplied to the Blend pool (`PoolContractV2`);
+  positions read live on-chain.
+- **Real DeFindex vaults** — XLM yield vaults; users deploy their own via the
+  DeFindex factory, **signed in Freighter** (self-custody).
+- **Real USDC payroll** — salaries settled to employee wallets in BR/AR/CO in a
+  Horizon batch tx (testnet demo-scaled 1:100). Verified example:
+  [`4bd1b927…bc12cf78`](https://stellar.expert/explorer/testnet/tx/4bd1b927df7ab404dcd56abe649dcd47f56aa174b8116c747ec4f1aabc12cf78).
+- **Self-custody "Move capital"** — builds an unsigned tx, the user signs in
+  **Freighter**, and it settles via Soroban RPC — keys never leave the wallet.
+- **Real SEP-24 off-ramp** — live SEP-10 auth + SEP-24 interactive withdraw against
+  a testnet anchor (`GET /api/v1/public/anchor`).
+- **Real AI reasoning layer** — a pluggable LLM writes each decision's rationale
+  (OpenAI by default; **bring-your-own-key** for Claude / Gemini / Grok / … via an
+  OpenAI-compatible gateway, no SSRF). The on-chain *decision* stays deterministic
+  and auditable; the LLM only explains it.
+- **Live dashboards** — every KPI, position, and activity row is read from on-chain
+  state / the API (no mock when signed in), with verifiable explorer links.
 
-- **DeFindex/Blend live calls** fall back to deterministic mocks without API keys
-  / contract IDs; the live request shapes are stubbed for swap-in.
-- **Anchor SEP-24/31** on/off-ramps are represented per payroll line (UI + data
-  model); wiring to specific LATAM anchors is a documented next step.
-- **AI/LLM** is intentionally not embedded — the deterministic `AgentService.plan()`
-  is the clean plug-in point for an external model.
-- **On-chain settlement** records LCP-bound events + balances; moving actual SAC
-  token value is the next contract milestone.
+**Production last mile (honest):** local rails (PIX · Transferencias 3.0 · Bre-B)
+are shown as "via licensed anchor" — they need a licensed anchor in production and
+can't run on testnet. **Mainnet** deployment is the next milestone (a scoring
+advantage we're pursuing).
+
+## Team
+
+A Stellar-native LATAM team, co-creators of **[Nirium](https://nirium.xyz)**:
+
+- **Gio** — blockchain developer (Soroban contracts, Stellar integrations, the
+  autonomous agent, on-chain settlement, full-stack).
+- **Monse** — UX/UI designer (product, flows, the dashboard experience).
+
+Graduates of **SDF's SCALE** program and the **Impacta** Stellar bootcamp;
+participated in **BBVA Open Deal** alongside other Stellar projects; **DoraHacks
+Instaward** winners with Nirium.
+
+## Customer discovery
+
+Built for LATAM SMBs and founders who pay teams/contractors across Brazil,
+Argentina, and Colombia and manage treasury in USDC/cash. We ran recorded
+discovery interviews validating the pain (idle cash losing value, costly
+cross-border payroll, manual treasury) and the solution:
+**[interview recordings ↗](ADD_DRIVE_LINK)**.
 
 ## Contributing
 
