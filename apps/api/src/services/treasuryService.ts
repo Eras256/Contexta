@@ -57,6 +57,11 @@ export class TreasuryService {
     private readonly treasuryAddress: string | undefined,
   ) {}
 
+  /** Short-TTL cache of the on-chain read so rapid dashboard loads don't re-hit
+   *  Stellar RPC / Blend / DeFindex on every request. */
+  private readonly onchainCache = new Map<string, { at: number; positions: TreasuryPosition[] }>();
+  private static readonly ONCHAIN_TTL_MS = 12_000;
+
   /**
    * Live treasury snapshot. When a treasury wallet is configured, positions are
    * read from REAL on-chain state — the wallet's classic balances (liquid) plus
@@ -113,6 +118,10 @@ export class TreasuryService {
 
   /** Build treasury positions from real on-chain state (wallet + Blend + DeFindex). */
   private async onchainPositions(tenantId: string): Promise<TreasuryPosition[]> {
+    const cached = this.onchainCache.get(tenantId);
+    if (cached && Date.now() - cached.at < TreasuryService.ONCHAIN_TTL_MS) {
+      return cached.positions;
+    }
     const addr = this.treasuryAddress as string;
     const positions: TreasuryPosition[] = [];
     const mk = (
@@ -164,7 +173,9 @@ export class TreasuryService {
     }
 
     // If every on-chain source failed, fall back to the DB so the page isn't empty.
-    return positions.length > 0 ? positions : this.repo.listPositions(tenantId);
+    const result = positions.length > 0 ? positions : await this.repo.listPositions(tenantId);
+    this.onchainCache.set(tenantId, { at: Date.now(), positions: result });
+    return result;
   }
 
   /**
