@@ -16,7 +16,7 @@ const doc: LegalContext = {
   contextId: "11111111-1111-4111-8111-111111111111",
   version: 1,
   tenantDomain: "acme.contexta.app",
-  provider: { legalName: "Acme", jurisdiction: "BR", contactEmail: "legal@acme.example" },
+  provider: { legalName: "Acme", jurisdiction: "BR, AR, CO", contactEmail: "legal@contextio.xyz" },
   terms: { url: "https://acme.contexta.app/legal/terms", sha256: "0".repeat(64), effectiveDate: "2026-01-01" },
   jurisdictions: ["BR", "AR", "CO"],
   consentRequirements: [

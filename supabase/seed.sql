@@ -29,7 +29,7 @@ values (
     "contextId": "11111111-1111-4111-8111-111111111111",
     "version": 1,
     "tenantDomain": "contextio.xyz",
-    "provider": {"legalName": "Acme Treasury Ltda", "jurisdiction": "BR", "contactEmail": "legal@acme.example"},
+    "provider": {"legalName": "Acme Treasury Ltda", "jurisdiction": "BR, AR, CO", "contactEmail": "legal@contextio.xyz"},
     "terms": {"url": "https://contextio.xyz/legal/terms", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "effectiveDate": "2026-01-01"},
     "jurisdictions": ["BR", "AR", "CO"],
     "consentRequirements": [

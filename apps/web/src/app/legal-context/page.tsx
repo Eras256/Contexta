@@ -11,8 +11,8 @@ const RAW_JSON = {
   tenantDomain: "contextio.xyz",
   provider: {
     legalName: "Acme Treasury Ltda",
-    jurisdiction: "BR",
-    contactEmail: "legal@acme.example",
+    jurisdiction: "BR, AR, CO",
+    contactEmail: "legal@contextio.xyz",
   },
   terms: {
     url: "https://contextio.xyz/legal/terms",
