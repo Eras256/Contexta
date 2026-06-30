@@ -133,6 +133,7 @@ const en: Dict = {
       "Contextio — non-custodial technology platform (not a fintech or financial services provider) for smart treasury & payroll in Latin America on Stellar. Testnet demo · Not financial advice.",
     security: "Security",
     docs: "Docs",
+    legalContext: "Legal Context",
   },
   legal: {
     title: "Legal Context Protocol (LCP) Manifest",
@@ -518,6 +519,7 @@ const es: Dict = {
       "Contextio — plataforma tecnológica sin custodia (no es una fintech ni un proveedor de servicios financieros) para tesorería y nómina inteligentes en Latinoamérica sobre Stellar. Demo en testnet · No es asesoría financiera.",
     security: "Seguridad",
     docs: "Docs",
+    legalContext: "Contexto Legal",
   },
   legal: {
     title: "Manifiesto de Protocolo de Contexto Legal (LCP)",
@@ -903,6 +905,7 @@ const pt: Dict = {
       "Contextio — plataforma tecnológica sem custódia (não é uma fintech ou provedora de serviços financeiros) para tesouraria e folha inteligentes na América Latina sob a Stellar. Demo na testnet · Não é consultoria financeira.",
     security: "Segurança",
     docs: "Docs",
+    legalContext: "Contexto Legal",
   },
   legal: {
     title: "Manifesto do Protocolo de Contexto Legal (LCP)",
