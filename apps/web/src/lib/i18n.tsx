@@ -233,6 +233,10 @@ const en: Dict = {
       runsEmpty: "No payroll has run yet.",
       runsPaid: "paid",
       runStatus: { completed: "Completed", executing: "Executing", simulated: "Simulated", failed: "Failed" },
+      runNow: "Pay now",
+      runConfirm: "This sends a REAL payroll on Stellar to your team's wallets (testnet, scaled 1:100). Continue?",
+      runDone: "Payroll settled on-chain.",
+      runsScaledNote: "settled on-chain · testnet 1:100",
     },
     agent: {
       eyebrow: "Assistant & rules",
@@ -569,6 +573,10 @@ const es: Dict = {
       runsEmpty: "Aún no se ha corrido la nómina.",
       runsPaid: "pagados",
       runStatus: { completed: "Completada", executing: "Ejecutando", simulated: "Simulada", failed: "Fallida" },
+      runNow: "Pagar ahora",
+      runConfirm: "Esto envía una nómina REAL en Stellar a las wallets de tu equipo (testnet, escala 1:100). ¿Continuar?",
+      runDone: "Nómina liquidada on-chain.",
+      runsScaledNote: "liquidado on-chain · testnet 1:100",
     },
     agent: {
       eyebrow: "Asistente y reglas",
@@ -905,6 +913,10 @@ const pt: Dict = {
       runsEmpty: "A folha ainda não foi executada.",
       runsPaid: "pagos",
       runStatus: { completed: "Concluída", executing: "Executando", simulated: "Simulada", failed: "Falhou" },
+      runNow: "Pagar agora",
+      runConfirm: "Isto envia uma folha REAL na Stellar para as carteiras do seu time (testnet, escala 1:100). Continuar?",
+      runDone: "Folha liquidada on-chain.",
+      runsScaledNote: "liquidado on-chain · testnet 1:100",
     },
     agent: {
       eyebrow: "Assistente e regras",

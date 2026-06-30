@@ -101,19 +101,22 @@ export function payrollRouter(): Router {
     try {
       const ctx = requireCtx(req);
       const body = runSchema.parse(req.body);
-      const run = await req.container.payroll.executeRun({
-        tenantId: ctx.tenantId,
-        scheduleId: body.scheduleId,
-        actorId: ctx.userId,
-        actorType: ctx.isAgent ? "agent" : "user",
-        dryRun: body.dryRun,
-      });
-      res.status(201).json(run);
-    } catch (e) {
-      if (e instanceof Error && e.message === "Schedule not found") {
-        next(new HttpError(404, e.message));
-        return;
+      try {
+        const run = await req.container.payroll.executeRun({
+          tenantId: ctx.tenantId,
+          scheduleId: body.scheduleId,
+          actorId: ctx.userId,
+          actorType: ctx.isAgent ? "agent" : "user",
+          dryRun: body.dryRun,
+        });
+        res.status(201).json(run);
+      } catch (opErr) {
+        // Surface the real settlement reason (insufficient funds, trustline, …)
+        // instead of a generic 500.
+        const msg = opErr instanceof Error ? opErr.message : String(opErr);
+        res.status(msg === "Schedule not found" ? 404 : 400).json({ error: msg });
       }
+    } catch (e) {
       next(e);
     }
   });

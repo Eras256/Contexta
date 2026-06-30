@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import { Badge, Card, DataBadge, SectionHeader, Skeleton, Stat } from "@/components/ui";
 import { COUNTRY_LABEL, RAIL_LABEL, fromBaseUnits, localDateTime, shortHash, usd, usdBase } from "@/lib/format";
 import { api, type PayrollEmployee, type TreasurySnapshot } from "@/lib/api";
 
 const NETWORK = (process.env.NEXT_PUBLIC_STELLAR_NETWORK ?? "testnet").toLowerCase();
+const isTestnet = NETWORK !== "mainnet" && NETWORK !== "public";
 const txUrl = (h: string) =>
   `https://stellar.expert/explorer/${NETWORK === "mainnet" ? "public" : "testnet"}/tx/${h}`;
 import { useLiveData } from "@/lib/useLiveData";
@@ -19,11 +21,13 @@ const EMPTY_TREASURY: TreasurySnapshot = {
 
 export default function PayrollPage() {
   const tr = useT();
-  const { accessToken, connect, connecting } = useAuth();
+  const { accessToken, tenantId, connect, connecting } = useAuth();
   const employeesQ = useLiveData<PayrollEmployee[]>(api.employees, []);
   const obligationsQ = useLiveData(api.obligations, []);
   const treasuryQ = useLiveData(api.treasury, EMPTY_TREASURY);
-  const runsQ = useLiveData(api.runs, []);
+  const runsQ = useLiveData(api.runs, [], { realtimeTable: "payroll_runs" });
+  const [running, setRunning] = useState(false);
+  const [runMsg, setRunMsg] = useState<string | null>(null);
 
   if (!accessToken) {
     return (
@@ -53,6 +57,25 @@ export default function PayrollPage() {
   const nextDate = next
     ? new Date(next.nextRunAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })
     : "—";
+
+  // Run a real payroll now: the treasury wallet settles USDC to each employee
+  // on-chain (testnet 1:100 scaled). Surfaces the real reason on failure.
+  const runPayrollNow = async () => {
+    if (running || !accessToken || !tenantId || !next?.scheduleId) return;
+    if (!window.confirm(tr("pages.payroll.runConfirm"))) return;
+    setRunning(true);
+    setRunMsg(null);
+    try {
+      const run = await api.runPayroll({ accessToken, tenantId }, next.scheduleId);
+      setRunMsg(
+        `${tr("pages.payroll.runDone")}${run.stellarTxHash ? ` · tx ${shortHash(run.stellarTxHash, 8, 6)}` : ""}`,
+      );
+    } catch (e) {
+      setRunMsg(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRunning(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -114,8 +137,24 @@ export default function PayrollPage() {
 
       {/* Recent payroll runs (real, on-chain) */}
       <Card>
-        <h3 className="mb-1 text-sm font-semibold text-white">{tr("pages.payroll.runsTitle")}</h3>
+        <div className="mb-1 flex items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold text-white">{tr("pages.payroll.runsTitle")}</h3>
+          {next?.scheduleId && (
+            <button
+              onClick={() => void runPayrollNow()}
+              disabled={running}
+              className="btn-ghost text-xs disabled:opacity-40"
+            >
+              {running ? tr("auth.connecting") : tr("pages.payroll.runNow")}
+            </button>
+          )}
+        </div>
         <p className="mb-4 text-xs text-slate-400">{tr("pages.payroll.runsBody")}</p>
+        {runMsg && (
+          <p className="mb-3 break-words rounded-lg border border-white/10 bg-ink-900/60 px-3 py-2 text-xs text-slate-300">
+            {runMsg}
+          </p>
+        )}
         <div className="space-y-3">
           {runsQ.loading &&
             runsQ.data.length === 0 &&
@@ -148,6 +187,11 @@ export default function PayrollPage() {
                   {localDateTime(run.executedAt ?? run.createdAt)}
                 </span>
               </div>
+              {isTestnet && run.status === "completed" && (
+                <p className="mt-1 text-[11px] text-slate-500">
+                  {usd(Number(run.totalAmount || 0) / 100)} {run.asset} · {tr("pages.payroll.runsScaledNote")}
+                </p>
+              )}
               <div className="mt-2 text-xs">
                 {run.stellarTxHash && !run.stellarTxHash.startsWith("sim:") ? (
                   <a href={txUrl(run.stellarTxHash)} target="_blank" rel="noreferrer" className="font-mono text-brand hover:underline">
