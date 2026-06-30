@@ -23,6 +23,7 @@ All code in this monorepo is original.
 | Client SDK (npm) | **`contextio-sdk`** — `npm i contextio-sdk` |
 | Soroban contracts (testnet) | treasury `CASGAQQVHDF4Q2XTK3QWYHRABYX7JUIO6HCLEOZZR7V3TIMVHMXPTA7I` · payroll `CDXML4PU5RVXQ7DSM7UO5OURKFUJMPGI57PRZCQ3NZTKFGPOIDIOIRCT` |
 | DeFindex vault (testnet · real yield) | `CDR4WRWLHN2KNAEWT4ZFOL42WDQAHF3N7TLYB7QA5IORUS7XP4UJGTHS` |
+| Reflector price oracle (testnet · SEP-40) | `CCYOZJCOPG34LLQQ7N24YXBM7LL62R7ONMZ3G6WZAAYPB5OYKOMJRN63` — live XLM/USD at `/api/v1/public/oracle` |
 | Autonomous agent (Fly.io · GRU) | app **`contextio-agent`** — rebalances + lends 24/7 |
 | Demo video | https://youtu.be/JI7KpNQMo0A |
 
