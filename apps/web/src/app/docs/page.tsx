@@ -128,7 +128,7 @@ export default function DocsPage() {
               <div className="rounded-xl border border-white/5 bg-white/[0.01] p-5 space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="rounded bg-brand/10 border border-brand/30 px-2 py-0.5 font-mono text-xs font-bold text-brand uppercase">POST</span>
-                  <span className="font-mono text-sm text-white">/api/v1/auth/wallet/challenge</span>
+                  <span className="font-mono text-sm text-white break-all">/api/v1/auth/wallet/challenge</span>
                 </div>
                 <p className="text-xs text-slate-400">Initiates the wallet authentication challenge. Returns an ed25519 payload challenge string designed for Freighter signature to satisfy SEP-53 verification.</p>
               </div>
@@ -137,7 +137,7 @@ export default function DocsPage() {
               <div className="rounded-xl border border-white/5 bg-white/[0.01] p-5 space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="rounded bg-brand/10 border border-brand/30 px-2 py-0.5 font-mono text-xs font-bold text-brand uppercase">POST</span>
-                  <span className="font-mono text-sm text-white">/api/v1/auth/wallet/verify</span>
+                  <span className="font-mono text-sm text-white break-all">/api/v1/auth/wallet/verify</span>
                 </div>
                 <p className="text-xs text-slate-400">Verifies the signed challenge and issues a HS256 JWT, authorizing company-level read/writes aligned with Postgres Row Level Security.</p>
               </div>
@@ -146,7 +146,7 @@ export default function DocsPage() {
               <div className="rounded-xl border border-white/5 bg-white/[0.01] p-5 space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="rounded bg-sky-500/10 border border-sky-500/30 px-2 py-0.5 font-mono text-xs font-bold text-sky-400 uppercase">GET</span>
-                  <span className="font-mono text-sm text-white">/api/v1/treasury/positions</span>
+                  <span className="font-mono text-sm text-white break-all">/api/v1/treasury/positions</span>
                 </div>
                 <p className="text-xs text-slate-400">Aggregates company balances on-chain. Returns active vaults, APY, holdings, and allocations on Blend and DeFindex. Cached with a 12s TTL to prevent rate limit throttling.</p>
               </div>
@@ -155,7 +155,7 @@ export default function DocsPage() {
               <div className="rounded-xl border border-white/5 bg-white/[0.01] p-5 space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="rounded bg-brand/10 border border-brand/30 px-2 py-0.5 font-mono text-xs font-bold text-brand uppercase">POST</span>
-                  <span className="font-mono text-sm text-white">/api/v1/payroll/runs</span>
+                  <span className="font-mono text-sm text-white break-all">/api/v1/payroll/runs</span>
                 </div>
                 <p className="text-xs text-slate-400">
                   Executes the scheduled payroll batch payments. Payments are executed directly on-chain.
@@ -167,7 +167,7 @@ export default function DocsPage() {
               <div className="rounded-xl border border-white/5 bg-white/[0.01] p-5 space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
                   <span className="rounded bg-sky-500/10 border border-sky-500/30 px-2 py-0.5 font-mono text-xs font-bold text-sky-400 uppercase">GET</span>
-                  <span className="font-mono text-sm text-white">/.well-known/legal-context.json</span>
+                  <span className="font-mono text-sm text-white break-all">/.well-known/legal-context.json</span>
                 </div>
                 <p className="text-xs text-slate-400">Serves the public machine-readable Legal Context Protocol (LCP) manifest containing signed terms hash, provider email, allowed scopes, and dispute forums.</p>
               </div>
