@@ -281,9 +281,9 @@ function Header({ title, body }: { title: string; body: string }) {
 
 function Row({ k, v }: { k: string; v: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-wrap items-center justify-between gap-2">
       <span className="text-slate-500">{k}</span>
-      {v}
+      <div className="text-right">{v}</div>
     </div>
   );
 }
