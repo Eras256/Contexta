@@ -24,7 +24,7 @@ export function Hero3D({ className = "" }: { className?: string }) {
       if (disposed || !mountRef.current) return;
 
       const isMobile = window.matchMedia("(max-width: 640px)").matches;
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const reduced = !isMobile && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
       const width = () => mount.clientWidth || 1;
       const height = () => mount.clientHeight || 1;
@@ -191,8 +191,13 @@ export function Hero3D({ className = "" }: { className?: string }) {
         (entries) => {
           const visible = entries[0]?.isIntersecting;
           if (reduced) return;
-          if (visible) start();
-          else stop();
+          if (isMobile) {
+            start();
+          } else if (visible) {
+            start();
+          } else {
+            stop();
+          }
         },
         { threshold: 0.05 },
       );
