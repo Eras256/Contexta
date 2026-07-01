@@ -304,7 +304,7 @@ function RebalancePanel({ auth, address }: { auth: ApiAuth; address: string | nu
         />
       </label>
 
-      <div className="mt-3 grid grid-cols-2 gap-2">
+      <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
         <button onClick={() => void move("in")} disabled={busy} className="btn-primary justify-center px-3 py-2 text-xs disabled:opacity-40">
           {busy ? "…" : "Aportar liquidez"}
         </button>

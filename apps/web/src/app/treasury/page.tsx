@@ -167,7 +167,7 @@ export default function TreasuryPage() {
                     tx {shortHash(d.stellarTxHash, 10, 6)} ↗
                   </a>
                 ) : d.stellarTxHash ? (
-                  <p className="mt-1 font-mono text-xs text-slate-500">{d.stellarTxHash}</p>
+                  <p className="mt-1 font-mono text-xs text-slate-500 break-all">{d.stellarTxHash}</p>
                 ) : null}
               </div>
             ))}
