@@ -21,9 +21,10 @@ All code in this monorepo is original.
 | Web app | **https://www.contextio.xyz** |
 | API (Fly.io · region GRU) | **https://contextio-api.fly.dev** |
 | Client SDK (npm) | **`contextio-sdk`** — `npm i contextio-sdk` |
-| Soroban contracts (testnet) | treasury `CASGAQQVHDF4Q2XTK3QWYHRABYX7JUIO6HCLEOZZR7V3TIMVHMXPTA7I` · payroll `CDXML4PU5RVXQ7DSM7UO5OURKFUJMPGI57PRZCQ3NZTKFGPOIDIOIRCT` |
-| DeFindex vault (testnet · real yield) | `CDR4WRWLHN2KNAEWT4ZFOL42WDQAHF3N7TLYB7QA5IORUS7XP4UJGTHS` |
-| Reflector price oracle (testnet · SEP-40) | `CCYOZJCOPG34LLQQ7N24YXBM7LL62R7ONMZ3G6WZAAYPB5OYKOMJRN63` — live XLM/USD at `/api/v1/public/oracle` |
+| Treasury contract (testnet) | [`CASGAQ…MXPTA7I` ↗](https://stellar.expert/explorer/testnet/contract/CASGAQQVHDF4Q2XTK3QWYHRABYX7JUIO6HCLEOZZR7V3TIMVHMXPTA7I) |
+| Payroll contract (testnet) | [`CDXML4…OIRCT` ↗](https://stellar.expert/explorer/testnet/contract/CDXML4PU5RVXQ7DSM7UO5OURKFUJMPGI57PRZCQ3NZTKFGPOIDIOIRCT) |
+| DeFindex vault (testnet · real yield) | [`CDR4WR…P4UJGTHS` ↗](https://stellar.expert/explorer/testnet/contract/CDR4WRWLHN2KNAEWT4ZFOL42WDQAHF3N7TLYB7QA5IORUS7XP4UJGTHS) |
+| Reflector price oracle (testnet · SEP-40) | [`CCYOZJ…OMJRN63` ↗](https://stellar.expert/explorer/testnet/contract/CCYOZJCOPG34LLQQ7N24YXBM7LL62R7ONMZ3G6WZAAYPB5OYKOMJRN63) · live at [/api/v1/public/oracle ↗](https://contextio-api.fly.dev/api/v1/public/oracle) |
 | Autonomous agent (Fly.io · GRU) | app **`contextio-agent`** — rebalances + lends 24/7 |
 | Demo video | https://youtu.be/JI7KpNQMo0A |
 
@@ -159,7 +160,7 @@ mock mode** so the full stack works offline.
 2. Put `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`,
    `SUPABASE_JWT_SECRET` in `.env.local`. The JWT secret is the project's
    **Legacy JWT Secret** (used to verify/mint HS256 session tokens).
-3. Apply schema + seed (migrations `0001`–`0003`, RLS, seed):
+3. Apply schema + seed (migrations `0001`–`0004`, RLS, seed):
    ```bash
    supabase db reset            # local
    # hosted: run supabase/full_setup.sql against the project (pooler connection)
@@ -274,15 +275,22 @@ accountable on-chain agents.
 
 ## Team
 
-A Stellar-native LATAM team, co-creators of **[Nirium](https://nirium.xyz)**:
+A team of **Stellar Ambassadors** building for LATAM:
 
-- **Gio** — blockchain developer (Soroban contracts, Stellar integrations, the
-  autonomous agent, on-chain settlement, full-stack).
-- **Monse** — UX/UI designer (product, flows, the dashboard experience).
+- **Giovanny Amador (Gio)** — Founder & lead architect · **Stellar México Ambassador**.
+  Built the full technical protocol: Soroban contracts, the autonomous agent, TS/Python
+  SDKs, and the "LLM proposes, the contract decides" security pattern. 3rd place Fintech
+  World Cup MX 2026; ETH Uruguay & ETH MX hackathon winner.
+- **Monserrat Mendoza (Monse)** — Cofounder & COO · **Stellar México Ambassador**.
+  Leads product, UX/UI, regulatory/compliance, and institutional & commercial relations
+  (SDF, Bitso, investors). SCF Kickstart co-applicant (95/100 readiness); 3rd place
+  Fintech World Cup MX 2026.
+- **Gonzalo Chacón** — Cofounder & CCO · **Stellar Costa Rica Ambassador**. Program &
+  go-to-market: 14+ years of enterprise delivery (Senior PM @ UST), MBA in finance,
+  Scrum Master; leads commercial development and the in-person pitch across BR/AR/CO.
 
-Graduates of **SDF's SCALE** program and the **Impacta** Stellar bootcamp;
-participated in **BBVA Open Deal** alongside other Stellar projects; **DoraHacks
-Instaward** winners with Nirium.
+All three are **SDF SCALE** graduates and **DoraHacks Instaward** winners. Gio & Monse
+co-created **[Nirium](https://nirium.xyz)** (Impacta · BBVA Open Deal).
 
 ## Customer discovery
 
