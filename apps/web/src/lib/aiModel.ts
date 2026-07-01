@@ -32,7 +32,7 @@ export const AI_PROVIDERS: ProviderDef[] = [
   {
     id: "anthropic",
     label: "Anthropic · Claude",
-    models: ["claude-sonnet-4-6", "claude-opus-4-8", "claude-haiku-4-5"],
+    models: ["claude-3-5-sonnet-latest", "claude-3-5-haiku-latest", "claude-3-opus-latest"],
     keyHint: "sk-ant-...",
     byok: true,
     note: "Claude — native Anthropic",

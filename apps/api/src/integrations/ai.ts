@@ -146,33 +146,63 @@ export class AiAdvisor {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), REQUEST_TIMEOUT_MS);
     try {
-      const res = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          authorization: `Bearer ${apiKey}`,
-          // Optional attribution headers OpenRouter recommends; ignored elsewhere.
-          "HTTP-Referer": "https://contextio.xyz",
-          "X-Title": "Contextio",
-        },
-        signal: ctrl.signal,
-        body: JSON.stringify({
-          model,
-          temperature: 0.4,
-          max_tokens: 220,
-          ...(useJsonMode ? { response_format: { type: "json_object" } } : {}),
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: JSON.stringify(ctx) },
-          ],
-        }),
-      });
+      let res: Response;
+      if (provider === "anthropic") {
+        res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "x-api-key": apiKey,
+            "anthropic-version": "2023-06-01",
+          },
+          signal: ctrl.signal,
+          body: JSON.stringify({
+            model,
+            max_tokens: 220,
+            system: systemPrompt,
+            messages: [
+              { role: "user", content: JSON.stringify(ctx) },
+            ],
+          }),
+        });
+      } else {
+        res = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            authorization: `Bearer ${apiKey}`,
+            // Optional attribution headers OpenRouter recommends; ignored elsewhere.
+            "HTTP-Referer": "https://contextio.xyz",
+            "X-Title": "Contextio",
+          },
+          signal: ctrl.signal,
+          body: JSON.stringify({
+            model,
+            temperature: 0.4,
+            max_tokens: 220,
+            ...(useJsonMode ? { response_format: { type: "json_object" } } : {}),
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: JSON.stringify(ctx) },
+            ],
+          }),
+        });
+      }
+
       if (!res.ok) {
         this.logger.warn({ status: res.status, provider }, "AI advisor request failed — using deterministic rationale");
         return null;
       }
-      const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-      const content = json.choices?.[0]?.message?.content;
+
+      let content = "";
+      if (provider === "anthropic") {
+        const json = (await res.json()) as { content?: { type?: string; text?: string }[] };
+        content = json.content?.[0]?.text ?? "";
+      } else {
+        const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+        content = json.choices?.[0]?.message?.content ?? "";
+      }
+
       if (!content) return null;
       const parsed = JSON.parse(content) as { rationale?: unknown; risk?: unknown };
       if (typeof parsed.rationale !== "string" || !parsed.rationale.trim()) return null;
