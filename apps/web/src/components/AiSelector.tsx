@@ -142,7 +142,7 @@ function AiModal({
         className="flex max-h-[88vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-white/10 bg-ink-950 shadow-2xl"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="min-h-0 flex-1 overflow-y-auto p-5">
+        <div className="min-h-0 flex-1 overflow-y-auto max-h-[calc(88vh-80px)] p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="flex items-center gap-2 text-base font-semibold text-white">
@@ -164,7 +164,7 @@ function AiModal({
             </svg>
           </button>
         </div>
-
+ 
         <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
           {AI_PROVIDERS.map((p) => {
             const isSel = p.id === sel;
@@ -176,7 +176,7 @@ function AiModal({
                   isSel ? "border-brand/60 bg-brand/10" : "border-white/10 bg-ink-900/60 hover:border-white/25"
                 }`}
               >
-                <span className="flex items-center gap-1.5 text-sm font-medium text-white">
+                <span className="flex flex-wrap items-center gap-1.5 text-sm font-medium text-white">
                   {p.label}
                   {!p.byok && <span className="rounded bg-brand/15 px-1 py-0.5 text-[9px] font-semibold text-brand">DEFAULT</span>}
                 </span>
