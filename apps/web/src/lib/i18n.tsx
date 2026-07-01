@@ -127,6 +127,7 @@ const en: Dict = {
     connection: "CONNECTION",
     online: "ONLINE",
     title2: "Agent audit feed",
+    aiReasoning: "AI Reasoning: Powered by OpenAI",
   },
   footer: {
     tagline:
@@ -513,6 +514,7 @@ const es: Dict = {
     connection: "CONEXIÓN",
     online: "EN LÍNEA",
     title2: "Feed de auditoría del agente",
+    aiReasoning: "Pensamiento de IA: Impulsado por OpenAI",
   },
   footer: {
     tagline:
@@ -899,6 +901,7 @@ const pt: Dict = {
     connection: "CONEXÃO",
     online: "ONLINE",
     title2: "Feed de auditoria do agente",
+    aiReasoning: "Pensamento de IA: Desenvolvido por OpenAI",
   },
   footer: {
     tagline:

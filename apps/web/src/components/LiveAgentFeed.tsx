@@ -214,6 +214,9 @@ export function LiveAgentFeed() {
           </div>
 
           <div className="flex items-center gap-3">
+            <span className="hidden sm:inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[10px] font-medium text-slate-400">
+              <span className="h-1 w-1 rounded-full bg-emerald-400" /> {t("feed.aiReasoning")}
+            </span>
             <span className="inline-flex items-center gap-1.5 rounded-md border border-brand/25 bg-brand/5 px-2 py-0.5 font-mono text-[11px] font-semibold text-brand">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand shadow-[0_0_6px_#2dd4bf]" /> {t("feed.online")}
             </span>
