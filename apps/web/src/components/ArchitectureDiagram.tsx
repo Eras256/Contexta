@@ -105,10 +105,11 @@ export function ArchitectureDiagram() {
             <path d="M520,112 C430,148 340,150 296,178" />
             <path d="M570,112 L570,176" />
             <path d="M670,210 L757,210" />
-            <path d="M282,244 L274,346" />
-            <path d="M540,244 L474,346" />
-            <path d="M602,244 L666,346" />
-            <path d="M652,236 C770,272 840,300 864,346" />
+            <path d="M280,242 L150,348" />
+            <path d="M500,242 L330,348" />
+            <path d="M550,242 L500,348" />
+            <path d="M655,348 L590,242" />
+            <path d="M640,242 L800,348" />
           </g>
 
           {/* Company */}
@@ -120,10 +121,11 @@ export function ArchitectureDiagram() {
           <Box x={760} y={178} w={200} h={64} title={t("diagram.recordsTitle")} subtitle={t("diagram.recordsSub")} accent="#34d399" />
 
           {/* Stellar */}
-          <Box x={180} y={348} w={184} h={64} title={t("diagram.contractsTitle")} subtitle={t("diagram.contractsSub")} accent="#2dd4bf" />
-          <Box x={378} y={348} w={184} h={64} title={t("diagram.savingsTitle")} subtitle={t("diagram.savingsSub")} accent="#f5b54a" />
-          <Box x={576} y={348} w={184} h={64} title={t("diagram.lendingTitle")} subtitle={t("diagram.lendingSub")} accent="#fb923c" />
-          <Box x={776} y={348} w={184} h={64} title={t("diagram.payoutsTitle")} subtitle={t("diagram.payoutsSub")} accent="#38bdf8" />
+          <Box x={40} y={348} w={160} h={64} title={t("diagram.contractsTitle")} subtitle={t("diagram.contractsSub")} accent="#2dd4bf" />
+          <Box x={225} y={348} w={160} h={64} title={t("diagram.savingsTitle")} subtitle={t("diagram.savingsSub")} accent="#f5b54a" />
+          <Box x={410} y={348} w={160} h={64} title={t("diagram.lendingTitle")} subtitle={t("diagram.lendingSub")} accent="#fb923c" />
+          <Box x={595} y={348} w={160} h={64} title={t("diagram.oracleTitle")} subtitle={t("diagram.oracleSub")} accent="#a78bfa" />
+          <Box x={780} y={348} w={160} h={64} title={t("diagram.payoutsTitle")} subtitle={t("diagram.payoutsSub")} accent="#38bdf8" />
 
           {/* LCP binding chip (cross-cutting) */}
           <rect x={420} y={280} width={300} height={30} rx={15} fill="#a78bfa" fillOpacity={0.12} stroke="#a78bfa" strokeOpacity={0.5} />
