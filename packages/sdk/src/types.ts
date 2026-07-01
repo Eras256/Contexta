@@ -116,3 +116,11 @@ export interface LcpBinding {
   hash: string;
   consents: string[];
 }
+
+export interface ProposeOptions {
+  execute?: boolean;
+  aiProvider?: "openai" | "anthropic" | "openrouter" | "groq" | "deepseek" | "xai" | "together";
+  aiModel?: string;
+  aiApiKey?: string;
+  locale?: "en" | "es" | "pt";
+}

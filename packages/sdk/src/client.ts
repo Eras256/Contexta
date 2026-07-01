@@ -6,6 +6,7 @@ import type {
   TreasurySnapshot,
   WalletChallenge,
   WalletSession,
+  ProposeOptions,
 } from "./types.js";
 
 export interface ContextioClientOptions {
@@ -76,8 +77,9 @@ export class ContextioClient {
     return this.request("/agent/decisions");
   }
 
-  propose(execute = false): Promise<AgentDecision> {
-    return this.request("/agent/propose", { method: "POST", body: { execute } });
+  propose(options: boolean | ProposeOptions = {}): Promise<AgentDecision> {
+    const body = typeof options === "boolean" ? { execute: options } : options;
+    return this.request("/agent/propose", { method: "POST", body });
   }
 
   legal(): Promise<LegalState> {
