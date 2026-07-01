@@ -1,64 +1,39 @@
 import { NextResponse } from "next/server";
 
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+
+/**
+ * Canonical LCP document for this tenant domain. The Legal Context Protocol
+ * hashes the document served here, so it MUST be the real, published document
+ * (with the real terms hash) — we proxy it from the API rather than serving a
+ * static placeholder, guaranteeing it matches what's bound on-chain.
+ */
 export async function GET(request: Request) {
   const acceptHeader = request.headers.get("accept") ?? "";
-  
   if (acceptHeader.includes("text/html")) {
     const url = new URL(request.url);
     url.pathname = "/legal-context";
     return NextResponse.redirect(url);
   }
-  
-  const doc = {
-    specVersion: "0.1.0",
-    contextId: "11111111-1111-4111-8111-111111111111",
-    version: 1,
-    tenantDomain: "contextio.xyz",
-    provider: {
-      legalName: "Acme Treasury Ltda",
-      jurisdiction: "BR, AR, CO",
-      contactEmail: "legal@contextio.xyz",
-    },
-    terms: {
-      url: "https://contextio.xyz/legal/terms",
-      sha256: "0000000000000000000000000000000000000000000000000000000000000000",
-      effectiveDate: "2026-01-01",
-    },
-    jurisdictions: ["BR", "AR", "CO"],
-    consentRequirements: [
-      {
-        id: "treasury-management",
-        description: "Authorize agents to allocate idle treasury.",
-        required: true,
-        scope: ["treasury", "yield"],
-      },
-      {
-        id: "payroll-execution",
-        description: "Authorize scheduled payroll settlement.",
-        required: true,
-        scope: ["payroll", "offramp"],
-      },
-    ],
-    disputeChannels: [
-      {
-        type: "arbitration",
-        provider: "Contextio default arbitration",
-        venue: "https://contextio.xyz/legal/disputes",
-        governingLaw: "BR",
-        language: "en",
-      },
-    ],
-    settlement: {
-      networks: ["stellar:testnet", "stellar:pubnet"],
-      assets: ["USDC", "XLM"],
-    },
-    publishedAt: "2026-01-04T10:02:00.000Z",
-  };
 
-  return NextResponse.json(doc, {
-    headers: {
-      "Cache-Control": "public, max-age=300",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
+  try {
+    const r = await fetch(`${API}/.well-known/legal-context.json?domain=contextio.xyz`, {
+      cache: "no-store",
+    });
+    if (r.ok) {
+      const doc = await r.json();
+      return NextResponse.json(doc, {
+        headers: {
+          "Cache-Control": "public, max-age=300",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
+  } catch {
+    /* fall through to 503 — never serve a fake/placeholder canonical document */
+  }
+  return NextResponse.json(
+    { error: "legal_context_unavailable" },
+    { status: 503, headers: { "Access-Control-Allow-Origin": "*" } },
+  );
 }

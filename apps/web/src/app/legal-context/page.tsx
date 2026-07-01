@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { Card } from "@/components/ui";
 
-const RAW_JSON = {
+const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+
+// Shape + graceful fallback; the real, published LCP (with the real terms hash)
+// is fetched on mount from the canonical .well-known endpoint.
+const FALLBACK = {
   specVersion: "0.1.0",
   contextId: "11111111-1111-4111-8111-111111111111",
   version: 1,
@@ -53,10 +57,32 @@ const RAW_JSON = {
 export default function LegalContextPage() {
   const t = useT();
   const [copied, setCopied] = useState(false);
+  const [doc, setDoc] = useState(FALLBACK);
+
+  // Load the REAL published LCP (with the real terms hash) from the canonical endpoint.
+  useEffect(() => {
+    let alive = true;
+    fetch(`${API}/.well-known/legal-context.json?domain=contextio.xyz`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!alive || !d) return;
+        setDoc({
+          ...FALLBACK,
+          ...d,
+          terms: { ...FALLBACK.terms, ...(d.terms ?? {}) },
+          provider: { ...FALLBACK.provider, ...(d.provider ?? {}) },
+          settlement: { ...FALLBACK.settlement, ...(d.settlement ?? {}) },
+        } as typeof FALLBACK);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(JSON.stringify(RAW_JSON, null, 2));
+      await navigator.clipboard.writeText(JSON.stringify(doc, null, 2));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -65,7 +91,7 @@ export default function LegalContextPage() {
   };
 
   const downloadJson = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(RAW_JSON, null, 2));
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(doc, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
     downloadAnchor.setAttribute("download", "legal-context.json");
@@ -95,17 +121,17 @@ export default function LegalContextPage() {
           <div className="flex flex-wrap gap-x-6 gap-y-2 pt-2 text-xs text-slate-400">
             <div>
               <span className="text-slate-500">{t("legal.specVersion")}: </span>
-              <span className="font-mono text-white">v{RAW_JSON.specVersion}</span>
+              <span className="font-mono text-white">v{doc.specVersion}</span>
             </div>
             <div className="hidden sm:inline text-slate-600">|</div>
             <div>
               <span className="text-slate-500">{t("legal.version")}: </span>
-              <span className="font-mono text-white">{RAW_JSON.version}</span>
+              <span className="font-mono text-white">{doc.version}</span>
             </div>
             <div className="hidden sm:inline text-slate-600">|</div>
             <div>
               <span className="text-slate-500">{t("legal.publishedAt")}: </span>
-              <span className="font-mono text-white">{new Date(RAW_JSON.publishedAt).toLocaleDateString()}</span>
+              <span className="font-mono text-white">{new Date(doc.publishedAt).toLocaleDateString()}</span>
             </div>
           </div>
         </div>
@@ -123,16 +149,16 @@ export default function LegalContextPage() {
             <div className="divide-y divide-white/5 text-sm">
               <div className="flex justify-between py-2.5">
                 <span className="text-slate-400">{t("legal.legalName")}</span>
-                <span className="font-medium text-white">{RAW_JSON.provider.legalName}</span>
+                <span className="font-medium text-white">{doc.provider.legalName}</span>
               </div>
               <div className="flex justify-between py-2.5">
                 <span className="text-slate-400">{t("legal.jurisdiction")}</span>
-                <span className="font-mono font-medium text-white">{RAW_JSON.provider.jurisdiction}</span>
+                <span className="font-mono font-medium text-white">{doc.provider.jurisdiction}</span>
               </div>
               <div className="flex justify-between py-2.5">
                 <span className="text-slate-400">{t("legal.contactEmail")}</span>
-                <a href={`mailto:${RAW_JSON.provider.contactEmail}`} className="text-accent hover:underline">
-                  {RAW_JSON.provider.contactEmail}
+                <a href={`mailto:${doc.provider.contactEmail}`} className="text-accent hover:underline">
+                  {doc.provider.contactEmail}
                 </a>
               </div>
             </div>
@@ -149,18 +175,18 @@ export default function LegalContextPage() {
             <div className="divide-y divide-white/5 text-sm">
               <div className="flex justify-between py-2.5">
                 <span className="text-slate-400">{t("legal.effectiveDate")}</span>
-                <span className="font-mono text-white">{RAW_JSON.terms.effectiveDate}</span>
+                <span className="font-mono text-white">{doc.terms.effectiveDate}</span>
               </div>
               <div className="flex flex-col gap-1.5 py-2.5">
                 <span className="text-slate-400">{t("legal.termsUrl")}</span>
-                <a href={RAW_JSON.terms.url} target="_blank" rel="noreferrer" className="text-accent hover:underline break-all text-xs">
-                  {RAW_JSON.terms.url} ↗
+                <a href={doc.terms.url} target="_blank" rel="noreferrer" className="text-accent hover:underline break-all text-xs">
+                  {doc.terms.url} ↗
                 </a>
               </div>
               <div className="flex flex-col gap-1.5 py-2.5">
                 <span className="text-slate-400">{t("legal.termsHash")}</span>
                 <span className="font-mono text-[10px] text-slate-400 break-all select-all">
-                  {RAW_JSON.terms.sha256}
+                  {doc.terms.sha256}
                 </span>
               </div>
             </div>
@@ -176,7 +202,7 @@ export default function LegalContextPage() {
         </h3>
         <p className="text-xs text-slate-400 mb-6">{t("legal.consentDesc")}</p>
         <div className="grid gap-4 md:grid-cols-2">
-          {RAW_JSON.consentRequirements.map((cr) => {
+          {doc.consentRequirements.map((cr) => {
             const descKey = cr.id === "treasury-management" ? "legal.consentTreasuryDesc" : "legal.consentPayrollDesc";
             return (
               <div key={cr.id} className="rounded-xl border border-white/5 bg-white/[0.02] p-4.5 space-y-3">
@@ -216,7 +242,7 @@ export default function LegalContextPage() {
             <div className="space-y-2">
               <div className="text-slate-400">{t("legal.allowedNetworks")}</div>
               <div className="flex flex-wrap gap-1.5">
-                {RAW_JSON.settlement.networks.map((n) => (
+                {doc.settlement.networks.map((n) => (
                   <span key={n} className="rounded border border-white/10 bg-white/5 px-2 py-1 font-mono text-slate-300">
                     {n}
                   </span>
@@ -226,7 +252,7 @@ export default function LegalContextPage() {
             <div className="space-y-2">
               <div className="text-slate-400">{t("legal.allowedAssets")}</div>
               <div className="flex flex-wrap gap-1.5">
-                {RAW_JSON.settlement.assets.map((a) => (
+                {doc.settlement.assets.map((a) => (
                   <span key={a} className="rounded border border-white/10 bg-white/5 px-2 py-1 font-mono font-semibold text-brand">
                     {a}
                   </span>
@@ -243,7 +269,7 @@ export default function LegalContextPage() {
             {t("legal.disputeResolution")}
           </h3>
           <div className="divide-y divide-white/5 text-xs">
-            {RAW_JSON.disputeChannels.map((dc, idx) => (
+            {doc.disputeChannels.map((dc, idx) => (
               <div key={idx} className="space-y-2.5 pb-1">
                 <div className="flex justify-between">
                   <span className="text-slate-400">{t("legal.disputeType")}</span>
@@ -286,7 +312,7 @@ export default function LegalContextPage() {
           </div>
         </div>
         <div className="rounded-xl border border-white/5 bg-ink-950 p-4 font-mono text-[10px] sm:text-xs text-slate-300 overflow-x-auto shadow-inner select-all">
-          <pre>{JSON.stringify(RAW_JSON, null, 2)}</pre>
+          <pre>{JSON.stringify(doc, null, 2)}</pre>
         </div>
       </Card>
     </div>
