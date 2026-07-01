@@ -185,7 +185,7 @@ export default function AgentPage() {
           {decisions.data.map((d) => (
             <div key={d.id} className="rounded-lg border border-white/10 bg-ink-900/60 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge tone="agent">{actionLabel(d.action)}</Badge>
                   <Badge tone={d.status === "executed" ? "success" : d.status === "proposed" ? "warn" : "default"}>
                     {statusLabel(d.status)}
@@ -222,7 +222,7 @@ export default function AgentPage() {
                       {shortHash(d.stellarTxHash, 10, 6)} ↗
                     </a>
                   ) : (
-                    <span className="font-mono text-slate-500">{d.stellarTxHash ?? "—"}</span>
+                    <span className="font-mono text-slate-500 break-all">{d.stellarTxHash ?? "—"}</span>
                   )}
                 </span>
               </div>
