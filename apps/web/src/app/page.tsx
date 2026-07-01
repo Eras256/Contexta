@@ -17,11 +17,11 @@ export default function HomePage() {
   const t = useT();
 
   return (
-    <div className="space-y-24 sm:space-y-28">
+    <div className="space-y-16 sm:space-y-24 lg:space-y-28">
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="relative grid items-center gap-10 pt-2 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
+      <section className="relative grid items-center gap-10 pt-4 sm:pt-6 lg:pt-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8">
         <div className="relative z-10">
-          <div className="animate-fade-up mb-6 flex items-center gap-3">
+          <div className="animate-fade-up mb-5 flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-brand/30 bg-brand/5 p-1.5 shadow-[0_0_12px_rgba(34,211,165,0.06)] animate-float">
               <img src="/logo-icon.png" alt="Contextio Logo" className="h-full w-full object-contain" />
             </div>
@@ -31,18 +31,18 @@ export default function HomePage() {
             </div>
           </div>
           <h1
-            className="animate-fade-up text-balance text-5xl font-semibold leading-[0.98] tracking-[-0.02em] text-white sm:text-6xl lg:text-7xl"
+            className="animate-fade-up text-balance text-[34px] leading-[1.05] sm:text-5xl sm:leading-[0.98] lg:text-7xl font-semibold tracking-[-0.02em] text-white"
             style={{ animationDelay: "80ms" }}
           >
             {t("hero.title")}
           </h1>
           <p
-            className="animate-fade-up mt-6 max-w-xl text-pretty text-base leading-relaxed text-slate-300 sm:text-lg"
+            className="animate-fade-up mt-4 sm:mt-6 max-w-xl text-pretty text-base leading-relaxed text-slate-300 sm:text-lg"
             style={{ animationDelay: "160ms" }}
           >
             {t("hero.subtitle")}
           </p>
-          <div className="animate-fade-up mt-8 flex flex-wrap gap-3" style={{ animationDelay: "240ms" }}>
+          <div className="animate-fade-up mt-6 sm:mt-8 flex flex-wrap gap-3" style={{ animationDelay: "240ms" }}>
             <Link href="/treasury" className="btn-primary px-5 py-2.5 text-[15px]">
               {t("hero.ctaPrimary")}
             </Link>
@@ -50,7 +50,7 @@ export default function HomePage() {
               {t("hero.ctaSecondary")}
             </a>
           </div>
-          <p className="animate-fade-up mt-5 flex items-center gap-2 text-xs text-slate-400" style={{ animationDelay: "320ms" }}>
+          <p className="animate-fade-up mt-4 sm:mt-5 flex items-center gap-2 text-xs text-slate-400" style={{ animationDelay: "320ms" }}>
             <LockIcon />
             {t("hero.trust")}
           </p>
@@ -67,13 +67,13 @@ export default function HomePage() {
               <div className="pointer-events-none absolute inset-0 hero-poster" />
               <Hero3D className="absolute inset-0" />
               {/* Floating active node badge with new logo */}
-              <div className="absolute left-6 top-6 z-10 flex items-center gap-2.5 rounded-2xl border border-white/10 bg-ink-950/45 px-3.5 py-2.5 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-md transition-all duration-300 hover:border-brand/40">
-                <div className="relative h-7 w-7 flex-shrink-0 animate-pulse">
+              <div className="absolute left-3 top-3 sm:left-6 sm:top-6 z-10 flex items-center gap-2 sm:gap-2.5 rounded-xl sm:rounded-2xl border border-white/10 bg-ink-950/45 px-2.5 py-1.5 sm:px-3.5 sm:py-2.5 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-md transition-all duration-300 hover:border-brand/40">
+                <div className="relative h-6 w-6 sm:h-7 sm:w-7 flex-shrink-0 animate-pulse">
                   <img src="/logo-icon.png" alt="Contextio Node" className="h-full w-full object-contain" />
                 </div>
                 <div className="text-left">
-                  <div className="text-[11px] font-semibold text-white/90">Contextio Engine</div>
-                  <div className="text-[9px] font-semibold text-brand tracking-wider uppercase flex items-center gap-1">
+                  <div className="text-[9px] sm:text-[11px] font-semibold text-white/90">Contextio Engine</div>
+                  <div className="text-[8px] sm:text-[9px] font-semibold text-brand tracking-wider uppercase flex items-center gap-1">
                     <span className="h-1.5 w-1.5 rounded-full bg-brand animate-ping" />
                     Active Node
                   </div>
@@ -93,7 +93,7 @@ export default function HomePage() {
       {/* ── How it works ─────────────────────────────────────────────────── */}
       <Reveal id="how">
         <SectionEyebrow eyebrow={t("steps.eyebrow")} title={t("steps.title")} />
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
+        <div className="mt-8 grid gap-4 grid-cols-1 sm:grid-cols-3">
           <StepCard n="1" tone="brand" title={t("steps.s1Title")} body={t("steps.s1Body")} icon={<WalletIcon />} />
           <StepCard n="2" tone="accent" title={t("steps.s2Title")} body={t("steps.s2Body")} icon={<SlidersIcon />} />
           <StepCard n="3" tone="sky" title={t("steps.s3Title")} body={t("steps.s3Body")} icon={<BoltIcon />} />
