@@ -294,13 +294,7 @@ co-created **[Nirium](https://nirium.xyz)** (Impacta · BBVA Open Deal).
 
 ## Customer discovery
 
-Built with and for real LATAM founders who pay teams/contractors across Brazil,
-Argentina, and Colombia and manage treasury in USDC/cash. We're running recorded
-discovery interviews validating the pain (idle cash losing value, costly
-cross-border payroll, manual treasury) and the solution.
-
-- **First interview (Colombia):** [watch ↗](https://www.youtube.com/watch?v=BLyYbG6iI38) — two more in progress.
-- All recordings: **[Drive folder ↗](ADD_DRIVE_LINK)**.
+Built with and for real LATAM founders. We're running recorded customer-discovery interviews validating the pain (idle cash losing value, costly cross-border payroll, manual treasury) and our solution. Interviews: https://drive.google.com/drive/folders/1OU8ShexpLqSakSd3ytPVS9WYWvodprUS?usp=sharing
 
 ## Contributing
 
