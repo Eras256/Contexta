@@ -170,7 +170,7 @@ export default function PayrollPage() {
           {runsQ.data.map((run) => (
             <div key={run.id} className="rounded-lg border border-white/10 bg-ink-900/60 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <Badge tone={run.status === "completed" ? "success" : run.status === "failed" ? "warn" : "default"}>
                     {tr(`pages.payroll.runStatus.${run.status}`)}
                   </Badge>
@@ -198,7 +198,7 @@ export default function PayrollPage() {
                     tx {shortHash(run.stellarTxHash, 8, 6)} ↗
                   </a>
                 ) : (
-                  <span className="font-mono text-slate-500">{run.stellarTxHash ?? "—"}</span>
+                  <span className="font-mono text-slate-500 break-all">{run.stellarTxHash ?? "—"}</span>
                 )}
               </div>
             </div>
