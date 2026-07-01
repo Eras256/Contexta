@@ -153,7 +153,15 @@ export default function LegalContextPage() {
               </div>
               <div className="flex justify-between py-2.5">
                 <span className="text-slate-400">{t("legal.jurisdiction")}</span>
-                <span className="font-mono font-medium text-white">{doc.provider.jurisdiction}</span>
+                <span className="font-mono font-medium text-white">
+                  {doc.provider.jurisdiction === "BR" ? "BR, AR, CO" : doc.provider.jurisdiction}
+                </span>
+              </div>
+              <div className="flex justify-between py-2.5">
+                <span className="text-slate-400">{t("legal.operatingJurisdictions")}</span>
+                <span className="font-mono font-medium text-white">
+                  {doc.jurisdictions ? doc.jurisdictions.join(", ") : "BR, AR, CO"}
+                </span>
               </div>
               <div className="flex justify-between py-2.5">
                 <span className="text-slate-400">{t("legal.contactEmail")}</span>
