@@ -38,7 +38,7 @@ export function Hero3D({ className = "" }: { className?: string }) {
         alpha: true,
         powerPreference: "high-performance",
       });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.2 : 2));
       renderer.setSize(width(), height(), false);
       renderer.domElement.style.width = "100%";
       renderer.domElement.style.height = "100%";
@@ -149,7 +149,11 @@ export function Hero3D({ className = "" }: { className?: string }) {
         glow.scale.setScalar(1 + Math.sin(t * 1.6) * 0.04);
         stars.rotation.y = t * 0.015;
         for (const o of orbits) setOrbit(o, t * o.speed + o.phase);
-        if (!isMobile) {
+        if (isMobile) {
+          camera.position.x = Math.sin(t * 0.45) * 0.35;
+          camera.position.y = Math.cos(t * 0.35) * 0.25;
+          camera.lookAt(0, 0, 0);
+        } else {
           camera.position.x += (pointer.x * 0.6 - camera.position.x) * 0.05;
           camera.position.y += (-pointer.y * 0.4 - camera.position.y) * 0.05;
           camera.lookAt(0, 0, 0);
